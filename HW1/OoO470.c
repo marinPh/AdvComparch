@@ -23,7 +23,12 @@ bool exception = false;
 unsigned int ePC = 0;
 
 // Register Map Table
-unsigned int * RenameTable; // array that maps architectural register names to physical register names
+unsigned int RegMapTable[ENTRY] = {  // On initialization, all architectural registers are mapped to physical registers with the same id
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+    10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+    20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
+    30, 31
+}; // array that maps architectural register names to physical register names
 // 32 architectural registers, 64 physical registers
 
 // Free List
@@ -46,6 +51,7 @@ typedef struct {
 // instructions that have been dispatched but have not yet completed
 // renamed instructions
 ActiveListEntry ActiveList[ENTRY]; 
+
 // Entry in Integer Queue
 typedef struct {
     int DestRegister;

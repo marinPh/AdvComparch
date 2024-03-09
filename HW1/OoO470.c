@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <jansson.h>
+#include <cjson/cJSON.h>
 
 #define REGS 64
 #define ENTRY 32
@@ -73,6 +74,92 @@ typedef struct {
 IntegerQueueEntry IntegerQueue[ENTRY]; 
 
 
+int main() {
+
+    // Open the JSON file
+    FILE *file = fopen("data.json", "r");
+    if (file == NULL) {
+        printf("Failed to open the file.\n");
+        return 1;
+    }
+
+    // Get the file size
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    rewind(file); // Go back to the beginning of the file
+
+    // Allocate memory to store the file contents
+    char *json_data = (char *)malloc(file_size + 1);
+    if (json_data == NULL) {
+        printf("Memory allocation failed.\n");
+        fclose(file);
+        return 1;
+    }
+
+    // Read the file contents into the allocated memory
+    fread(json_data, 1, file_size, file);
+    json_data[file_size] = '\0'; // Null-terminate the string
+
+    // Close the file
+    fclose(file);
+
+    // Parse the JSON data
+    cJSON *root = cJSON_Parse(json_data);
+    if (root == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("Error before: %s\n", error_ptr);
+        }
+        cJSON_free(json_data); // Free memory
+        return 1;
+    }
+
+    // Iterate over the array and print each string
+    cJSON *instruction;
+    cJSON_ArrayForEach(instruction, root) {
+        printf("%s\n", instruction->valuestring);
+    }
+
+    // Free memory
+    cJSON_Delete(root);
+    free(json_data);
+
+    return 0;
+
+
+
+
+    // Initialize the Free List
+    FreeList = (unsigned int *)malloc((REGS - 32) * sizeof(unsigned int));
+    for (int i = 0; i < (REGS - 32); i++) {
+        FreeList[i] = 32 + i;
+    }
+
+    // Fetch & Decode
+    FetchAndDecode();
+
+    // Rename
+    Rename();
+
+    // Dispatch
+    Dispatch();
+
+    // Issue
+    Issue();
+
+    // Execute
+    Execute();
+
+    // Write Result
+    WriteResult();
+
+    // Commit
+    Commit();
+
+    return 0;
+}
+
+
 
 // Fetch & Decode
 void FetchAndDecode() {
@@ -81,6 +168,8 @@ void FetchAndDecode() {
     // Decode the instructions
     // get first 4 instructions from buffer
     // read JSON file until the end 
+
+
     const char *json_file = "your_file_path.json";  // Replace with your actual file path
     json_t *root;
     json_error_t error;

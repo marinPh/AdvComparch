@@ -3,8 +3,14 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
-#include <jansson.h>
-#include <cjson/cJSON.h>
+#include "lib/cJSON.h"
+#include "lib/cJSON_Utils.h"
+#include <math.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
+
+
 
 #define REGS 64
 #define ENTRY 32
@@ -32,14 +38,22 @@ unsigned int PC = 0;
 unsigned long PhysRegFile[REGS]; // 64 registers of 64 bits each
 
 // Decoded Instruction Register
+/*
 unsigned int * DIR; // array that buffers instructions that have been decoded but have not been renamed and dispatched yet
-unsigned int DIRSize = 0; // size of the DIR
+unsigned int DIRSize = 0; // size of the DIR*/
+struct{
+    unsigned int * DIRarray; // array that buffers instructions that have been decoded but have not been renamed and dispatched yet
+    unsigned int DIRSize; // size of the DIR
+}DIR;
 
 // Exception Flag
 bool exception = false;
 
 // Exception PC
 unsigned int ePC = 0;
+
+bool backPressureRDS = false;
+
 
 // Register Map Table
 unsigned int RegMapTable[ENTRY] = {  // On initialization, all architectural registers are mapped to physical registers with the same id
@@ -51,7 +65,13 @@ unsigned int RegMapTable[ENTRY] = {  // On initialization, all architectural reg
 // 32 architectural registers, 64 physical registers
 
 // Free List
-unsigned int * FreeList; // array that keeps track of the physical registers that are free
+unsigned int * FreeList[ENTRY] = {
+    32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+    42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
+    52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
+    62, 63
+}; // array that keeps track of the physical registers that are free
+ // array that keeps track of the physical registers that are free
 // on initialization 32-63 are free
 
 // Busy Bit Table
@@ -65,11 +85,49 @@ typedef struct {
     int OldDestination;
     int PC;
 } ActiveListEntry;
+int PopFreeList(){
+    int reg = FreeList[0];
+    for (size_t i = 0; i < ENTRY - 1; i++) {
+        FreeList[i+1] = FreeList[i];
+    }
+    FreeList[ENTRY - 1] = -1;
+    return reg;
+}
+
+int getFreeReg(){
+
+    return PopFreeList();
+}
+
+
+
+int PushFreeList(int reg){
+    if(FreeList[ENTRY - 1] == -1){
+        return -1;
+    }
+    for (size_t i = 0; i < ENTRY; i++) {
+        FreeList[i] = FreeList[i+1];
+    }
+    FreeList[0] = reg;
+    return 0;
+    
+}
+
+
+
 
 // Active List
 // instructions that have been dispatched but have not yet completed
-// renamed instructions
-ActiveListEntry ActiveList[ENTRY]; 
+// renamed instruction
+/*
+ActiveListEntry ActiveList[ENTRY]; */
+
+struct {
+    ActiveListEntry ALarray[ENTRY];
+    int ALSize;
+} ActiveList;
+
+
 
 // Entry in Integer Queue
 typedef struct {
@@ -85,8 +143,15 @@ typedef struct {
 } IntegerQueueEntry;
 
 // Integer Queue
-// instructions awaiting issuing
-IntegerQueueEntry IntegerQueue[ENTRY]; 
+/*
+IntegerQueueEntry IntegerQueue[ENTRY]; */
+//always 32 entries myx but can be less, need to check if it is full
+struct {
+    IntegerQueueEntry IQarray[ENTRY];
+    int IQSize;
+} IntegerQueue;
+
+
 
 
 int main() {
@@ -141,7 +206,7 @@ int main() {
         return 1;
     }
 
-    Instruction instrs;
+    Instruction instrs = {NULL, 0};
     instrs.instructions = (InstructionEntry *)malloc(array_size * sizeof(InstructionEntry));
     if(instrs.instructions == NULL) {
         printf("Instruction memory allocation failed.\n");
@@ -163,7 +228,7 @@ int main() {
         char *token = strtok(instruction_copy, ' ');
         
         if (token != NULL) {
-            instrs.instructions[instrs.size].opcode = strdup(token); // already null-terminated
+            strcpy(instrs.instructions[instrs.size].opcode, token); // already null-terminated
 
             token = strtok(NULL, ','); 
             if (token != NULL) {
@@ -217,26 +282,82 @@ int main() {
     return 0;
 }
 
+int Commit(){
+    return 0;
+}
+
 
 
 // Fetch & Decode
-void FetchAndDecode(Instuction * instr) {
+void FetchAndDecode(Instruction * instr) {
     // Fetch MAX 4 instructions from memory
 
     // Decode the instructions
     // get first 4 instructions from buffer
     // read JSON file until the end 
 
-    index = math.min(instrs->size - PC, INSTR); // get the first 4 instructions
+   
 
+/* 
+When the Commit stage
+ indicates that an exception is detected, the PC is set to 0x10000
+ */
+//TODO: create Commit Stage
+    if(Commit()<0)
+{
+    // set at 0x10000
+    PC = 0x10000;
+    
+}
+//Check Back Pressure 
+if (backPressureRDS){
+    return;
+}
+    
+    int index = min(instr->size - PC, INSTR); // get the first 4 instructions
+    if (index <= 0) {
+        return;
+    }
     for (size_t i = 0; i < index; i++) {
 
         // Buffer the decoded instructions in the DIR
-        DIR = realloc(DIR, (DIRSize + 1) * sizeof(unsigned int)); // increase the size of the DIR by 1   TODO better way for performance !!
-        DIR[DIRSize] = PC; 
-        DIRSize += 1;
-
-        // Update the PC
+        DIR.DIRarray = realloc(DIR.DIRarray, (DIR.DIRSize + 1) * sizeof(unsigned int)); // increase the size of the DIR by 1   TODO better way for performance !!
+        DIR.DIRarray[DIR.DIRSize] = PC; 
+        DIR.DIRSize += 1;
         PC += 1; 
     }
 }
+
+// Rename
+
+void RDS (){
+    
+    if (DIR.DIRSize == 0  || ActiveList.ALSize == ENTRY || IntegerQueue.IQSize == ENTRY){
+        backPressureRDS = true;
+        return;
+    }else{
+        backPressureRDS = false;
+    }
+    int newReg = getFreeReg();
+    if (newReg < 0){
+        return;
+    }
+    // Rename the instructions
+    for (size_t i = 0; i < DIR.DIRSize; i++) {
+        // make it busy
+        BusyBitTable[newReg] = true;
+        // map the logical destination to the physical register
+        RegMapTable[inst] = newReg;
+        //
+       
+    }
+
+
+    
+    
+
+
+
+    
+}
+    // Rename, Dispatch, and Issue instructions

@@ -9,6 +9,21 @@
 #define REGS 64
 #define ENTRY 32
 #define INSTR 4
+#define OPCODE 5
+
+// Structure for parsing JSON entry
+typedef struct {
+    char opcode[OPCODE]; // 4 characters + null terminator
+    int dest;
+    int src1;
+    int src2;
+} InstructionEntry;
+
+// Structure for parsing JSON
+typedef struct {
+    InstructionEntry *instructions;
+    size_t size;
+} Instruction;
 
 // Program Counter unsigned integer pointing to the next instruction to fetch.
 unsigned int PC = 0;
@@ -65,7 +80,7 @@ typedef struct {
     bool OpBIsReady;
     int OpBRegTag;
     int OpBValue;
-    char OpCode[5];  // 4 characters + null terminator
+    char OpCode[OPCODE];  // 4 characters + null terminator
     int PC;
 } IntegerQueueEntry;
 
@@ -116,45 +131,88 @@ int main() {
 
     // Iterate over the array and print each string
     cJSON *instruction;
+
+    size_t array_size = cJSON_GetArraySize(root);
+
+    if (array_size == 0) {
+        printf("Error: Empty or invalid JSON array.\n");
+        cJSON_Delete(root);
+        free(json_data);
+        return 1;
+    }
+
+    Instruction instrs;
+    instrs.instructions = (InstructionEntry *)malloc(array_size * sizeof(InstructionEntry));
+    if(instrs.instructions == NULL) {
+        printf("Instruction memory allocation failed.\n");
+        cJSON_Delete(root);
+        free(json_data);
+        return 1;
+    }
+    instrs.size = 0;
+
     cJSON_ArrayForEach(instruction, root) {
-        printf("%s\n", instruction->valuestring);
+        //printf("%s\n", instruction->valuestring);
+
+        // Parse at whitespace and eliminate ',' and store in InstructionEntry
+
+        // Copy the instruction string since strtok modifies the input
+        char *instruction_copy = strdup(instruction->valuestring);
+
+        // Tokenize the instruction string
+        char *token = strtok(instruction_copy, ' ');
+        
+        if (token != NULL) {
+            instrs.instructions[instrs.size].opcode = strdup(token); // already null-terminated
+
+            token = strtok(NULL, ','); 
+            if (token != NULL) {
+                sscanf(token, "%d", &instrs.instructions[instrs.size].dest);
+
+                token = strtok(NULL, ',');
+                if (token != NULL) {
+                    sscanf(token, "%d", &instrs.instructions[instrs.size].src1);
+
+                    token = strtok(NULL, '\0');
+                    if (token != NULL) {
+                        sscanf(token, "%d", &instrs.instructions[instrs.size].src2);
+                    }
+                }
+            }
+        }
+        instrs.size += 1;
     }
 
     // Free memory
     cJSON_Delete(root);
     free(json_data);
 
-    return 0;
+    // // Initialize the Free List
+    // FreeList = (unsigned int *)malloc((REGS - 32) * sizeof(unsigned int));
+    // for (int i = 0; i < (REGS - 32); i++) {
+    //     FreeList[i] = 32 + i;
+    // }
 
+    // // Fetch & Decode
+    // FetchAndDecode();
 
+    // // Rename
+    // Rename();
 
+    // // Dispatch
+    // Dispatch();
 
-    // Initialize the Free List
-    FreeList = (unsigned int *)malloc((REGS - 32) * sizeof(unsigned int));
-    for (int i = 0; i < (REGS - 32); i++) {
-        FreeList[i] = 32 + i;
-    }
+    // // Issue
+    // Issue();
 
-    // Fetch & Decode
-    FetchAndDecode();
+    // // Execute
+    // Execute();
 
-    // Rename
-    Rename();
+    // // Write Result
+    // WriteResult();
 
-    // Dispatch
-    Dispatch();
-
-    // Issue
-    Issue();
-
-    // Execute
-    Execute();
-
-    // Write Result
-    WriteResult();
-
-    // Commit
-    Commit();
+    // // Commit
+    // Commit();
 
     return 0;
 }
@@ -162,48 +220,16 @@ int main() {
 
 
 // Fetch & Decode
-void FetchAndDecode() {
+void FetchAndDecode(Instuction * instr) {
     // Fetch MAX 4 instructions from memory
 
     // Decode the instructions
     // get first 4 instructions from buffer
     // read JSON file until the end 
 
-
-    const char *json_file = "your_file_path.json";  // Replace with your actual file path
-    json_t *root;
-    json_error_t error;
-
-    root = json_loads(buffer, 0, &error);
-    if (!root) {
-        fprintf(stderr, "error: on line %d: %s\n", error.line, error.text);
-        return 1;
-    }
-
-    size_t index = json_array_size(root);
-    index = math.min(index, INSTR); // get the first 4 instructions
+    index = math.min(instrs->size - PC, INSTR); // get the first 4 instructions
 
     for (size_t i = 0; i < index; i++) {
-        json_t *instruction = json_array_get(root, i);
-
-        json_t *opcode = json_object_get(instruction, "opcode");
-        json_t *dest = json_object_get(instruction, "dest");
-        json_t *src1 = json_object_get(instruction, "src1");
-        json_t *src2 = json_object_get(instruction, "src2");
-
-        IntegerQueue[i].DestRegister = json_integer_value(dest);  // TODO not i but the actual index
-        IntegerQueue[i].OpARegTag = json_integer_value(src1);
-        IntegerQueue[i].OpBRegTag = json_integer_value(src2);
-        strcpy(IntegerQueue[i].OpCode, json_string_value(opcode));
-        IntegerQueue[i].PC = PC;
-
-        // Check whether the source registers are ready
-        if (BusyBitTable[IntegerQueue[i].OpARegTag] == false) { 
-            IntegerQueue[i].OpAIsReady = true;
-            IntegerQueue[i].OpAValue = PhysRegFile[IntegerQueue[i].OpARegTag];
-        } else {
-            IntegerQueue[i].OpAIsReady = false;
-        }
 
         // Buffer the decoded instructions in the DIR
         DIR = realloc(DIR, (DIRSize + 1) * sizeof(unsigned int)); // increase the size of the DIR by 1   TODO better way for performance !!

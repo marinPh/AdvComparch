@@ -113,6 +113,11 @@ int PushFreeList(int reg){
     
 }
 
+bool forwardable(int reg){
+    //TODO: implement
+    return true;
+}
+
 
 
 
@@ -286,6 +291,12 @@ int Commit(){
     return 0;
 }
 
+bool isOpBusy(int reg){
+    return BusyBitTable[reg];
+}
+
+
+
 
 
 // Fetch & Decode
@@ -330,7 +341,7 @@ if (backPressureRDS){
 
 // Rename
 
-void RDS (){
+void RDS (Instruction * instr){
     
     if (DIR.DIRSize == 0  || ActiveList.ALSize == ENTRY || IntegerQueue.IQSize == ENTRY){
         backPressureRDS = true;
@@ -346,10 +357,71 @@ void RDS (){
     for (size_t i = 0; i < DIR.DIRSize; i++) {
         // make it busy
         BusyBitTable[newReg] = true;
+        unsigned int oldReg = RegMapTable[instr[i].instructions->dest];
         // map the logical destination to the physical register
-        RegMapTable[inst] = newReg;
-        //
-       
+        RegMapTable[instr[i].instructions->dest] = newReg;
+        // add the instruction to the Active List
+        ActiveList.ALarray[ActiveList.ALSize].LogicalDestination = instr[i].instructions->dest;
+        ActiveList.ALarray[ActiveList.ALSize].OldDestination = oldReg,
+        ActiveList.ALarray[ActiveList.ALSize].PC = DIR.DIRarray[i];
+        ActiveList.ALSize += 1;
+        // add the instruction to the Integer Queue
+        IntegerQueue.IQarray[IntegerQueue.IQSize].DestRegister = newReg;
+        IntegerQueue.IQarray[IntegerQueue.IQSize].PC = DIR.DIRarray[i];
+        const char* tempOpCode = instr[i].instructions->opcode;
+        strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode, tempOpCode);
+        
+
+       // we want to check if the source registers are ready
+       // if they are ready, we want to forward the value to the Integer Queue
+       // if opcode is "addi" then we only need to check if src1 is ready
+       // and we give the value of src2 to IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue
+         // if opcode is not "addi" then we need to check if both src1 and src2 are ready
+         // and we give the value of src1 to IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue
+        
+        if (isOpBusy(RegMapTable[instr[i].instructions->src1])){
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = false;
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = RegMapTable[instr[i].instructions->src1];
+        }else if(forwardable(RegMapTable[instr[i].instructions->src1])){
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = true;
+            //TODO: check value from forwarding table
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue = PhysRegFile[RegMapTable[instr[i].instructions->src1]];
+
+        }else{
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = true;
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue = PhysRegFile[RegMapTable[instr[i].instructions->src1]];
+        }
+
+        if (strcmp(instr[i].instructions->opcode, "addi")==0){
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = instr[i].instructions->src2;
+
+        }else{
+
+            if (isOpBusy(RegMapTable[instr[i].instructions->src2])){
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = false;
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = RegMapTable[instr[i].instructions->src2];
+            }else if(forwardable(RegMapTable[instr[i].instructions->src2])){
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
+                //TODO: check value from forwarding table
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = PhysRegFile[RegMapTable[instr[i].instructions->src2]];
+            }else{
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = PhysRegFile[RegMapTable[instr[i].instructions->src2]];
+            }
+
+           
+        }
+        IntegerQueue.IQSize += 1;
+    }
+    // Clear the DIR
+    free(DIR.DIRarray);
+       return;
+    }
+
+    void IEF(){
+        //scan for the 4 
+
     }
 
 
@@ -359,5 +431,5 @@ void RDS (){
 
 
     
-}
+
     // Rename, Dispatch, and Issue instructions

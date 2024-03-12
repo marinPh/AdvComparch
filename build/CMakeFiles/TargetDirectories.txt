@@ -1,0 +1,3 @@
+/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/build/CMakeFiles/ParserTest.dir
+/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/build/CMakeFiles/edit_cache.dir
+/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/build/CMakeFiles/rebuild_cache.dir

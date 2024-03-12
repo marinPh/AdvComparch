@@ -95,5 +95,7 @@ void FetchAndDecode();
 void RDS();
 void Issue();
 void Execute();
+void showBp();
+int PopFreeList();
 
 #endif /* MIPS_SIMULATOR_H */

@@ -50,6 +50,30 @@ struct
     unsigned int DIRSize;   // size of the DIR
 } DIR;
 
+// popDIR and realloc DIRarray
+int popDIR()
+{
+    if (DIR.DIRSize == 0)
+    {
+        return -1;
+    }
+    for (size_t i = 0; i < DIR.DIRSize - 1; i++)
+    {
+        DIR.DIRarray[i] = DIR.DIRarray[i + 1];
+    }
+    DIR.DIRarray = realloc(DIR.DIRarray, (DIR.DIRSize - 1) * sizeof(unsigned int));
+    DIR.DIRSize -= 1;
+    return 0;
+}
+
+int pushDIR(unsigned int instr)
+{
+    DIR.DIRarray = realloc(DIR.DIRarray, (DIR.DIRSize + 1) * sizeof(unsigned int));
+    DIR.DIRarray[DIR.DIRSize] = instr;
+    DIR.DIRSize += 1;
+    return 0;
+}
+
 // Exception Flag
 bool exception = false;
 
@@ -92,7 +116,8 @@ int PopFreeList()
     int reg = FreeList[0];
     for (size_t i = 0; i < ENTRY - 1; i++)
     {
-        FreeList[i + 1] = FreeList[i];
+        FreeList[i] = FreeList[i + 1];
+        // printf("%d <-%d\n",FreeList[i],FreeList[i+1]);
     }
     FreeList[ENTRY - 1] = -1;
     return reg;
@@ -118,12 +143,6 @@ int PushFreeList(int reg)
     return 0;
 }
 
-bool forwardable(int reg)
-{
-    // TODO: implement
-    return true;
-}
-
 // Active List
 // instructions that have been dispatched but have not yet completed
 // renamed instruction
@@ -135,8 +154,6 @@ struct
     ActiveListEntry ALarray[ENTRY];
     int ALSize;
 } ActiveList;
-
-
 
 // Entry in Integer Queue
 typedef struct
@@ -178,7 +195,7 @@ int parser(char *file_name)
     FILE *file = fopen(file_name, "r");
     if (file == NULL)
     {
-        //printf("Failed to open the file.\n");
+        // printf("Failed to open the file.\n");
         return 1;
     }
 
@@ -186,17 +203,17 @@ int parser(char *file_name)
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
     rewind(file); // Go back to the beginning of the file
-    //printf("File size: %ld\n", file_size);
+    // printf("File size: %ld\n", file_size);
 
     // Allocate memory to store the file contents
     char *json_data = (char *)malloc(file_size + 1);
     if (json_data == NULL)
     {
-        //printf("Memory allocation failed.\n");
+        // printf("Memory allocation failed.\n");
         fclose(file);
         return 1;
     }
-    //printf("Memory allocated.\n");
+    // printf("Memory allocated.\n");
 
     // Read the file contents into the allocated memory
     fread(json_data, 1, file_size, file);
@@ -212,12 +229,12 @@ int parser(char *file_name)
         const char *error_ptr = cJSON_GetErrorPtr();
         if (error_ptr != NULL)
         {
-            //printf("Error before: %s\n", error_ptr);
+            // printf("Error before: %s\n", error_ptr);
         }
         cJSON_free(json_data); // Free memory
         return 1;
     }
-    //printf("JSON parsed.\n");
+    // printf("JSON parsed.\n");
 
     // Iterate over the array and print each string
     cJSON *instruction;
@@ -226,81 +243,80 @@ int parser(char *file_name)
 
     if (array_size == 0)
     {
-        //printf("Error: Empty or invalid JSON array.\n");
+        // printf("Error: Empty or invalid JSON array.\n");
         cJSON_Delete(root);
         free(json_data);
         return 1;
     }
-    //printf("Array size: %ld\n", array_size);
+    // printf("Array size: %ld\n", array_size);
 
     instrs.instructions = (InstructionEntry *)malloc(array_size * sizeof(InstructionEntry));
     if (instrs.instructions == NULL)
     {
-        //printf("Instruction memory allocation failed.\n");
+        // printf("Instruction memory allocation failed.\n");
         cJSON_Delete(root);
         free(json_data);
         return 1;
     }
     instrs.size = 0;
-    //printf("Memory allocated for instructions.\n");
+    // printf("Memory allocated for instructions.\n");
 
     cJSON_ArrayForEach(instruction, root)
     {
-        //printf("%s\n", cJSON_Print(instruction));
-        // printf("%s\n", instruction->valuestring);
+        // printf("%s\n", cJSON_Print(instruction));
+        //  printf("%s\n", instruction->valuestring);
 
         // Parse at whitespace and eliminate ',' and store in InstructionEntry
 
         // Copy the instruction string since strtok modifies the input
         char *instruction_copy = strdup(instruction->valuestring);
-       
 
         // Tokenize the instruction string
         char *token = strtok(instruction_copy, " ");
-      
 
         if (token != NULL)
         {
-           
+
             strcpy(instrs.instructions[instrs.size].opcode, token); // already null-terminated
 
             token = strtok(NULL, ",");
             if (token != NULL)
             {
-                //printf("Token: %s\n", token);
-                //remove the 'x' from the string
+                // printf("Token: %s\n", token);
+                // remove the 'x' from the string
                 token = token + 1;
-                //printf("Token: %s\n", token);
+                // printf("Token: %s\n", token);
                 sscanf(token, "%d", &instrs.instructions[instrs.size].dest);
-                //printf("Dest: %d\n", instrs.instructions[instrs.size].dest);
+                // printf("Dest: %d\n", instrs.instructions[instrs.size].dest);
 
                 token = strtok(NULL, ",");
                 if (token != NULL)
                 {
-                    //printf("Token: %s\n", token);
-                    //remove the 'x' from the string
+                    // printf("Token: %s\n", token);
+                    // remove the 'x' from the string
                     token = token + 2;
-                    //printf("Token: %s\n", token);
+                    // printf("Token: %s\n", token);
                     sscanf(token, "%d", &instrs.instructions[instrs.size].src1);
-                    //printf("Src1: %d\n", instrs.instructions[instrs.size].src1);
+                    // printf("Src1: %d\n", instrs.instructions[instrs.size].src1);
                     token = strtok(NULL, "\0");
-                    //printf("idk","ok");
+                    // printf("idk","ok");
                     if (token != NULL)
-                    {   //check if src2 starts by 'x' if so remove it
+                    { // check if src2 starts by 'x' if so remove it
                         if (token[0] == 'x')
                         {
                             token = token + 2;
-                        //    printf("Token: %s\n", token);
+                            //    printf("Token: %s\n", token);
                             sscanf(token, "%d", &instrs.instructions[instrs.size].src2);
                         }
                         else
                         {
-                        sscanf(token, "%d", &instrs.instructions[instrs.size].src2);}
+                            sscanf(token, "%d", &instrs.instructions[instrs.size].src2);
+                        }
                     }
                 }
             }
         }
-        //printf("Token: %s\n", token);
+        // printf("Token: %s\n", token);
         instrs.size += 1;
     }
 
@@ -360,6 +376,18 @@ struct
     int size;
 } forwardingTable;
 
+int forwardable(int reg)
+{
+    for (int i = 0; i < INSTR; i++)
+    {
+        if (forwardingTable.table[i].reg == reg)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
 // Fetch & Decode
 void FetchAndDecode()
 {
@@ -394,9 +422,7 @@ void FetchAndDecode()
     {
 
         // Buffer the decoded instructions in the DIR
-        DIR.DIRarray = realloc(DIR.DIRarray, (DIR.DIRSize + 1) * sizeof(unsigned int)); // increase the size of the DIR by 1   TODO better way for performance !!
-        DIR.DIRarray[DIR.DIRSize] = PC;
-        DIR.DIRSize += 1;
+        pushDIR(PC);
         PC += 1;
     }
 }
@@ -406,37 +432,51 @@ void FetchAndDecode()
 void RDS()
 {
 
-    if (DIR.DIRSize == 0 || ActiveList.ALSize == ENTRY || IntegerQueue.IQSize == ENTRY)
+    if (ActiveList.ALSize == ENTRY || IntegerQueue.IQSize == ENTRY)
     {
         backPressureRDS = true;
         return;
     }
+
     else
     {
         backPressureRDS = false;
     }
-    int newReg = getFreeReg();
-    if (newReg < 0)
+
+    if (DIR.DIRSize == 0)
     {
         return;
     }
+
     // Rename the instructions
-    for (size_t i = 0; i < DIR.DIRSize; i++)
+
+    
+    unsigned int index = min(DIR.DIRSize, INSTR);
+    for (int i = 0; i < index; i++)
     {
-        // make it busy
-        BusyBitTable[newReg] = true;
+    
+        int newReg = getFreeReg();
+        if (newReg < 0)
+        {
+            return;
+        }
+        // printf("newReg: %d\n", newReg);
+        // printf("DIR.DIRarray[i]: %d\n", DIR.DIRarray[i]);
+        //  make it busy
+
         unsigned int oldReg = RegMapTable[instrs.instructions[i].dest];
         // map the logical destination to the physical register
-        RegMapTable[instrs.instructions[i].dest] = newReg;
+
         // add the instruction to the Active List
+        unsigned int currentPc = popDIR();
         ActiveList.ALarray[ActiveList.ALSize].LogicalDestination = instrs.instructions[i].dest;
         ActiveList.ALarray[ActiveList.ALSize].OldDestination = oldReg,
-        ActiveList.ALarray[ActiveList.ALSize].PC = DIR.DIRarray[i];
+        ActiveList.ALarray[ActiveList.ALSize].PC = currentPc;
         ActiveList.ALarray[ActiveList.ALSize].Done = false;
         ActiveList.ALSize += 1;
         // add the instruction to the Integer Queue
         IntegerQueue.IQarray[IntegerQueue.IQSize].DestRegister = newReg;
-        IntegerQueue.IQarray[IntegerQueue.IQSize].PC = DIR.DIRarray[i];
+        IntegerQueue.IQarray[IntegerQueue.IQSize].PC = currentPc;
         const char *tempOpCode = instrs.instructions[i].opcode;
         strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode, tempOpCode);
 
@@ -446,17 +486,17 @@ void RDS()
         // and we give the value of src2 to IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue
         // if opcode is not "addi" then we need to check if both src1 and src2 are ready
         // and we give the value of src1 to IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue
+        int forwardIndexA = forwardable(RegMapTable[instrs.instructions[i].src1]);
 
         if (isOpBusy(RegMapTable[instrs.instructions[i].src1]))
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = false;
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = RegMapTable[instrs.instructions[i].src1];
         }
-        else if (forwardable(RegMapTable[instrs.instructions[i].src1]))
+        else if (forwardIndexA >= 0)
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = true;
-            // TODO: check value from forwarding table
-            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue = PhysRegFile[RegMapTable[instrs.instructions[i].src1]];
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue = forwardingTable.table[forwardIndexA].value;
         }
         else
         {
@@ -471,17 +511,17 @@ void RDS()
         }
         else
         {
+            int forwardIndexB = forwardable(RegMapTable[instrs.instructions[i].src2]);
 
             if (isOpBusy(RegMapTable[instrs.instructions[i].src2]))
             {
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = false;
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = RegMapTable[instrs.instructions[i].src2];
             }
-            else if (forwardable(RegMapTable[instrs.instructions[i].src2]))
+            else if (forwardIndexB >= 0)
             {
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
-                // TODO: check value from forwarding table
-                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = PhysRegFile[RegMapTable[instrs.instructions[i].src2]];
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = forwardingTable.table[forwardIndexB].value;
             }
             else
             {
@@ -489,10 +529,14 @@ void RDS()
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = PhysRegFile[RegMapTable[instrs.instructions[i].src2]];
             }
         }
+    
+        RegMapTable[instrs.instructions[i].dest] = newReg;
+        BusyBitTable[newReg] = true;
         IntegerQueue.IQSize += 1;
+
     }
     // Clear the DIR
-    free(DIR.DIRarray);
+
     return;
 }
 
@@ -561,8 +605,6 @@ void Execute()
         forwardingTable.table[i].reg = (ALU2[i]).instr.DestRegister;
         forwardingTable.table[i].value = temp;
         ALU2[i] = ALU1[i];
-        
-        
 
         return;
     }
@@ -570,6 +612,7 @@ void Execute()
 
 void showDIR()
 {
+    printf("DIR\n");
     for (size_t i = 0; i < DIR.DIRSize; i++)
     {
         printf("%d\n", DIR.DIRarray[i]);
@@ -577,34 +620,83 @@ void showDIR()
 }
 void showActiveList()
 {
+    printf("ActiveList\n");
     for (size_t i = 0; i < ActiveList.ALSize; i++)
     {
-        printf("%d\n", ActiveList.ALarray[i].LogicalDestination);
+        printf("%d %d %d\n", ActiveList.ALarray[i].LogicalDestination, ActiveList.ALarray[i].OldDestination, ActiveList.ALarray[i].PC);
     }
 }
 
 void showIntegerQueue()
 {
+    printf("IntegerQueue\n");
     for (size_t i = 0; i < IntegerQueue.IQSize; i++)
     {
-        printf("%d\n", IntegerQueue.IQarray[i].DestRegister);
+        printf("%d %d %d %d %d %d %d %s %d\n", IntegerQueue.IQarray[i].DestRegister, IntegerQueue.IQarray[i].OpAIsReady, IntegerQueue.IQarray[i].OpARegTag, IntegerQueue.IQarray[i].OpAValue, IntegerQueue.IQarray[i].OpBRegTag, IntegerQueue.IQarray[i].OpBIsReady, IntegerQueue.IQarray[i].OpBValue, IntegerQueue.IQarray[i].OpCode, IntegerQueue.IQarray[i].PC);
     }
 }
 
 void showInstruction()
 {
-    char* temp;
+    printf("Instructions\n");
+    char *temp;
     for (size_t i = 0; i < instrs.size; i++)
-    { if(strcmp(instrs.instructions[i].opcode,"addi")!=0){
-        temp = "x";
+    {
+        if (strcmp(instrs.instructions[i].opcode, "addi") != 0)
+        {
+            temp = "x";
+        }
+        else
+        {
+            temp = "";
+        }
 
-    }else{
-        temp = "";
-    }
- 
         printf("%s x%d, x%d, %s%d\n", instrs.instructions[i].opcode,
                instrs.instructions[i].dest, instrs.instructions[i].src1,
                temp,
                instrs.instructions[i].src2);
     }
+}
+
+void showBusyBitTable()
+{
+    printf("BusyBitTable\n");
+    for (size_t i = 0; i < REGS; i++)
+    {
+        printf("%d ", BusyBitTable[i]);
+    }
+    printf("\n");
+}
+
+void showRegMapTable()
+{
+    printf("RegMapTable\n");
+    for (size_t i = 0; i < ENTRY; i++)
+    {
+        printf("%d ->%d\n", i, RegMapTable[i]);
+    }
+}
+
+void showFreeList()
+{
+    printf("FreeList\n");
+    for (size_t i = 0; i < ENTRY; i++)
+    {
+        printf("%d ", FreeList[i]);
+    }
+    printf("\n");
+}
+
+void showPhysRegFile()
+{
+    printf("PhysRegFile\n");
+    for (size_t i = 0; i < REGS; i++)
+    {
+        printf("%lu ", PhysRegFile[i]);
+    }
+    printf("\n");
+}
+void showBp()
+{
+    printf("BackPressure: %d\n", backPressureRDS);
 }

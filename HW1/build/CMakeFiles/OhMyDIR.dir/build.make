@@ -69,10 +69,24 @@ include CMakeFiles/OhMyDIR.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/OhMyDIR.dir/flags.make
 
+CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o: CMakeFiles/OhMyDIR.dir/flags.make
+CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o: ../HandMadeTests/OhMyDIR.c
+CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o: CMakeFiles/OhMyDIR.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o -MF CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o.d -o CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o -c /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/HandMadeTests/OhMyDIR.c
+
+CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/HandMadeTests/OhMyDIR.c > CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.i
+
+CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/HandMadeTests/OhMyDIR.c -o CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.s
+
 CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o: CMakeFiles/OhMyDIR.dir/flags.make
 CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o: ../Lib/cJSON.c
 CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o: CMakeFiles/OhMyDIR.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o -MF CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o.d -o CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o -c /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/Lib/cJSON.c
 
 CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.i: cmake_force
@@ -86,7 +100,7 @@ CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.s: cmake_force
 CMakeFiles/OhMyDIR.dir/OoO470.c.o: CMakeFiles/OhMyDIR.dir/flags.make
 CMakeFiles/OhMyDIR.dir/OoO470.c.o: ../OoO470.c
 CMakeFiles/OhMyDIR.dir/OoO470.c.o: CMakeFiles/OhMyDIR.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/OhMyDIR.dir/OoO470.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/OhMyDIR.dir/OoO470.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/OhMyDIR.dir/OoO470.c.o -MF CMakeFiles/OhMyDIR.dir/OoO470.c.o.d -o CMakeFiles/OhMyDIR.dir/OoO470.c.o -c /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/OoO470.c
 
 CMakeFiles/OhMyDIR.dir/OoO470.c.i: cmake_force
@@ -97,32 +111,18 @@ CMakeFiles/OhMyDIR.dir/OoO470.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/OhMyDIR.dir/OoO470.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/OoO470.c -o CMakeFiles/OhMyDIR.dir/OoO470.c.s
 
-CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o: CMakeFiles/OhMyDIR.dir/flags.make
-CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o: ../HandMadeTests/OhMyDIR.c
-CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o: CMakeFiles/OhMyDIR.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o -MF CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o.d -o CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o -c /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/HandMadeTests/OhMyDIR.c
-
-CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/HandMadeTests/OhMyDIR.c > CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.i
-
-CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/HandMadeTests/OhMyDIR.c -o CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.s
-
 # Object files for target OhMyDIR
 OhMyDIR_OBJECTS = \
+"CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o" \
 "CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o" \
-"CMakeFiles/OhMyDIR.dir/OoO470.c.o" \
-"CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o"
+"CMakeFiles/OhMyDIR.dir/OoO470.c.o"
 
 # External object files for target OhMyDIR
 OhMyDIR_EXTERNAL_OBJECTS =
 
+OhMyDIR: CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o
 OhMyDIR: CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o
 OhMyDIR: CMakeFiles/OhMyDIR.dir/OoO470.c.o
-OhMyDIR: CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o
 OhMyDIR: CMakeFiles/OhMyDIR.dir/build.make
 OhMyDIR: CMakeFiles/OhMyDIR.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking C executable OhMyDIR"

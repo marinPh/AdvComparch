@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/build",
+  "command": "/usr/bin/gcc  -I/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch -g -o CMakeFiles/ParserTest.dir/ParserTest.c.o -c /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/ParserTest.c",
+  "file": "/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/ParserTest.c"
+}
+]

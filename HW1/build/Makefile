@@ -129,6 +129,80 @@ OhMyDIR/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/build
 .PHONY : OhMyDIR/fast
 
+#=============================================================================
+# Target rules for targets named FrenchDispatch
+
+# Build rule for target.
+FrenchDispatch: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 FrenchDispatch
+.PHONY : FrenchDispatch
+
+# fast build rule for target.
+FrenchDispatch/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/build
+.PHONY : FrenchDispatch/fast
+
+#=============================================================================
+# Target rules for targets named KingOfPop
+
+# Build rule for target.
+KingOfPop: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 KingOfPop
+.PHONY : KingOfPop
+
+# fast build rule for target.
+KingOfPop/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/build
+.PHONY : KingOfPop/fast
+
+HandMadeTests/FrenchDispatch.o: HandMadeTests/FrenchDispatch.c.o
+.PHONY : HandMadeTests/FrenchDispatch.o
+
+# target to build an object file
+HandMadeTests/FrenchDispatch.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/HandMadeTests/FrenchDispatch.c.o
+.PHONY : HandMadeTests/FrenchDispatch.c.o
+
+HandMadeTests/FrenchDispatch.i: HandMadeTests/FrenchDispatch.c.i
+.PHONY : HandMadeTests/FrenchDispatch.i
+
+# target to preprocess a source file
+HandMadeTests/FrenchDispatch.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/HandMadeTests/FrenchDispatch.c.i
+.PHONY : HandMadeTests/FrenchDispatch.c.i
+
+HandMadeTests/FrenchDispatch.s: HandMadeTests/FrenchDispatch.c.s
+.PHONY : HandMadeTests/FrenchDispatch.s
+
+# target to generate assembly for a file
+HandMadeTests/FrenchDispatch.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/HandMadeTests/FrenchDispatch.c.s
+.PHONY : HandMadeTests/FrenchDispatch.c.s
+
+HandMadeTests/KingOfPop.o: HandMadeTests/KingOfPop.c.o
+.PHONY : HandMadeTests/KingOfPop.o
+
+# target to build an object file
+HandMadeTests/KingOfPop.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/HandMadeTests/KingOfPop.c.o
+.PHONY : HandMadeTests/KingOfPop.c.o
+
+HandMadeTests/KingOfPop.i: HandMadeTests/KingOfPop.c.i
+.PHONY : HandMadeTests/KingOfPop.i
+
+# target to preprocess a source file
+HandMadeTests/KingOfPop.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/HandMadeTests/KingOfPop.c.i
+.PHONY : HandMadeTests/KingOfPop.c.i
+
+HandMadeTests/KingOfPop.s: HandMadeTests/KingOfPop.c.s
+.PHONY : HandMadeTests/KingOfPop.s
+
+# target to generate assembly for a file
+HandMadeTests/KingOfPop.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/HandMadeTests/KingOfPop.c.s
+.PHONY : HandMadeTests/KingOfPop.c.s
+
 HandMadeTests/OhMyDIR.o: HandMadeTests/OhMyDIR.c.o
 .PHONY : HandMadeTests/OhMyDIR.o
 
@@ -159,6 +233,8 @@ Lib/cJSON.o: Lib/cJSON.c.o
 # target to build an object file
 Lib/cJSON.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/Lib/cJSON.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/Lib/cJSON.c.o
 .PHONY : Lib/cJSON.c.o
 
 Lib/cJSON.i: Lib/cJSON.c.i
@@ -167,6 +243,8 @@ Lib/cJSON.i: Lib/cJSON.c.i
 # target to preprocess a source file
 Lib/cJSON.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/Lib/cJSON.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/Lib/cJSON.c.i
 .PHONY : Lib/cJSON.c.i
 
 Lib/cJSON.s: Lib/cJSON.c.s
@@ -175,6 +253,8 @@ Lib/cJSON.s: Lib/cJSON.c.s
 # target to generate assembly for a file
 Lib/cJSON.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/Lib/cJSON.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/Lib/cJSON.c.s
 .PHONY : Lib/cJSON.c.s
 
 OoO470.o: OoO470.c.o
@@ -183,6 +263,8 @@ OoO470.o: OoO470.c.o
 # target to build an object file
 OoO470.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/OoO470.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/OoO470.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/OoO470.c.o
 .PHONY : OoO470.c.o
 
 OoO470.i: OoO470.c.i
@@ -191,6 +273,8 @@ OoO470.i: OoO470.c.i
 # target to preprocess a source file
 OoO470.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/OoO470.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/OoO470.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/OoO470.c.i
 .PHONY : OoO470.c.i
 
 OoO470.s: OoO470.c.s
@@ -199,6 +283,8 @@ OoO470.s: OoO470.c.s
 # target to generate assembly for a file
 OoO470.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/OoO470.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/OoO470.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/OoO470.c.s
 .PHONY : OoO470.c.s
 
 # Help Target
@@ -209,7 +295,15 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... FrenchDispatch"
+	@echo "... KingOfPop"
 	@echo "... OhMyDIR"
+	@echo "... HandMadeTests/FrenchDispatch.o"
+	@echo "... HandMadeTests/FrenchDispatch.i"
+	@echo "... HandMadeTests/FrenchDispatch.s"
+	@echo "... HandMadeTests/KingOfPop.o"
+	@echo "... HandMadeTests/KingOfPop.i"
+	@echo "... HandMadeTests/KingOfPop.s"
 	@echo "... HandMadeTests/OhMyDIR.o"
 	@echo "... HandMadeTests/OhMyDIR.i"
 	@echo "... HandMadeTests/OhMyDIR.s"

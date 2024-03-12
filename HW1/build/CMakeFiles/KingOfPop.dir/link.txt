@@ -1,0 +1,1 @@
+/usr/bin/cc -rdynamic CMakeFiles/KingOfPop.dir/HandMadeTests/KingOfPop.c.o CMakeFiles/KingOfPop.dir/Lib/cJSON.c.o CMakeFiles/KingOfPop.dir/OoO470.c.o -o KingOfPop 

@@ -1,0 +1,1 @@
+/usr/bin/gcc -g CMakeFiles/ParserTest.dir/ParserTest.c.o -o ParserTest 

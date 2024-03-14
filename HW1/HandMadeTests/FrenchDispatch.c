@@ -3,10 +3,10 @@
 
 int main(int argc, char *argv[]) {
     printf("Hello, World!\n");
-  parser("../given_tests/02/input.json");
+  parser("../given_tests/01/input.json");
   showInstruction();
   
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 7; i++) {
     showDIR();
     RDS();
     showFreeList();

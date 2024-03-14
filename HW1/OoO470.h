@@ -82,13 +82,13 @@ void showPhysRegFile();
 void showActiveList();
 void showFreeList();
 void showIntegerQueue();
-void showForwardingTable();
 void showDIR();
 void showRegMapTable();
 void showBusyBitTable();
 void showInstruction();
 int parser(char* file_name);
-int Commit();
+void Commit();
+void Exception();
 bool isOpBusy(int reg);
 bool forwardable(int reg);
 void FetchAndDecode();
@@ -96,6 +96,10 @@ void RDS();
 void Issue();
 void Execute();
 void showBp();
+void showALU();
+void showForwardingTable();
 int PopFreeList();
+void initALU();
+void initForwardingTable();
 
 #endif /* MIPS_SIMULATOR_H */

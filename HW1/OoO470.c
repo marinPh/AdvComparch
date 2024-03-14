@@ -25,6 +25,8 @@ typedef struct
     int src2;
 } InstructionEntry;
 
+
+
 // Structure for parsing JSON
 typedef struct
 {
@@ -53,6 +55,7 @@ struct
 // popDIR and realloc DIRarray
 int popDIR()
 {
+    int temp = DIR.DIRarray[0];
     if (DIR.DIRSize == 0)
     {
         return -1;
@@ -63,7 +66,7 @@ int popDIR()
     }
     DIR.DIRarray = realloc(DIR.DIRarray, (DIR.DIRSize - 1) * sizeof(unsigned int));
     DIR.DIRSize -= 1;
-    return 0;
+    return temp;
 }
 
 int pushDIR(unsigned int instr)
@@ -168,15 +171,45 @@ typedef struct
     char OpCode[OPCODE]; // 4 characters + null terminator
     int PC;
 } IntegerQueueEntry;
+IntegerQueueEntry createNop()
+{
+    IntegerQueueEntry temp = {-1, true, -1, 0, true, -1, 0, "nop", -1};
+    return temp;
+}
+
+IntegerQueueEntry copyIQE(IntegerQueueEntry entry)
+{
+    IntegerQueueEntry temp ;
+    temp.DestRegister = entry.DestRegister;
+    temp.OpAIsReady = entry.OpAIsReady;
+    temp.OpARegTag = entry.OpARegTag;
+    temp.OpAValue = entry.OpAValue;
+    temp.OpBIsReady = entry.OpBIsReady;
+    temp.OpBRegTag = entry.OpBRegTag;
+    temp.OpBValue = entry.OpBValue;
+    strcpy(temp.OpCode, entry.OpCode);
+    temp.PC = entry.PC;
+
+    return temp;
+}
 
 typedef struct
 {
     IntegerQueueEntry instr;
-    unsigned int ActiveListIndex;
 } ALUEntry;
 
 ALUEntry ALU1[INSTR];
 ALUEntry ALU2[INSTR];
+
+void initALU()
+{
+    for (size_t i = 0; i < INSTR; i++)
+    {
+        ALU1[i].instr = createNop();
+
+        ALU2[i].instr = createNop();
+    }
+}
 
 // Integer Queue
 /*
@@ -354,11 +387,6 @@ int parser(char *file_name)
     return 0;
 }
 
-int Commit()
-{
-    return 0;
-}
-
 bool isOpBusy(int reg)
 {
     return BusyBitTable[reg];
@@ -372,9 +400,17 @@ typedef struct
 
 struct
 {
-    forwardingTableEntry table[ENTRY];
+    forwardingTableEntry table[INSTR];
     int size;
 } forwardingTable;
+void initForwardingTable()
+{
+    for (size_t i = 0; i < INSTR; i++)
+    {
+        forwardingTable.table[i].reg = -1;
+        forwardingTable.table[i].value = 0;
+    }
+}
 
 int forwardable(int reg)
 {
@@ -387,6 +423,8 @@ int forwardable(int reg)
     }
     return -1;
 }
+
+
 
 // Fetch & Decode
 void FetchAndDecode()
@@ -402,7 +440,7 @@ void FetchAndDecode()
      indicates that an exception is detected, the PC is set to 0x10000
      */
     // TODO: create Commit Stage
-    if (Commit() < 0)
+    if (exception)
     {
         // set at 0x10000
         PC = 0x10000;
@@ -450,11 +488,10 @@ void RDS()
 
     // Rename the instructions
 
-    
     unsigned int index = min(DIR.DIRSize, INSTR);
     for (int i = 0; i < index; i++)
     {
-    
+
         int newReg = getFreeReg();
         if (newReg < 0)
         {
@@ -469,8 +506,8 @@ void RDS()
 
         // add the instruction to the Active List
         unsigned int currentPc = popDIR();
-        ActiveList.ALarray[ActiveList.ALSize].LogicalDestination = instrs.instructions[i].dest;
-        ActiveList.ALarray[ActiveList.ALSize].OldDestination = oldReg,
+        ActiveList.ALarray[ActiveList.ALSize].LogicalDestination = newReg;
+        ActiveList.ALarray[ActiveList.ALSize].OldDestination = oldReg;
         ActiveList.ALarray[ActiveList.ALSize].PC = currentPc;
         ActiveList.ALarray[ActiveList.ALSize].Done = false;
         ActiveList.ALSize += 1;
@@ -529,32 +566,85 @@ void RDS()
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = PhysRegFile[RegMapTable[instrs.instructions[i].src2]];
             }
         }
-    
+
         RegMapTable[instrs.instructions[i].dest] = newReg;
         BusyBitTable[newReg] = true;
         IntegerQueue.IQSize += 1;
-
     }
     // Clear the DIR
 
     return;
 }
 
+IntegerQueueEntry popIQ()
+{
+    // we are looking for the oldest instruction that has both operands ready
+    // the oldest have are the nearest to 0 in the queue
+    for (size_t i = 0; i < IntegerQueue.IQSize; i++)
+    {
+        if (IntegerQueue.IQarray[i].OpAIsReady && IntegerQueue.IQarray[i].OpBIsReady)
+        {
+            IntegerQueueEntry temp = IntegerQueue.IQarray[i];
+            for (size_t j = i; j < IntegerQueue.IQSize - 1; j++)
+            {
+                IntegerQueue.IQarray[j] = IntegerQueue.IQarray[j + 1];
+            }
+            IntegerQueue.IQSize -= 1;
+            return temp;
+        }
+    }
+    IntegerQueueEntry temp = createNop();
+    return temp;
+}
+int findActiveIndex(int PC)
+{
+    for (size_t i = 0; i < ActiveList.ALSize; i++)
+    {
+        if (ActiveList.ALarray[i].PC == PC)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+//TODO: change how ALU works as they are passed by reference
+
 void Issue()
 {
+    for (size_t i = 0; i < IntegerQueue.IQSize; i++)
+    {
+       // putting every forwadabble reg into corresponding integerquueentry
+        int forwardIndexA = forwardable(IntegerQueue.IQarray[i].OpARegTag);
+        if (forwardIndexA >= 0)
+        {
+            IntegerQueue.IQarray[i].OpAIsReady = true;
+            IntegerQueue.IQarray[i].OpAValue = forwardingTable.table[forwardIndexA].value;
+        }
+        int forwardIndexB = forwardable(IntegerQueue.IQarray[i].OpBRegTag);
+        if (forwardIndexB >= 0)
+        {
+            IntegerQueue.IQarray[i].OpBIsReady = true;
+            IntegerQueue.IQarray[i].OpBValue = forwardingTable.table[forwardIndexB].value;
+        }
+    }
     // scan for the 4 available entries in the Integer Queue
-    int index = min(IntegerQueue.IQSize, ENTRY);
+    int index = min(IntegerQueue.IQSize, INSTR);
     if (index <= 0)
     {
         return;
     }
 
-    struct
+    for (size_t i = 0; i < index; i++)
     {
-        IntegerQueueEntry ilist[INSTR];
-        size_t size;
-    } tempList;
+        ALU1[i].instr = copyIQE(popIQ());
+        //show the pointer of ALU1[i].instr and ALU2[i].instr
+        printf("ALU1[%d]: %p <- ALU2[%d]: %p \n", i, &ALU1[i], i, &ALU2[i]);
+    }
+    
+ 
+}
 
+/*
     for (size_t i = index; i >= 0; i--)
     {
         if (IntegerQueue.IQarray[i].OpAIsReady && IntegerQueue.IQarray[i].OpBIsReady)
@@ -566,14 +656,15 @@ void Issue()
         {
             break;
         }
-    }
-}
+    }*/
 
 void Execute()
 {
+  
     int temp;
     for (int i = 0; i < INSTR; i++)
     {
+        //printf("ALU2[%d].instr.OpCode: %s\n", i, ALU2[i].instr.OpCode);
         if (strcmp((ALU2[i]).instr.OpCode, "addi") == 0)
         {
             temp = (ALU2[i]).instr.OpAValue + (ALU2[i]).instr.OpBValue;
@@ -604,10 +695,95 @@ void Execute()
         }
         forwardingTable.table[i].reg = (ALU2[i]).instr.DestRegister;
         forwardingTable.table[i].value = temp;
-        ALU2[i] = ALU1[i];
 
-        return;
+        // if DestRegister is not -1 then we need to update the value of the physical register and set the busy bit to false
+        //printf("ALU2[%d].instr.DestRegister: %d\n", i, (ALU2[i]).instr.DestRegister);
+        if ((ALU2[i]).instr.DestRegister >= 0)
+        {
+            //printf("ALU2[%d].instr.DestRegister: %d\n", i, (ALU2[i]).instr.DestRegister);
+            //printf("temp: %d\n", temp);
+            //printf("PhysRegFile[(ALU2[i]).instr.DestRegister]: %lu\n", PhysRegFile[(ALU2[i]).instr.DestRegister]);
+            PhysRegFile[(ALU2[i]).instr.DestRegister] = temp;
+            //printf("PhysRegFile[(ALU2[i]).instr.DestRegister]: %lu\n", PhysRegFile[(ALU2[i]).instr.DestRegister]);
+
+            BusyBitTable[(ALU2[i]).instr.DestRegister] = false;
+        }
+        
+        //printf("ALU2[%d]: %d <- ALU1[%d]: %d \n", i, (ALU2[i]).instr.DestRegister,i, (ALU1[i]).instr.DestRegister);
+
+        ALU2[i].instr = ( ALU1[i].instr);
+    //print the pointer of ALU2[i].instr and ALU1[i].instr
+    //printf("ALU2[%d]: %p <- ALU1[%d]: %p \n", i, &ALU2[i].instr, i, &ALU1[i].instr);
+        //printf("ALU2[%d]: %d\n",i, (ALU2[i]).instr.DestRegister);
+        
     }
+   
+    return;
+}
+
+ActiveListEntry popAL()
+{
+    ActiveListEntry temp = ActiveList.ALarray[0];
+    for (size_t i = 0; i < ActiveList.ALSize - 1; i++)
+    {
+        ActiveList.ALarray[i] = ActiveList.ALarray[i + 1];
+    }
+    ActiveList.ALSize -= 1;
+    return temp;
+}
+void Commit()
+{
+    for (size_t i = 0; i < INSTR; i++)
+    {
+        if (ALU2[i].instr.DestRegister >= 0)
+        {
+            //printf("ALU2[%d].instr.DestRegister: %d\n", i, ALU2[i].instr.DestRegister);
+            int index = findActiveIndex(ALU2[i].instr.PC);
+            //printf("index: %d\n", index);
+            if (index >= 0)
+            {
+                ActiveList.ALarray[index].Done = true;
+            }
+        }
+    }
+    //showActiveList();
+
+    for (size_t i = 0; i < INSTR; i++)
+    {
+        // if the instruction is done, we need to remove it from the Active List
+    
+        if (ActiveList.ALarray[0].Done)
+        {
+
+            if (ActiveList.ALarray[0].Exception)
+            {
+                ePC = ActiveList.ALarray[0].PC;
+                exception = true;
+                Exception();
+            }
+            else
+            {
+                int reg = ActiveList.ALarray[0].LogicalDestination;
+                PushFreeList(reg);
+                BusyBitTable[reg] = false;
+                popAL();
+            }
+         
+         
+
+            
+        }
+        else
+        {
+            break;
+        }
+    }
+    return;
+}
+
+void Exception()
+{
+    return;
 }
 
 void showDIR()
@@ -623,7 +799,7 @@ void showActiveList()
     printf("ActiveList\n");
     for (size_t i = 0; i < ActiveList.ALSize; i++)
     {
-        printf("%d %d %d\n", ActiveList.ALarray[i].LogicalDestination, ActiveList.ALarray[i].OldDestination, ActiveList.ALarray[i].PC);
+        printf("log:%d old:%d PC:%d done:%d\n", ActiveList.ALarray[i].LogicalDestination, ActiveList.ALarray[i].OldDestination, ActiveList.ALarray[i].PC, ActiveList.ALarray[i].Done);
     }
 }
 
@@ -632,7 +808,7 @@ void showIntegerQueue()
     printf("IntegerQueue\n");
     for (size_t i = 0; i < IntegerQueue.IQSize; i++)
     {
-        printf("%d %d %d %d %d %d %d %s %d\n", IntegerQueue.IQarray[i].DestRegister, IntegerQueue.IQarray[i].OpAIsReady, IntegerQueue.IQarray[i].OpARegTag, IntegerQueue.IQarray[i].OpAValue, IntegerQueue.IQarray[i].OpBRegTag, IntegerQueue.IQarray[i].OpBIsReady, IntegerQueue.IQarray[i].OpBValue, IntegerQueue.IQarray[i].OpCode, IntegerQueue.IQarray[i].PC);
+        printf("dest->%d tag1:%d gtg:%d val:%d tag2:%d gtg:%d val:%d %s PC:%d\n", IntegerQueue.IQarray[i].DestRegister, IntegerQueue.IQarray[i].OpARegTag, IntegerQueue.IQarray[i].OpAIsReady, IntegerQueue.IQarray[i].OpAValue, IntegerQueue.IQarray[i].OpBRegTag, IntegerQueue.IQarray[i].OpBIsReady, IntegerQueue.IQarray[i].OpBValue, IntegerQueue.IQarray[i].OpCode, IntegerQueue.IQarray[i].PC);
     }
 }
 
@@ -686,6 +862,14 @@ void showFreeList()
     }
     printf("\n");
 }
+void showForwardingTable()
+{
+    printf("ForwardingTable\n");
+    for (size_t i = 0; i < INSTR; i++)
+    {
+        printf("reg:%d val:%d\n", forwardingTable.table[i].reg, forwardingTable.table[i].value);
+    }
+}
 
 void showPhysRegFile()
 {
@@ -699,4 +883,31 @@ void showPhysRegFile()
 void showBp()
 {
     printf("BackPressure: %d\n", backPressureRDS);
+}
+
+void showALU()
+{
+    printf("ALU1 -> ALU2\n");
+    for (size_t i = 0; i < INSTR; i++)
+    {
+        printf("|dest->%d tag1:%d gtg:%d val:%d tag2:%d gtg:%d val:%d opcode:%s PC:%d|->|dest->%d tag1:%d gtg:%d val:%d tag2:%d gtg:%d val:%d %s PC:%d|\n",
+               ALU1[i].instr.DestRegister,
+               ALU1[i].instr.OpARegTag,
+               ALU1[i].instr.OpAIsReady,
+               ALU1[i].instr.OpAValue,
+               ALU1[i].instr.OpBRegTag,
+               ALU1[i].instr.OpBIsReady,
+               ALU1[i].instr.OpBValue,
+               ALU1[i].instr.OpCode,
+               ALU1[i].instr.PC,
+               ALU2[i].instr.DestRegister,
+               ALU2[i].instr.OpARegTag,
+               ALU2[i].instr.OpAIsReady,
+               ALU2[i].instr.OpAValue,
+               ALU2[i].instr.OpBRegTag,
+               ALU2[i].instr.OpBIsReady,
+               ALU2[i].instr.OpBValue,
+               ALU2[i].instr.OpCode,
+               ALU2[i].instr.PC);
+    }
 }

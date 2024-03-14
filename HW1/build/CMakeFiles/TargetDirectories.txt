@@ -1,5 +1,7 @@
 /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles/OhMyDIR.dir
 /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles/FrenchDispatch.dir
 /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles/KingOfPop.dir
+/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles/NameYourIssue.dir
+/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles/CommitmentIsScary.dir
 /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles/edit_cache.dir
 /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles/rebuild_cache.dir

@@ -42,4 +42,6 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/OhMyDIR.dir/DependInfo.cmake"
   "CMakeFiles/FrenchDispatch.dir/DependInfo.cmake"
   "CMakeFiles/KingOfPop.dir/DependInfo.cmake"
+  "CMakeFiles/NameYourIssue.dir/DependInfo.cmake"
+  "CMakeFiles/CommitmentIsScary.dir/DependInfo.cmake"
   )

@@ -101,5 +101,6 @@ void showForwardingTable();
 int PopFreeList();
 void initALU();
 void initForwardingTable();
-
+void toJsonActiveList(char* filename);
+void toJsonTotal(char* filename);
 #endif /* MIPS_SIMULATOR_H */

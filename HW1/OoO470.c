@@ -497,15 +497,16 @@ void RDS()
         {
             return;
         }
+        
         // printf("newReg: %d\n", newReg);
         // printf("DIR.DIRarray[i]: %d\n", DIR.DIRarray[i]);
         //  make it busy
-
-        unsigned int oldReg = RegMapTable[instrs.instructions[i].dest];
+        unsigned int currentPc = popDIR();
+        unsigned int oldReg = RegMapTable[instrs.instructions[currentPc].dest];
         // map the logical destination to the physical register
 
         // add the instruction to the Active List
-        unsigned int currentPc = popDIR();
+        
         ActiveList.ALarray[ActiveList.ALSize].LogicalDestination = newReg;
         ActiveList.ALarray[ActiveList.ALSize].OldDestination = oldReg;
         ActiveList.ALarray[ActiveList.ALSize].PC = currentPc;
@@ -514,7 +515,7 @@ void RDS()
         // add the instruction to the Integer Queue
         IntegerQueue.IQarray[IntegerQueue.IQSize].DestRegister = newReg;
         IntegerQueue.IQarray[IntegerQueue.IQSize].PC = currentPc;
-        const char *tempOpCode = instrs.instructions[i].opcode;
+        const char *tempOpCode = instrs.instructions[currentPc].opcode;
         strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode, tempOpCode);
 
         // we want to check if the source registers are ready
@@ -523,12 +524,16 @@ void RDS()
         // and we give the value of src2 to IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue
         // if opcode is not "addi" then we need to check if both src1 and src2 are ready
         // and we give the value of src1 to IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue
-        int forwardIndexA = forwardable(RegMapTable[instrs.instructions[i].src1]);
-
-        if (isOpBusy(RegMapTable[instrs.instructions[i].src1]))
+        int forwardIndexA = forwardable(RegMapTable[instrs.instructions[currentPc].src1]);
+        //print the current instruction
+        //printf("currentPc: %d\n", currentPc);
+        //printf("current instr = %d %s %d %d\n", instrs.instructions[currentPc].dest, instrs.instructions[currentPc].opcode, instrs.instructions[currentPc].src1, instrs.instructions[currentPc].src2);
+        //printf("[%d] <- [%d]\n", RegMapTable[instrs.instructions[currentPc].src1],instrs.instructions[currentPc].src1);
+        if (isOpBusy(RegMapTable[instrs.instructions[currentPc].src1]))
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = false;
-            IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = RegMapTable[instrs.instructions[i].src1];
+            //printf("OpARegTag: %d\n", RegMapTable[instrs.instructions[currentPc].src1]);
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = RegMapTable[instrs.instructions[currentPc].src1];
         }
         else if (forwardIndexA >= 0)
         {
@@ -538,22 +543,22 @@ void RDS()
         else
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = true;
-            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue = PhysRegFile[RegMapTable[instrs.instructions[i].src1]];
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue = PhysRegFile[RegMapTable[instrs.instructions[currentPc].src1]];
         }
 
-        if (strcmp(instrs.instructions[i].opcode, "addi") == 0)
+        if (strcmp(instrs.instructions[currentPc].opcode, "addi") == 0)
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
-            IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = instrs.instructions[i].src2;
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = instrs.instructions[currentPc].src2;
         }
         else
         {
-            int forwardIndexB = forwardable(RegMapTable[instrs.instructions[i].src2]);
+            int forwardIndexB = forwardable(RegMapTable[instrs.instructions[currentPc].src2]);
 
-            if (isOpBusy(RegMapTable[instrs.instructions[i].src2]))
+            if (isOpBusy(RegMapTable[instrs.instructions[currentPc].src2]))
             {
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = false;
-                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = RegMapTable[instrs.instructions[i].src2];
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = RegMapTable[instrs.instructions[currentPc].src2];
             }
             else if (forwardIndexB >= 0)
             {
@@ -563,11 +568,11 @@ void RDS()
             else
             {
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
-                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = PhysRegFile[RegMapTable[instrs.instructions[i].src2]];
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = PhysRegFile[RegMapTable[instrs.instructions[currentPc].src2]];
             }
         }
 
-        RegMapTable[instrs.instructions[i].dest] = newReg;
+        RegMapTable[instrs.instructions[currentPc].dest] = newReg;
         BusyBitTable[newReg] = true;
         IntegerQueue.IQSize += 1;
     }
@@ -628,17 +633,15 @@ void Issue()
         }
     }
     // scan for the 4 available entries in the Integer Queue
-    int index = min(IntegerQueue.IQSize, INSTR);
-    if (index <= 0)
-    {
-        return;
-    }
+   
 
-    for (size_t i = 0; i < index; i++)
+    for (size_t i = 0; i < INSTR; i++)
     {
+        //printf("ALU1[%d]: %d <- ALU2[%d]: %d \n", i, ALU1[i].instr.DestRegister, i, ALU2[i].instr.DestRegister);
+
         ALU1[i].instr = copyIQE(popIQ());
         //show the pointer of ALU1[i].instr and ALU2[i].instr
-        printf("ALU1[%d]: %p <- ALU2[%d]: %p \n", i, &ALU1[i], i, &ALU2[i]);
+        //printf("ALU1[%d]: %d <- ALU2[%d]: %d \n", i, ALU1[i].instr.DestRegister, i, ALU2[i].instr.DestRegister);
     }
     
  
@@ -768,10 +771,6 @@ void Commit()
                 BusyBitTable[reg] = false;
                 popAL();
             }
-         
-         
-
-            
         }
         else
         {
@@ -910,4 +909,73 @@ void showALU()
                ALU2[i].instr.OpCode,
                ALU2[i].instr.PC);
     }
+}
+
+void toJsonDIR(char *filename)
+{
+    FILE * f = fopen(filename, "w");
+    
+    if (f == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    fprintf(f, "{\n");
+    fprintf(f, "\"DIR\": [\n");
+    for (size_t i = 0; i < DIR.DIRSize; i++)
+    {
+        fprintf(f, "%d", DIR.DIRarray[i]);
+        if (i < DIR.DIRSize - 1)
+        {
+            fprintf(f, ",\n");
+        }
+    }
+    }
+
+void toJsonActiveList(FILE * f)
+{
+    printf("ActiveList save\n");
+  
+    printf("pointer to file %p\n", f);
+    if (f == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    printf("ActiveList saving\n");
+   
+    fprintf(f, "\"ActiveList\": [\n");
+    for (size_t i = 0; i < ActiveList.ALSize; i++)
+    {
+        fprintf(f, "{\"LogicalDestination\": %d,\n \"OldDestination\": %d,\n \"PC\": %d,\n \"Done\": %d}", ActiveList.ALarray[i].LogicalDestination, ActiveList.ALarray[i].OldDestination, ActiveList.ALarray[i].PC, ActiveList.ALarray[i].Done);
+        
+        if ( i < ActiveList.ALSize - 1)
+        {
+            fprintf(f, ",\n");
+        }
+        
+        
+        
+        printf("ActiveList flushed\n");
+        
+    }
+    fprintf(f, "]\n");
+
+  
+    }
+
+void toJsonTotal(char *filename)
+{
+    FILE * f = fopen(filename, "a");
+    if (f == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+   fprintf(f, "{\n");
+  
+    toJsonActiveList(f);
+    fprintf(f, "},\n");
+    fflush(f);
+    
 }

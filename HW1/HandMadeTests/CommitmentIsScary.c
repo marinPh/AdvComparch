@@ -10,18 +10,22 @@ int main(int argc, char *argv[]) {
   initForwardingTable();
     printf("%s", "initForwardingTable\n");
 
-  
-  for (int i = 0; i < 7; i++) {
+  //open output file and add [
+  FILE *fp = fopen("output.json", "w");
+  fprintf(fp, "[\n");
+  fclose(fp);
+  for (int i = 0; i < 9; i++) {
     //showForwardingTable();
-    //showALU();
-    //showPhysRegFile();
-    //showActiveList();
+    toJsonTotal("output.json");
+    showALU();
+    showPhysRegFile();
+
     //showBusyBitTable();
-    //showIntegerQueue();
+    showIntegerQueue();
     Commit();
     printf("Commit, [%d]\n", i);
     Execute();
-    showALU();
+    //showALU();
     printf("Execute, [%d]\n", i);
     Issue();
  
@@ -31,8 +35,11 @@ int main(int argc, char *argv[]) {
     FetchAndDecode();
     printf("FetchAndDecode, [%d]\n", i);
   }
-
-  
-
+  fp = fopen("output.json", "a");
+  //remove last comma
+  fseek(fp, -3, SEEK_END);
+  fprintf(fp, "]\n");
+  fflush(fp);
+  fclose(fp);
   return 0;
 }

@@ -6,7 +6,6 @@ int main(int argc, char *argv[]) {
   parser("../given_tests/01/input.json");
 
   initALU();
-  
   printf("%s", "initALU\n");
   initForwardingTable();
     printf("%s", "initForwardingTable\n");

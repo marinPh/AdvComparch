@@ -100,24 +100,6 @@ unsigned int RegMapTable[ENTRY] = { // On initialization, all architectural regi
     30, 31}; // array that maps architectural register names to physical register names
 // 32 architectural registers, 64 physical registers
 
-// // Free List
-// unsigned int *FreeList[ENTRY] = {  // TODO why * ?
-//     32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
-//     42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
-//     52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
-//     62, 63 }; // array that keeps track of the physical registers that are free
-// // on initialization 32-63 are free
-
-// // Free List
-// unsigned int FreeList[REGS] = {
-//     32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
-//     42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
-//     52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
-//     62, 63, -1, -1, -1, -1, -1, -1, -1, -1,
-//     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-//     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-//     -1, -1, -1, -1}; // array that keeps track of the physical registers that are free
-// // on initialization 32-63 are free
 
 // Define a struct for a node in the double linked list
 typedef struct FreeListNode {
@@ -135,7 +117,7 @@ typedef struct {
 FreeList freeList; // Initialize the FreeList
 
 // Function to initialize the double linked list
-void initFreeList() {
+void initFreeList() { // on initialization 32-63 are free
 
     freeList.head = NULL;
     freeList.tail = NULL;
@@ -222,60 +204,6 @@ struct {
 } ActiveList;
 
 
-// int PopFreeList()
-// {
-//     for (size_t i = 0; i < REGS; ++i)
-//     {
-//         if (FreeList[i] != -1)
-//         {
-//             unsigned int poppedValue = FreeList[i];
-//             FreeList[i] = -1;
-//             return poppedValue;
-//         }
-//     }
-//     return -1; // If all elements are -1, FreeList is empty
-// }
-
-// int PopFreeList() {
-//     int reg = FreeList[0];
-//     for (size_t i = 0; i < ENTRY - 1; i++) {
-//         FreeList[i] = FreeList[i + 1];
-//         // printf("%d <-%d\n",FreeList[i],FreeList[i+1]);
-//     }
-//     FreeList[ENTRY - 1] = -1;
-//     return reg;
-// }
-
-/*
-    Push a register to the beginning of the Free List
-    If the Free List is full, return -1
-    Else, return 0
-*/
-// int PushFreeList(unsigned int reg)
-// {
-//     printf("Free list reg: %d\n", reg);
-//     for (size_t i = 0; i < REGS; ++i)
-//     {
-//         if (FreeList[i] == -1)
-//         {
-//             FreeList[i] = reg;
-//             return 0;
-//         }
-//     }
-//     return -1; // If no element is -1, FreeList is full
-// }
-
-// int PushFreeList(int reg) {
-
-//     if (FreeList[ENTRY - 1] == -1) return -1;  // TODO if (FreeList[ENTRY - 1] == -1) never -1
-
-//     for (size_t i = 0; i < ENTRY; i++) {
-//         FreeList[i] = FreeList[i + 1];
-//     }
-//     FreeList[0] = reg;
-//     return 0;
-// }
-
 // Entry in Integer Queue
 typedef struct
 {
@@ -361,174 +289,6 @@ void initALU()
         ALU1[i].instr = createNop();
         ALU2[i].instr = createNop();
     }
-}
-
-/*
-    Parser for JSON file
-*/
-int parser(char *file_name)
-{
-    // Open the JSON file
-    FILE *file = fopen(file_name, "r");
-    if (file == NULL)
-    {
-        // printf("Failed to open the file.\n");
-        return 1;
-    }
-
-    // Get the file size
-    fseek(file, 0, SEEK_END);
-    long file_size = ftell(file);
-    rewind(file); // Go back to the beginning of the file
-    // printf("File size: %ld\n", file_size);
-
-    // Allocate memory to store the file contents
-    char *json_data = (char *)malloc(file_size + 1);
-    if (json_data == NULL)
-    {
-        // printf("Memory allocation failed.\n");
-        fclose(file);
-        return 1;
-    }
-    // printf("Memory allocated.\n");
-
-    // Read the file contents into the allocated memory
-    fread(json_data, 1, file_size, file);
-    json_data[file_size] = '\0'; // Null-terminate the string
-
-    // Close the file
-    fclose(file);
-
-    // Parse the JSON data
-    cJSON *root = cJSON_Parse(json_data);
-    if (root == NULL)
-    {
-        const char *error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL)
-        {
-            // printf("Error before: %s\n", error_ptr);
-        }
-        cJSON_free(json_data); // Free memory
-        return 1;
-    }
-    // printf("JSON parsed.\n");
-
-    // Iterate over the array and print each string
-    cJSON *instruction;
-
-    size_t array_size = cJSON_GetArraySize(root);
-
-    if (array_size == 0)
-    {
-        // printf("Error: Empty or invalid JSON array.\n");
-        cJSON_Delete(root);
-        free(json_data);
-        return 1;
-    }
-    // printf("Array size: %ld\n", array_size);
-
-    instrs.instructions = (InstructionEntry *)malloc(array_size * sizeof(InstructionEntry));
-    if (instrs.instructions == NULL)
-    {
-        // printf("Instruction memory allocation failed.\n");
-        cJSON_Delete(root);
-        free(json_data);
-        return 1;
-    }
-    instrs.size = 0;
-    // printf("Memory allocated for instructions.\n");
-
-    cJSON_ArrayForEach(instruction, root)
-    {
-        // printf("%s\n", cJSON_Print(instruction));
-        //  printf("%s\n", instruction->valuestring);
-
-        // Parse at whitespace and eliminate ',' and store in InstructionEntry
-
-        // Copy the instruction string since strtok modifies the input
-        char *instruction_copy = strdup(instruction->valuestring);
-
-        // Tokenize the instruction string
-        char *token = strtok(instruction_copy, " ");
-
-        if (token != NULL)
-        {
-
-            strcpy(instrs.instructions[instrs.size].opcode, token); // already null-terminated
-
-            token = strtok(NULL, ",");
-            if (token != NULL)
-            {
-                // printf("Token: %s\n", token);
-                // remove the 'x' from the string
-                token = token + 1;
-                // printf("Token: %s\n", token);
-                sscanf(token, "%d", &instrs.instructions[instrs.size].dest);
-                // printf("Dest: %d\n", instrs.instructions[instrs.size].dest);
-
-                token = strtok(NULL, ",");
-                if (token != NULL)
-                {
-                    // printf("Token: %s\n", token);
-                    // remove the 'x' from the string
-                    token = token + 2;
-                    // printf("Token: %s\n", token);
-                    sscanf(token, "%d", &instrs.instructions[instrs.size].src1);
-                    // printf("Src1: %d\n", instrs.instructions[instrs.size].src1);
-                    token = strtok(NULL, "\0");
-                    // printf("idk","ok");
-                    if (token != NULL)
-                    { // check if src2 starts by 'x' if so remove it
-                        if (token[0] == 'x')
-                        {
-                            token = token + 2;
-                            //    printf("Token: %s\n", token);
-                            sscanf(token, "%d", &instrs.instructions[instrs.size].src2);
-                        }
-                        else
-                        {
-                            sscanf(token, "%d", &instrs.instructions[instrs.size].src2);
-                        }
-                    }
-                }
-            }
-        }
-        // printf("Token: %s\n", token);
-        instrs.size += 1;
-    }
-
-    // Free memory
-    cJSON_Delete(root);
-    free(json_data);
-
-    // // Initialize the Free List
-    // FreeList = (unsigned int *)malloc((REGS - 32) * sizeof(unsigned int));
-    // for (int i = 0; i < (REGS - 32); i++) {
-    //     FreeList[i] = 32 + i;
-    // }
-
-    // // Fetch & Decode
-    // FetchAndDecode();
-
-    // // Rename
-    // Rename();
-
-    // // Dispatch
-    // Dispatch();
-
-    // // Issue
-    // Issue();
-
-    // // Execute
-    // Execute();
-
-    // // Write Result
-    // WriteResult();
-
-    // // Commit
-    // Commit();
-
-    return 0;
 }
 
 bool isOpBusy(int reg)
@@ -800,19 +560,6 @@ void Issue()
     }
 }
 
-/*
-    for (size_t i = index; i >= 0; i--)
-    {
-        if (IntegerQueue.IQarray[i].OpAIsReady && IntegerQueue.IQarray[i].OpBIsReady)
-        {
-            tempList.ilist[tempList.size] = IntegerQueue.IQarray[i];
-            tempList.size += 1;
-        }
-        if (tempList.size == INSTR)
-        {
-            break;
-        }
-    }*/
 
 void Execute()
 {
@@ -928,37 +675,6 @@ void Commit()
             // TODO "an instruction is met that is not completed yet"
         }
     }
-
-    // for (size_t i = 0; i < INSTR; i++) // MAX 4 instructions
-    // {
-    //     if (ALU2[i].instr.DestRegister >= 0) // if DestRegister is available (i.e. >=0)
-    //     {
-    //         //printf("ALU2[%d].instr.DestRegister: %d\n", i, ALU2[i].instr.DestRegister);
-    //         int index = findActiveIndex(ALU2[i].instr.PC); // find the index of the instruction with PC in the Active List
-    //         //printf("index: %d\n", index);
-    //         if (index >= 0) ActiveList.ALarray[index].Done = true;
-    //     }
-    // }
-    // //showActiveList();
-
-    // for (size_t i = 0; i < INSTR; i++) {
-    //     // if the instruction is done, we need to remove it from the Active List
-
-    //     if (ActiveList.ALarray[0].Done) { // TODO why 0? not i?
-
-    //         if (ActiveList.ALarray[0].Exception) {
-    //             ePC = ActiveList.ALarray[0].PC;
-    //             exception = true;
-    //             Exception();
-    //         } else {
-    //             int reg = ActiveList.ALarray[0].LogicalDestination;
-    //             PushFreeList(reg);
-    //             BusyBitTable[reg] = false;
-    //             popAL();
-    //         }
-    //     }
-    //     else break;
-    // }
 }
 
 void Exception()
@@ -1139,3 +855,227 @@ void Init(){
     initALU();
     initForwardingTable();
 }
+
+
+//---------------------------------------------
+// JSON 
+
+/*
+    Parser for JSON file
+*/
+int parser(char *file_name)
+{
+    // Open the JSON file
+    FILE *file = fopen(file_name, "r");
+    if (file == NULL)
+    {
+        // printf("Failed to open the file.\n");
+        return 1;
+    }
+
+    // Get the file size
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    rewind(file); // Go back to the beginning of the file
+    // printf("File size: %ld\n", file_size);
+
+    // Allocate memory to store the file contents
+    char *json_data = (char *)malloc(file_size + 1);
+    if (json_data == NULL)
+    {
+        // printf("Memory allocation failed.\n");
+        fclose(file);
+        return 1;
+    }
+    // printf("Memory allocated.\n");
+
+    // Read the file contents into the allocated memory
+    fread(json_data, 1, file_size, file);
+    json_data[file_size] = '\0'; // Null-terminate the string
+
+    // Close the file
+    fclose(file);
+
+    // Parse the JSON data
+    cJSON *root = cJSON_Parse(json_data);
+    if (root == NULL)
+    {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL)
+        {
+            // printf("Error before: %s\n", error_ptr);
+        }
+        cJSON_free(json_data); // Free memory
+        return 1;
+    }
+    // printf("JSON parsed.\n");
+
+    // Iterate over the array and print each string
+    cJSON *instruction;
+
+    size_t array_size = cJSON_GetArraySize(root);
+
+    if (array_size == 0)
+    {
+        // printf("Error: Empty or invalid JSON array.\n");
+        cJSON_Delete(root);
+        free(json_data);
+        return 1;
+    }
+    // printf("Array size: %ld\n", array_size);
+
+    instrs.instructions = (InstructionEntry *)malloc(array_size * sizeof(InstructionEntry));
+    if (instrs.instructions == NULL)
+    {
+        // printf("Instruction memory allocation failed.\n");
+        cJSON_Delete(root);
+        free(json_data);
+        return 1;
+    }
+    instrs.size = 0;
+    // printf("Memory allocated for instructions.\n");
+
+    cJSON_ArrayForEach(instruction, root)
+    {
+        // printf("%s\n", cJSON_Print(instruction));
+        //  printf("%s\n", instruction->valuestring);
+
+        // Parse at whitespace and eliminate ',' and store in InstructionEntry
+
+        // Copy the instruction string since strtok modifies the input
+        char *instruction_copy = strdup(instruction->valuestring);
+
+        // Tokenize the instruction string
+        char *token = strtok(instruction_copy, " ");
+
+        if (token != NULL)
+        {
+
+            strcpy(instrs.instructions[instrs.size].opcode, token); // already null-terminated
+
+            token = strtok(NULL, ",");
+            if (token != NULL)
+            {
+                // printf("Token: %s\n", token);
+                // remove the 'x' from the string
+                token = token + 1;
+                // printf("Token: %s\n", token);
+                sscanf(token, "%d", &instrs.instructions[instrs.size].dest);
+                // printf("Dest: %d\n", instrs.instructions[instrs.size].dest);
+
+                token = strtok(NULL, ",");
+                if (token != NULL)
+                {
+                    // printf("Token: %s\n", token);
+                    // remove the 'x' from the string
+                    token = token + 2;
+                    // printf("Token: %s\n", token);
+                    sscanf(token, "%d", &instrs.instructions[instrs.size].src1);
+                    // printf("Src1: %d\n", instrs.instructions[instrs.size].src1);
+                    token = strtok(NULL, "\0");
+                    // printf("idk","ok");
+                    if (token != NULL)
+                    { // check if src2 starts by 'x' if so remove it
+                        if (token[0] == 'x')
+                        {
+                            token = token + 2;
+                            //    printf("Token: %s\n", token);
+                            sscanf(token, "%d", &instrs.instructions[instrs.size].src2);
+                        }
+                        else
+                        {
+                            sscanf(token, "%d", &instrs.instructions[instrs.size].src2);
+                        }
+                    }
+                }
+            }
+        }
+        // printf("Token: %s\n", token);
+        instrs.size += 1;
+    }
+
+    // Free memory
+    cJSON_Delete(root);
+    free(json_data);
+
+    // // Initialize the Free List
+    // FreeList = (unsigned int *)malloc((REGS - 32) * sizeof(unsigned int));
+    // for (int i = 0; i < (REGS - 32); i++) {
+    //     FreeList[i] = 32 + i;
+    // }
+
+    // // Fetch & Decode
+    // FetchAndDecode();
+
+    // // Rename
+    // Rename();
+
+    // // Dispatch
+    // Dispatch();
+
+    // // Issue
+    // Issue();
+
+    // // Execute
+    // Execute();
+
+    // // Write Result
+    // WriteResult();
+
+    // // Commit
+    // Commit();
+
+    return 0;
+}
+
+/*
+    Output the system state in JSON format to a file
+*/
+void outputSystemStateJSON(FILE *file) {
+    fprintf(file, "{\n");
+    fprintf(file, "  \"ActiveList\": [],\n");
+    fprintf(file, "  \"BusyBitTable\": [");
+    for (int i = 0; i < REGS; i++) {
+        fprintf(file, "%s%s", (i > 0 ? ", " : ""), (BusyBitTable[i] ? "true" : "false"));
+    }
+    fprintf(file, "],\n");
+    fprintf(file, "  \"DecodedPCs\": [],\n");
+    fprintf(file, "  \"Exception\": %s,\n", (exception ? "true" : "false"));
+    fprintf(file, "  \"ExceptionPC\": %u,\n", ePC);
+    fprintf(file, "  \"FreeList\": [");
+    FreeListNode *current = freeList.head;
+    while (current != NULL) {
+        fprintf(file, "%s%d", (current != freeList.head ? ", " : ""), current->value);
+        current = current->next;
+    }
+    fprintf(file, "],\n");
+    fprintf(file, "  \"IntegerQueue\": [],\n");
+    fprintf(file, "  \"PC\": %u,\n", PC);
+    fprintf(file, "  \"PhysicalRegisterFile\": [");
+    for (int i = 0; i < REGS; i++) {
+        fprintf(file, "%s%d", (i > 0 ? ", " : ""), PhysRegFile[i]);
+    }
+    fprintf(file, "],\n");
+    fprintf(file, "  \"RegisterMapTable\": [");
+    for (int i = 0; i < ENTRY; i++) {
+        fprintf(file, "%s%d", (i > 0 ? ", " : ""), RegMapTable[i]);
+    }
+    fprintf(file, "]\n");
+    fprintf(file, "}\n");
+}
+
+int wrapper() {
+    FILE *outputFile = fopen("system_state.json", "w"); // Open file for writing
+    if (outputFile == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    
+    // Call the function to output the JSON representation to the file
+    outputSystemStateJSON(outputFile);
+    
+    fclose(outputFile); // Close the file
+    return 0;
+}
+
+

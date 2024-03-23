@@ -147,10 +147,6 @@ int PopFreeList() {
 //     return reg;
 // }
 
-int getFreeReg() {  // TODO necessary? 
-    return PopFreeList();
-}
-
 /*
     Push a register to the beginning of the Free List
     If the Free List is full, return -1
@@ -519,7 +515,7 @@ void RDS() {
 
     unsigned int index = min(DIR.DIRSize, INSTR);
     for (int i = 0; i < index; i++) {
-        int newReg = getFreeReg();
+        int newReg = PopFreeList();
         if (newReg < 0) return;
         // printf("newReg: %d\n", newReg);
         // printf("DIR.DIRarray[i]: %d\n", DIR.DIRarray[i]);
@@ -558,17 +554,21 @@ void RDS() {
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = true;
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue = forwardingTable.table[forwardIndexA].value;
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = -1;
         }
         else
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = true;
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue = PhysRegFile[RegMapTable[instrs.instructions[i].src1]];
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = -1;
         }
 
+        // B operand is always ready for addi
         if (strcmp(instrs.instructions[i].opcode, "addi") == 0)
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = instrs.instructions[i].src2;
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = -1;
         }
         else
         {
@@ -583,11 +583,13 @@ void RDS() {
             {
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = forwardingTable.table[forwardIndexB].value;
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = -1;
             }
             else
             {
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = PhysRegFile[RegMapTable[instrs.instructions[i].src2]];
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = -1;
             }
         }
 
@@ -595,9 +597,6 @@ void RDS() {
         BusyBitTable[newReg] = true;
         IntegerQueue.IQSize += 1;
     }
-    // Clear the DIR
-
-    return;
 }
 
 
@@ -917,12 +916,13 @@ void showRegMapTable()
 void showFreeList()
 {
     printf("FreeList\n");
-    for (size_t i = 0; i < ENTRY; i++)
+    for (size_t i = 0; i < REGS; i++)
     {
         printf("%d ", FreeList[i]);
     }
     printf("\n");
 }
+
 void showForwardingTable()
 {
     printf("ForwardingTable\n");

@@ -101,5 +101,8 @@ void showForwardingTable();
 int PopFreeList();
 void initALU();
 void initForwardingTable();
+void initFreeList();
+void Init();
+
 
 #endif /* MIPS_SIMULATOR_H */

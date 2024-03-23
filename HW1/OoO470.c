@@ -153,38 +153,42 @@ FreeList initFreeList() {
     return list;
 }
 
-FreeList FreeList = initFreeList(); // Initialize the FreeList
+FreeList freeList; // Initialize the FreeList
 
 // Function to pop the first element of the list
-int popFreeList(FreeList *list) {
-    if (list->head == NULL) {
+int popFreeList() {
+    if (freeList.head == NULL) {
         return -1; // If the list is empty, return -1
     }
-    int value = list->head->value; // Get the value of the head
-    FreeListNode *temp = list->head; // Store the head in a temporary variable
-    list->head = list->head->next; // Move the head to the next node
-    if (list->head != NULL) {
-        list->head->prev = NULL; // Set the previous node of the new head to NULL
+    int value = freeList.head->value; // Get the value of the head
+    FreeListNode *temp = freeList.head; // Store the head in a temporary variable
+    freeList.head = freeList.head->next; // Move the head to the next node
+    if (freeList.head != NULL) {
+        freeList.head->prev = NULL; // Set the previous node of the new head to NULL
     } else {
-        list->tail = NULL; // If the list is empty, set the tail to NULL
+        freeList.tail = NULL; // If the list is empty, set the tail to NULL
     }
     free(temp); // Free the memory of the old head
     return value; // Return the value of the old head
 }
 
 // Function to push a value to the end of the list
-void pushFreeList(FreeList *list, int value) {
+int pushFreeList(int value) {
     FreeListNode *newNode = (FreeListNode *)malloc(sizeof(FreeListNode)); // Create a new node
+    if (newNode == NULL) {
+        return -1; // If memory allocation fails, return
+    }
     newNode->value = value; // Set the value of the new node
     newNode->next = NULL; // Set the next node to NULL
-    if (list->tail != NULL) {
-        list->tail->next = newNode; // Link the old tail to the new node
-        newNode->prev = list->tail; // Link the new node to the old tail
+    if (freeList.tail != NULL) {
+        freeList.tail->next = newNode; // Link the old tail to the new node
+        newNode->prev = freeList.tail; // Link the new node to the old tail
     } else {
-        list->head = newNode; // If the list is empty, set the new node as the head
+        freeList.head = newNode; // If the list is empty, set the new node as the head
         newNode->prev = NULL; // Set the previous node to NULL
     }
-    list->tail = newNode; // Set the new node as the tail
+    freeList.tail = newNode; // Set the new node as the tail
+    return 0; 
 }
 
 
@@ -203,32 +207,25 @@ typedef struct
 
 // Active List
 // instructions that have been dispatched but have not yet completed, renamed instruction
-struct
-{
+struct {
     ActiveListEntry ALarray[ENTRY];
     int ALSize;
 } ActiveList;
 
-typedef struct
-{
-    int reg;
-    freeListEntry *next;
-    freeListEntry *prev;
-} freeListEntry;
 
-int PopFreeList()
-{
-    for (size_t i = 0; i < REGS; ++i)
-    {
-        if (FreeList[i] != -1)
-        {
-            unsigned int poppedValue = FreeList[i];
-            FreeList[i] = -1;
-            return poppedValue;
-        }
-    }
-    return -1; // If all elements are -1, FreeList is empty
-}
+// int PopFreeList()
+// {
+//     for (size_t i = 0; i < REGS; ++i)
+//     {
+//         if (FreeList[i] != -1)
+//         {
+//             unsigned int poppedValue = FreeList[i];
+//             FreeList[i] = -1;
+//             return poppedValue;
+//         }
+//     }
+//     return -1; // If all elements are -1, FreeList is empty
+// }
 
 // int PopFreeList() {
 //     int reg = FreeList[0];
@@ -245,19 +242,19 @@ int PopFreeList()
     If the Free List is full, return -1
     Else, return 0
 */
-int PushFreeList(unsigned int reg)
-{
-    printf("Free list reg: %d\n", reg);
-    for (size_t i = 0; i < REGS; ++i)
-    {
-        if (FreeList[i] == -1)
-        {
-            FreeList[i] = reg;
-            return 0;
-        }
-    }
-    return -1; // If no element is -1, FreeList is full
-}
+// int PushFreeList(unsigned int reg)
+// {
+//     printf("Free list reg: %d\n", reg);
+//     for (size_t i = 0; i < REGS; ++i)
+//     {
+//         if (FreeList[i] == -1)
+//         {
+//             FreeList[i] = reg;
+//             return 0;
+//         }
+//     }
+//     return -1; // If no element is -1, FreeList is full
+// }
 
 // int PushFreeList(int reg) {
 
@@ -633,7 +630,7 @@ void RDS()
     unsigned int index = min(DIR.DIRSize, INSTR);
     for (int i = 0; i < index; i++)
     {
-        int newReg = PopFreeList();
+        int newReg = popFreeList();
         if (newReg < 0)
             return;
         // printf("newReg: %d\n", newReg);
@@ -913,7 +910,7 @@ void Commit()
                     BusyBitTable[physReg] = false; // value is not generated from the Execution stage anymore
                     printf("physReg: %d\n", physReg);
 
-                    if (PushFreeList(physReg) == -1)
+                    if (pushFreeList(physReg) == -1)
                         break; // if the Free List is full, do nothing   TODO
                     popAL();
                 }
@@ -987,7 +984,7 @@ void Exception()
 
             BusyBitTable[physReg] = false; // set the Busy Bit to false
             // put the physical register back to the Free List
-            if (PushFreeList(physReg) == -1)
+            if (pushFreeList(physReg) == -1)
                 break; // if the Free List is full, do nothing   TODO
         }
     }
@@ -1064,12 +1061,13 @@ void showRegMapTable()
     }
 }
 
-void showFreeList()
-{
-    printf("FreeList\n");
-    for (size_t i = 0; i < REGS; i++)
-    {
-        printf("%d ", FreeList[i]);
+void showFreeList() {
+    printf("FreeList: \n");
+    // go through the Free List and print the registers
+    FreeListNode *current = freeList.head;
+    while (current != NULL) {
+        printf("%d ", current->value);
+        current = current->next;
     }
     printf("\n");
 }

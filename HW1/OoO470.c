@@ -750,29 +750,32 @@ void Commit() {
     // TODO "until 4 are pciked" => ? 
    for (size_t i = 0; i < INSTR; i++) { // MAX 4 instructions 
 
-        // TODO ALU2 ?? 
         if (ALU2[i].instr.DestRegister >= 0) { // if DestRegister is available (i.e. >=0)
             int index = findActiveIndex(ALU2[i].instr.PC); // find the index of the instruction with PC in the Active List
 
             if (index >= 0) { // if the instruction is in the Active List
                 ActiveList.ALarray[index].Done = true; // set the Done flag to true
+            }
+        }
 
-                if (ActiveList.ALarray[i].Exception) {
-                    ePC = ActiveList.ALarray[i].PC;
+        for (size_t i = 0; i < ActiveList.ALSize; i++) {
+            if (ActiveList.ALarray[0].Done) { // if the first instruction is done, we need to remove it from the Active List
+
+                if (ActiveList.ALarray[0].Exception) {
+                    ePC = ActiveList.ALarray[0].PC;
                     exception = true;
                     Exception();
                     break; // TODO
                 } else { 
-                    int archReg = ActiveList.ALarray[i].LogicalDestination;
+                    int archReg = ActiveList.ALarray[0].LogicalDestination;
                     int physReg = RegMapTable[archReg]; 
 
                     BusyBitTable[physReg] = false; // value is not generated from the Execution stage anymore
                     if (PushFreeList(physReg) == -1) break; // if the Free List is full, do nothing   TODO
                     popAL(); 
                 }
-            }
-        } else { // if DestRegister is NOT available, do nothing
-            break; // TODO "an instruction is met that is not completed yet"
+            } else break; // if DestRegister is NOT available, do nothing
+            // TODO "an instruction is met that is not completed yet"
         }
     }
 

@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
     //showPhysRegFile();
     //showActiveList();
     //showBusyBitTable();
+    showRegMapTable();
     //showDIR();
     showFreeList();
     showIntegerQueue();

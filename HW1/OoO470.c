@@ -209,6 +209,13 @@ struct
     int ALSize;
 } ActiveList;
 
+typedef struct
+{
+    int reg;
+    freeListEntry *next;
+    freeListEntry *prev;
+} freeListEntry;
+
 int PopFreeList()
 {
     for (size_t i = 0; i < REGS; ++i)
@@ -240,6 +247,7 @@ int PopFreeList()
 */
 int PushFreeList(unsigned int reg)
 {
+    printf("Free list reg: %d\n", reg);
     for (size_t i = 0; i < REGS; ++i)
     {
         if (FreeList[i] == -1)
@@ -632,15 +640,14 @@ void RDS()
         // printf("DIR.DIRarray[i]: %d\n", DIR.DIRarray[i]);
         //  make it busy
 
-        unsigned int oldReg = RegMapTable[instrs.instructions[i].dest];
         // map the logical destination to the physical register
 
         // add the instruction to the Active List
 
         unsigned int currentPc = popDIR();
 
-        ActiveList.ALarray[ActiveList.ALSize].LogicalDestination = newReg;
-        ActiveList.ALarray[ActiveList.ALSize].OldDestination = oldReg;
+        ActiveList.ALarray[ActiveList.ALSize].LogicalDestination = instrs.instructions[currentPc].dest;
+        ActiveList.ALarray[ActiveList.ALSize].OldDestination = RegMapTable[instrs.instructions[currentPc].dest];
         ActiveList.ALarray[ActiveList.ALSize].PC = currentPc;
         ActiveList.ALarray[ActiveList.ALSize].Done = false;
         ActiveList.ALSize += 1;
@@ -705,6 +712,8 @@ void RDS()
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = -1;
             }
         }
+
+        printf("newReg: %d\n", newReg);
 
         RegMapTable[instrs.instructions[i].dest] = newReg;
         BusyBitTable[newReg] = true;
@@ -872,7 +881,8 @@ void Commit()
     for (size_t i = 0; i < INSTR; i++)
     { // MAX 4 instructions
 
-        if (ALU2[i].instr.DestRegister >= 0) { // if DestRegister is available (i.e. >=0)
+        if (ALU2[i].instr.DestRegister >= 0)
+        {                                                  // if DestRegister is available (i.e. >=0)
             int index = findActiveIndex(ALU2[i].instr.PC); // find the index of the instruction with PC in the Active List
             printf("index: %d\n", index);
             if (index >= 0)
@@ -881,24 +891,35 @@ void Commit()
             }
         }
 
-        for (size_t i = 0; i < ActiveList.ALSize; i++) {
-            if (ActiveList.ALarray[0].Done) { // if the first instruction is done, we need to remove it from the Active List
+        for (size_t i = 0; i < ActiveList.ALSize; i++)
+        {
+            if (ActiveList.ALarray[0].Done)
+            { // if the first instruction is done, we need to remove it from the Active List
 
-                if (ActiveList.ALarray[0].Exception) {
+                if (ActiveList.ALarray[0].Exception)
+                {
                     ePC = ActiveList.ALarray[0].PC;
                     exception = true;
                     Exception();
                     break; // TODO
-                } else { 
+                }
+                else
+                {
+                    printf("we are entering new territory\n");
                     int archReg = ActiveList.ALarray[0].LogicalDestination;
-                    int physReg = RegMapTable[archReg]; 
+                    printf("archReg: %d\n", archReg);
+                    int physReg = RegMapTable[archReg];
 
                     BusyBitTable[physReg] = false; // value is not generated from the Execution stage anymore
+                    printf("physReg: %d\n", physReg);
+
                     if (PushFreeList(physReg) == -1)
                         break; // if the Free List is full, do nothing   TODO
                     popAL();
                 }
-            } else break; // if DestRegister is NOT available, do nothing
+            }
+            else
+                break; // if DestRegister is NOT available, do nothing
             // TODO "an instruction is met that is not completed yet"
         }
     }

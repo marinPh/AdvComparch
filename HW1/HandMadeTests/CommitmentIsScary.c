@@ -11,17 +11,19 @@ int main(int argc, char *argv[]) {
     printf("%s", "initForwardingTable\n");
 
   
-  for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < 10; i++) {
     //showForwardingTable();
     //showALU();
     //showPhysRegFile();
     //showActiveList();
     //showBusyBitTable();
-    //showIntegerQueue();
+    //showDIR();
+    showFreeList();
+    showIntegerQueue();
     Commit();
     printf("Commit, [%d]\n", i);
     Execute();
-    showALU();
+    //showALU();
     printf("Execute, [%d]\n", i);
     Issue();
  

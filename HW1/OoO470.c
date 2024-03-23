@@ -25,10 +25,9 @@ typedef struct
     int src2;
 } InstructionEntry;
 
-
-
 // Structure for parsing JSON
-typedef struct {
+typedef struct
+{
     InstructionEntry *instructions;
     size_t size;
 } Instruction;
@@ -42,29 +41,44 @@ unsigned int PC = 0;
 unsigned long PhysRegFile[REGS]; // 64 registers of 64 bits each
 
 // Decoded Instruction Register
-struct {
+struct
+{
     unsigned int *DIRarray; // array that buffers instructions that have been decoded but have not been renamed and dispatched yet
     unsigned int DIRSize;   // size of the DIR
 } DIR;
 
 // popDIR and realloc DIRarray
-int popDIR() {
-    int temp = DIR.DIRarray[0];  // TODO LinkedList for complexity O(1)
-    if (DIR.DIRSize == 0) return -1; // if the DIR is empty, return -1
+int popDIR()
+{
+    int temp = DIR.DIRarray[0]; // TODO LinkedList for complexity O(1)
+    if (DIR.DIRSize == 0)
+        return -1; // if the DIR is empty, return -1
 
-    for (size_t i = 0; i < DIR.DIRSize - 1; i++) {
+    for (size_t i = 0; i < DIR.DIRSize - 1; i++)
+    {
         DIR.DIRarray[i] = DIR.DIRarray[i + 1];
     }
-    DIR.DIRarray = realloc(DIR.DIRarray, (DIR.DIRSize - 1) * sizeof(unsigned int));
-    if (DIR.DIRarray == NULL) return -1; // if realloc fails, return -1
+    if (DIR.DIRSize > 1)
+    {
+        DIR.DIRarray = realloc(DIR.DIRarray, (DIR.DIRSize - 1) * sizeof(unsigned int));
+        if (DIR.DIRarray == NULL)
+            return -1; // if realloc fails, return -1
+    }
+    else
+    {
+        free(DIR.DIRarray);
+        DIR.DIRarray = NULL;
+    }
 
     DIR.DIRSize -= 1;
     return temp;
 }
 
-int pushDIR(unsigned int instr) {
+int pushDIR(unsigned int instr)
+{
     DIR.DIRarray = realloc(DIR.DIRarray, (DIR.DIRSize + 1) * sizeof(unsigned int));
-    if (DIR.DIRarray == NULL) return -1; // if realloc fails, return -1
+    if (DIR.DIRarray == NULL)
+        return -1; // if realloc fails, return -1
 
     DIR.DIRarray[DIR.DIRSize] = instr;
     DIR.DIRSize += 1;
@@ -88,7 +102,7 @@ unsigned int RegMapTable[ENTRY] = { // On initialization, all architectural regi
 // 32 architectural registers, 64 physical registers
 
 // // Free List
-// unsigned int *FreeList[ENTRY] = {  // TODO why * ? 
+// unsigned int *FreeList[ENTRY] = {  // TODO why * ?
 //     32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
 //     42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
 //     52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
@@ -96,21 +110,22 @@ unsigned int RegMapTable[ENTRY] = { // On initialization, all architectural regi
 // // on initialization 32-63 are free
 
 // Free List
-unsigned int FreeList[REGS] = {  
+unsigned int FreeList[REGS] = {
     32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
     42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
     52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
-    62, 63, -1, -1, -1, -1, -1, -1, -1, -1, 
+    62, 63, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1 }; // array that keeps track of the physical registers that are free
+    -1, -1, -1, -1}; // array that keeps track of the physical registers that are free
 // on initialization 32-63 are free
 
 // Busy Bit Table
 bool BusyBitTable[REGS] = {false}; // whether the value of a specific physical register will be generated from the Execution stage
 
 // Entry in the Active List
-typedef struct {
+typedef struct
+{
     bool Done;
     bool Exception;
     int LogicalDestination; // the architectural register that the instruction writes to
@@ -120,15 +135,18 @@ typedef struct {
 
 // Active List
 // instructions that have been dispatched but have not yet completed, renamed instruction
-struct {
+struct
+{
     ActiveListEntry ALarray[ENTRY];
     int ALSize;
 } ActiveList;
 
-
-int PopFreeList() {
-    for (size_t i = 0; i < REGS; ++i) {
-        if (FreeList[i] != -1) {
+int PopFreeList()
+{
+    for (size_t i = 0; i < REGS; ++i)
+    {
+        if (FreeList[i] != -1)
+        {
             unsigned int poppedValue = FreeList[i];
             FreeList[i] = -1;
             return poppedValue;
@@ -152,9 +170,12 @@ int PopFreeList() {
     If the Free List is full, return -1
     Else, return 0
 */
-int PushFreeList(unsigned int reg) {
-    for (size_t i = 0; i < REGS; ++i) {
-        if (FreeList[i] == -1) {
+int PushFreeList(unsigned int reg)
+{
+    for (size_t i = 0; i < REGS; ++i)
+    {
+        if (FreeList[i] == -1)
+        {
             FreeList[i] = reg;
             return 0;
         }
@@ -164,7 +185,7 @@ int PushFreeList(unsigned int reg) {
 
 // int PushFreeList(int reg) {
 
-//     if (FreeList[ENTRY - 1] == -1) return -1;  // TODO if (FreeList[ENTRY - 1] == -1) never -1 
+//     if (FreeList[ENTRY - 1] == -1) return -1;  // TODO if (FreeList[ENTRY - 1] == -1) never -1
 
 //     for (size_t i = 0; i < ENTRY; i++) {
 //         FreeList[i] = FreeList[i + 1];
@@ -173,9 +194,9 @@ int PushFreeList(unsigned int reg) {
 //     return 0;
 // }
 
-
 // Entry in Integer Queue
-typedef struct {
+typedef struct
+{
     int DestRegister;
     bool OpAIsReady;
     int OpARegTag; // for cheking forwarding
@@ -189,18 +210,21 @@ typedef struct {
 
 // Integer Queue
 // always 32 entries myx but can be less, need to check if it is full
-struct {
+struct
+{
     IntegerQueueEntry IQarray[ENTRY];
     int IQSize;
 } IntegerQueue;
 
-IntegerQueueEntry createNop() {
+IntegerQueueEntry createNop()
+{
     IntegerQueueEntry temp = {-1, true, -1, 0, true, -1, 0, "nop", -1};
     return temp;
 }
 
-IntegerQueueEntry copyIQE(IntegerQueueEntry entry) {
-    IntegerQueueEntry temp ;
+IntegerQueueEntry copyIQE(IntegerQueueEntry entry)
+{
+    IntegerQueueEntry temp;
     temp.DestRegister = entry.DestRegister;
     temp.OpAIsReady = entry.OpAIsReady;
     temp.OpARegTag = entry.OpARegTag;
@@ -218,15 +242,19 @@ IntegerQueueEntry copyIQE(IntegerQueueEntry entry) {
     Pop the oldest instruction that has both operands ready
     If no such instruction exists, return a NOP
 */
-IntegerQueueEntry popReadyIQE() {
+IntegerQueueEntry popReadyIQE()
+{
     // we are looking for the oldest instruction that has both operands ready
     // the oldest are the nearest to 0 in the queue
-    for (size_t i = 0; i < IntegerQueue.IQSize; i++) {
+    for (size_t i = 0; i < IntegerQueue.IQSize; i++)
+    {
 
-        if (IntegerQueue.IQarray[i].OpAIsReady && IntegerQueue.IQarray[i].OpBIsReady) {
+        if (IntegerQueue.IQarray[i].OpAIsReady && IntegerQueue.IQarray[i].OpBIsReady)
+        {
             IntegerQueueEntry temp = IntegerQueue.IQarray[i];
 
-            for (size_t j = i; j < IntegerQueue.IQSize - 1; j++) {
+            for (size_t j = i; j < IntegerQueue.IQSize - 1; j++)
+            {
                 IntegerQueue.IQarray[j] = IntegerQueue.IQarray[j + 1];
             }
             IntegerQueue.IQSize -= 1;
@@ -237,22 +265,22 @@ IntegerQueueEntry popReadyIQE() {
     return temp;
 }
 
-
-typedef struct {
+typedef struct
+{
     IntegerQueueEntry instr;
 } ALUEntry;
 
 ALUEntry ALU1[INSTR];
 ALUEntry ALU2[INSTR]; // TODO 4 ALUs not 2 => max 4 instructions
 
-void initALU() {
-    for (size_t i = 0; i < INSTR; i++) {
+void initALU()
+{
+    for (size_t i = 0; i < INSTR; i++)
+    {
         ALU1[i].instr = createNop();
         ALU2[i].instr = createNop();
     }
 }
-
-
 
 /*
     Parser for JSON file
@@ -422,25 +450,28 @@ int parser(char *file_name)
     return 0;
 }
 
-
-bool isOpBusy(int reg) {
+bool isOpBusy(int reg)
+{
     return BusyBitTable[reg];
 }
 
-
 // Forwarding Table
-typedef struct {
-    int reg; // the physical register that the value is forwarded to
+typedef struct
+{
+    int reg;   // the physical register that the value is forwarded to
     int value; // the value that is forwarded
 } forwardingTableEntry;
 
-struct {
+struct
+{
     forwardingTableEntry table[INSTR];
     int size;
 } forwardingTable;
 
-void initForwardingTable() {
-    for (size_t i = 0; i < INSTR; i++) {
+void initForwardingTable()
+{
+    for (size_t i = 0; i < INSTR; i++)
+    {
         forwardingTable.table[i].reg = -1;
         forwardingTable.table[i].value = 0;
     }
@@ -451,14 +482,15 @@ void initForwardingTable() {
     If it is, return the index
     If it is not, return -1
 */
-int forwardable(int reg) {
-    for (int i = 0; i < INSTR; i++) { // 4 instructions MAX in the forwarding table because 4 ALUs  
-        if (forwardingTable.table[i].reg == reg) return i; // if the register is in the forwarding table, return the index
+int forwardable(int reg)
+{
+    for (int i = 0; i < INSTR; i++)
+    { // 4 instructions MAX in the forwarding table because 4 ALUs
+        if (forwardingTable.table[i].reg == reg)
+            return i; // if the register is in the forwarding table, return the index
     }
     return -1;
 }
-
-
 
 // Fetch & Decode
 void FetchAndDecode()
@@ -473,25 +505,31 @@ void FetchAndDecode()
      When the Commit stage
      indicates that an exception is detected, the PC is set to 0x10000
      */
-    if (exception) {
+    if (exception)
+    {
         // set PC at 0x10000
         PC = 0x10000;
         // clear Decode Instruction Register
         size_t size = DIR.DIRSize;
-        for (size_t i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++)
+        {
             popDIR();
         }
-        if (DIR.DIRSize != 0) {
+        if (DIR.DIRSize != 0)
+        {
             printf("Failed to pop DIR; not empty...\n");
         }
     }
     // Check Back Pressure
-    if (backPressureRDS) return;
+    if (backPressureRDS)
+        return;
 
     int index = min(instrs.size - PC, INSTR); // get the first 4 instructions
-    if (index <= 0) return;
-    
-    for (size_t i = 0; i < index; i++) {
+    if (index <= 0)
+        return;
+
+    for (size_t i = 0; i < index; i++)
+    {
         // Buffer the decoded instructions in the DIR
         pushDIR(PC);
         PC += 1;
@@ -500,23 +538,29 @@ void FetchAndDecode()
 
 // Rename
 
-void RDS() {
+void RDS()
+{
 
-    if (ActiveList.ALSize == ENTRY || IntegerQueue.IQSize == ENTRY) {
+    if (ActiveList.ALSize == ENTRY || IntegerQueue.IQSize == ENTRY)
+    {
         backPressureRDS = true;
         return;
     }
 
-    else backPressureRDS = false;
+    else
+        backPressureRDS = false;
 
-    if (DIR.DIRSize == 0) return;
+    if (DIR.DIRSize == 0)
+        return;
 
     // Rename the instructions
 
     unsigned int index = min(DIR.DIRSize, INSTR);
-    for (int i = 0; i < index; i++) {
+    for (int i = 0; i < index; i++)
+    {
         int newReg = PopFreeList();
-        if (newReg < 0) return;
+        if (newReg < 0)
+            return;
         // printf("newReg: %d\n", newReg);
         // printf("DIR.DIRarray[i]: %d\n", DIR.DIRarray[i]);
         //  make it busy
@@ -525,7 +569,9 @@ void RDS() {
         // map the logical destination to the physical register
 
         // add the instruction to the Active List
+
         unsigned int currentPc = popDIR();
+
         ActiveList.ALarray[ActiveList.ALSize].LogicalDestination = newReg;
         ActiveList.ALarray[ActiveList.ALSize].OldDestination = oldReg;
         ActiveList.ALarray[ActiveList.ALSize].PC = currentPc;
@@ -599,27 +645,30 @@ void RDS() {
     }
 }
 
-
-
 /*
     Find the index of the instruction with PC in the Active List
 */
-int findActiveIndex(int PC) {
-    for (size_t i = 0; i < ActiveList.ALSize; i++) {
-        if (ActiveList.ALarray[i].PC == PC) return i;
+int findActiveIndex(int PC)
+{
+    for (size_t i = 0; i < ActiveList.ALSize; i++)
+    {
+        if (ActiveList.ALarray[i].PC == PC)
+            return i;
     }
     return -1;
 }
-//TODO: change how ALU works as they are passed by reference
+// TODO: change how ALU works as they are passed by reference
 
 /*
     Pop the first element of the Active List
 */
-ActiveListEntry popAL() { // TODO LinkedList for complexity O(1)
+ActiveListEntry popAL()
+{ // TODO LinkedList for complexity O(1)
 
     ActiveListEntry temp = ActiveList.ALarray[0];
 
-    for (size_t i = 0; i < ActiveList.ALSize - 1; i++) {
+    for (size_t i = 0; i < ActiveList.ALSize - 1; i++)
+    {
         ActiveList.ALarray[i] = ActiveList.ALarray[i + 1];
     }
     ActiveList.ALSize -= 1;
@@ -629,17 +678,18 @@ ActiveListEntry popAL() { // TODO LinkedList for complexity O(1)
 /*
     Pop the last element of the Active List
 */
-ActiveListEntry popALBack() { // TODO LinkedList for complexity O(1)
+ActiveListEntry popALBack()
+{ // TODO LinkedList for complexity O(1)
     ActiveListEntry temp = ActiveList.ALarray[ActiveList.ALSize - 1];
     ActiveList.ALSize -= 1;
     return temp;
 }
 
-
 /*
     Issue max 4 ready instructions to the ALU
 */
-void Issue() {
+void Issue()
+{
     for (size_t i = 0; i < IntegerQueue.IQSize; i++)
     {
         // putting every forwardable reg into corresponding integerquueentry
@@ -658,14 +708,14 @@ void Issue() {
     }
     // scan for the 4 available entries in the Integer Queue
     int index = min(IntegerQueue.IQSize, INSTR);
-    if (index <= 0) return;
+    if (index <= 0)
+        return;
 
-    // ALU broadcast on 2nd cycle  TODO 
+    // ALU broadcast on 2nd cycle  TODO
     for (size_t i = 0; i < index; i++)
     {
         ALU1[i].instr = copyIQE(popReadyIQE()); // pop the oldest instruction that has both operands ready
-        //show the pointer of ALU1[i].instr and ALU2[i].instr
-        printf("ALU1[%d]: %p <- ALU2[%d]: %p \n", i, &ALU1[i], i, &ALU2[i]);
+        // show the pointer of ALU1[i].instr and ALU2[i].instr
     }
 }
 
@@ -683,12 +733,12 @@ void Issue() {
         }
     }*/
 
-
-
-void Execute() {
+void Execute()
+{
     int temp;
-    for (int i = 0; i < INSTR; i++) {
-        //printf("ALU2[%d].instr.OpCode: %s\n", i, ALU2[i].instr.OpCode);
+    for (int i = 0; i < INSTR; i++)
+    {
+        // printf("ALU2[%d].instr.OpCode: %s\n", i, ALU2[i].instr.OpCode);
         if (strcmp((ALU2[i]).instr.OpCode, "addi") == 0)
         {
             temp = (ALU2[i]).instr.OpAValue + (ALU2[i]).instr.OpBValue;
@@ -713,65 +763,78 @@ void Execute() {
         {
             temp = (ALU2[i]).instr.OpAValue % (ALU2[i]).instr.OpBValue;
         }
-        else { temp = 0; }
+        else
+        {
+            temp = 0;
+        }
 
         int physDestReg = ALU2[i].instr.DestRegister;
-        // update the forwarding table 
-        forwardingTable.table[i].reg = physDestReg; 
+        // update the forwarding table
+        forwardingTable.table[i].reg = physDestReg;
         forwardingTable.table[i].value = temp;
 
         // if DestRegister is not -1 then we need to update the value of the physical register and set the busy bit to false
-        //printf("ALU2[%d].instr.DestRegister: %d\n", i, (ALU2[i]).instr.DestRegister);
-        if (physDestReg >= 0) {
-            //printf("ALU2[%d].instr.DestRegister: %d\n", i, (ALU2[i]).instr.DestRegister);
-            //printf("temp: %d\n", temp);
-            //printf("PhysRegFile[(ALU2[i]).instr.DestRegister]: %lu\n", PhysRegFile[(ALU2[i]).instr.DestRegister]);
+        // printf("ALU2[%d].instr.DestRegister: %d\n", i, (ALU2[i]).instr.DestRegister);
+        if (physDestReg >= 0)
+        {
+            // printf("ALU2[%d].instr.DestRegister: %d\n", i, (ALU2[i]).instr.DestRegister);
+            // printf("temp: %d\n", temp);
+            // printf("PhysRegFile[(ALU2[i]).instr.DestRegister]: %lu\n", PhysRegFile[(ALU2[i]).instr.DestRegister]);
             PhysRegFile[physDestReg] = temp;
-            //printf("PhysRegFile[(ALU2[i]).instr.DestRegister]: %lu\n", PhysRegFile[(ALU2[i]).instr.DestRegister]);
+            // printf("PhysRegFile[(ALU2[i]).instr.DestRegister]: %lu\n", PhysRegFile[(ALU2[i]).instr.DestRegister]);
             BusyBitTable[physDestReg] = false;
         }
-        
-        //printf("ALU2[%d]: %d <- ALU1[%d]: %d \n", i, (ALU2[i]).instr.DestRegister,i, (ALU1[i]).instr.DestRegister);
+
+        // printf("ALU2[%d]: %d <- ALU1[%d]: %d \n", i, (ALU2[i]).instr.DestRegister,i, (ALU1[i]).instr.DestRegister);
 
         // Pass the instruction to the next stage
         ALU2[i].instr = ALU1[i].instr;
 
-    //print the pointer of ALU2[i].instr and ALU1[i].instr
-    //printf("ALU2[%d]: %p <- ALU1[%d]: %p \n", i, &ALU2[i].instr, i, &ALU1[i].instr);
-        //printf("ALU2[%d]: %d\n",i, (ALU2[i]).instr.DestRegister);
+        // print the pointer of ALU2[i].instr and ALU1[i].instr
+        // printf("ALU2[%d]: %p <- ALU1[%d]: %p \n", i, &ALU2[i].instr, i, &ALU1[i].instr);
+        // printf("ALU2[%d]: %d\n",i, (ALU2[i]).instr.DestRegister);
     }
 }
-
 
 /*
     Commit the instructions
 */
-void Commit() {
-    // TODO "until 4 are pciked" => ? 
-   for (size_t i = 0; i < INSTR; i++) { // MAX 4 instructions 
+void Commit()
+{
+    // TODO "until 4 are pciked" => ?
+    for (size_t i = 0; i < INSTR; i++)
+    { // MAX 4 instructions
 
-        // TODO ALU2 ?? 
-        if (ALU2[i].instr.DestRegister >= 0) { // if DestRegister is available (i.e. >=0)
+        // TODO ALU2 ??
+        if (ALU2[i].instr.DestRegister >= 0)
+        {                                                  // if DestRegister is available (i.e. >=0)
             int index = findActiveIndex(ALU2[i].instr.PC); // find the index of the instruction with PC in the Active List
-
-            if (index >= 0) { // if the instruction is in the Active List
+            printf("index: %d\n", index);
+            if (index >= 0)
+            {                                          // if the instruction is in the Active List
                 ActiveList.ALarray[index].Done = true; // set the Done flag to true
 
-                if (ActiveList.ALarray[i].Exception) {
+                if (ActiveList.ALarray[i].Exception)
+                {
                     ePC = ActiveList.ALarray[i].PC;
                     exception = true;
                     Exception();
                     break; // TODO
-                } else { 
+                }
+                else
+                {
                     int archReg = ActiveList.ALarray[i].LogicalDestination;
-                    int physReg = RegMapTable[archReg]; 
+                    int physReg = RegMapTable[archReg];
 
                     BusyBitTable[physReg] = false; // value is not generated from the Execution stage anymore
-                    if (PushFreeList(physReg) == -1) break; // if the Free List is full, do nothing   TODO
-                    popAL(); 
+                    if (PushFreeList(physReg) == -1)
+                        break; // if the Free List is full, do nothing   TODO
+                    popAL();
                 }
             }
-        } else { // if DestRegister is NOT available, do nothing
+        }
+        else
+        {          // if DestRegister is NOT available, do nothing
             break; // TODO "an instruction is met that is not completed yet"
         }
     }
@@ -790,8 +853,8 @@ void Commit() {
 
     // for (size_t i = 0; i < INSTR; i++) {
     //     // if the instruction is done, we need to remove it from the Active List
-    
-    //     if (ActiveList.ALarray[0].Done) { // TODO why 0? not i? 
+
+    //     if (ActiveList.ALarray[0].Done) { // TODO why 0? not i?
 
     //         if (ActiveList.ALarray[0].Exception) {
     //             ePC = ActiveList.ALarray[0].PC;
@@ -808,24 +871,28 @@ void Commit() {
     // }
 }
 
-
-void Exception() {
+void Exception()
+{
     // reset the Integer Queue
-    for (size_t i = 0; i < IntegerQueue.IQSize; i++) {
+    for (size_t i = 0; i < IntegerQueue.IQSize; i++)
+    {
         IntegerQueue.IQarray[i] = createNop();
     }
     IntegerQueue.IQSize = 0;
 
     // reset the Execute stage
-    for (size_t i = 0; i < INSTR; i++) {
+    for (size_t i = 0; i < INSTR; i++)
+    {
         ALU1[i].instr = createNop();
         ALU2[i].instr = createNop();
     }
 
     // reset the Active List
-    while (ActiveList.ALSize > 0) { // TODO 
+    while (ActiveList.ALSize > 0)
+    { // TODO
         // pick up 4 instructions from the Active List in reverse PC order
-        for (size_t i = 0; i < INSTR; i++) {
+        for (size_t i = 0; i < INSTR; i++)
+        {
             ActiveListEntry temp = popALBack(); // remove the last instruction from the Active List
 
             int archReg = temp.LogicalDestination;
@@ -835,12 +902,11 @@ void Exception() {
 
             BusyBitTable[physReg] = false; // set the Busy Bit to false
             // put the physical register back to the Free List
-            if (PushFreeList(physReg) == -1) break; // if the Free List is full, do nothing   TODO
+            if (PushFreeList(physReg) == -1)
+                break; // if the Free List is full, do nothing   TODO
         }
     }
 }
-
-
 
 //---------------------------------------------
 // Data Structure Print Functions

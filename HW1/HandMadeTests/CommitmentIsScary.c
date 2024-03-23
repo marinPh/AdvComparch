@@ -5,10 +5,9 @@ int main(int argc, char *argv[]) {
     printf("Hello, World!\n");
   parser("../given_tests/01/input.json");
 
-  initALU();
-  printf("%s", "initALU\n");
-  initForwardingTable();
-    printf("%s", "initForwardingTable\n");
+  Init();
+  printf("%s", "init\n");
+  
 
   
   for (int i = 0; i < 10; i++) {
@@ -20,7 +19,9 @@ int main(int argc, char *argv[]) {
     showRegMapTable();
     //showDIR();
     showFreeList();
-    showIntegerQueue();
+  //showIntegerQueue();
+    showActiveList();
+    //showIntegerQueue();
     Commit();
     printf("Commit, [%d]\n", i);
     Execute();

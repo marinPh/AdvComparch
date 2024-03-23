@@ -132,25 +132,34 @@ typedef struct {
     FreeListNode *tail; // Pointer to the tail of the list
 } FreeList;
 
+FreeList freeList; // Initialize the FreeList
+
 // Function to initialize the double linked list
-FreeList initFreeList() {
-    FreeList list;
-    list.head = NULL;
-    list.tail = NULL;
+void initFreeList() {
+
+    freeList.head = NULL;
+    freeList.tail = NULL;
 
     // Create nodes for each register and link them together
+    
     for (int i = (REGS - 1); i >= 32; i--) {
         FreeListNode *newNode = (FreeListNode *)malloc(sizeof(FreeListNode));
+        if (i == (REGS - 1)) {
+            freeList.tail = newNode; // Set the last node as the tail
+        }
         newNode->value = i;
         newNode->prev = NULL;
-        newNode->next = list.head;
-        if (list.head != NULL) {
-            (list.head)->prev = newNode; // Link the previous head to the new node
+        newNode->next = freeList.head;
+        printf("newNode->value: %d\n", newNode->value);
+        if (freeList.head != NULL) {
+            (freeList.head)->prev = newNode; // Link the previous head to the new node
         }
-        list.head = newNode; // Set the new node as the head
+        freeList.head = newNode; // Set the new node as the head
     }
+    printf("FreeList initialized\n");
+    printf("freeList.head->value: %d\n", freeList.head->value);
+    printf("freelist: %p\n", freeList);
 
-    return list;
 }
 
 FreeList freeList; // Initialize the FreeList
@@ -710,9 +719,8 @@ void RDS()
             }
         }
 
-        printf("newReg: %d\n", newReg);
-
-        RegMapTable[instrs.instructions[i].dest] = newReg;
+        printf("newReg: %d for:%d\n", newReg, instrs.instructions[currentPc].dest);
+        RegMapTable[instrs.instructions[currentPc].dest] = newReg;
         BusyBitTable[newReg] = true;
         IntegerQueue.IQSize += 1;
     }
@@ -1063,8 +1071,11 @@ void showRegMapTable()
 
 void showFreeList() {
     printf("FreeList: \n");
+    printf("freelist: %p\n", freeList);
     // go through the Free List and print the registers
     FreeListNode *current = freeList.head;
+    printf("FreeList: ");
+    printf("head: %p tail: %p\n", freeList.head, freeList.tail);
     while (current != NULL) {
         printf("%d ", current->value);
         current = current->next;
@@ -1121,4 +1132,10 @@ void showALU()
                ALU2[i].instr.OpCode,
                ALU2[i].instr.PC);
     }
+}
+
+void Init(){
+   initFreeList();
+    initALU();
+    initForwardingTable();
 }

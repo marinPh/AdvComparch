@@ -98,8 +98,7 @@ void Execute();
 void showBp();
 void showALU();
 void showForwardingTable();
-int PopFreeList();
-void initALU();
-void initForwardingTable();
+
+void Init();
 
 #endif /* MIPS_SIMULATOR_H */

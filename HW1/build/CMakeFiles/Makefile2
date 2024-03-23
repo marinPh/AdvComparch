@@ -65,7 +65,6 @@ CMAKE_BINARY_DIR = /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build
 # The main recursive "all" target.
 all: CMakeFiles/OhMyDIR.dir/all
 all: CMakeFiles/FrenchDispatch.dir/all
-all: CMakeFiles/KingOfPop.dir/all
 all: CMakeFiles/NameYourIssue.dir/all
 all: CMakeFiles/CommitmentIsScary.dir/all
 .PHONY : all
@@ -77,7 +76,6 @@ preinstall:
 # The main recursive "clean" target.
 clean: CMakeFiles/OhMyDIR.dir/clean
 clean: CMakeFiles/FrenchDispatch.dir/clean
-clean: CMakeFiles/KingOfPop.dir/clean
 clean: CMakeFiles/NameYourIssue.dir/clean
 clean: CMakeFiles/CommitmentIsScary.dir/clean
 .PHONY : clean
@@ -89,7 +87,7 @@ clean: CMakeFiles/CommitmentIsScary.dir/clean
 CMakeFiles/OhMyDIR.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=17,18,19,20 "Built target OhMyDIR"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=13,14,15,16 "Built target OhMyDIR"
 .PHONY : CMakeFiles/OhMyDIR.dir/all
 
 # Build rule for subdir invocation for target.
@@ -135,39 +133,13 @@ CMakeFiles/FrenchDispatch.dir/clean:
 .PHONY : CMakeFiles/FrenchDispatch.dir/clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/KingOfPop.dir
-
-# All Build rule for target.
-CMakeFiles/KingOfPop.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=9,10,11,12 "Built target KingOfPop"
-.PHONY : CMakeFiles/KingOfPop.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/KingOfPop.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 4
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/KingOfPop.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 0
-.PHONY : CMakeFiles/KingOfPop.dir/rule
-
-# Convenience name for target.
-KingOfPop: CMakeFiles/KingOfPop.dir/rule
-.PHONY : KingOfPop
-
-# clean rule for target.
-CMakeFiles/KingOfPop.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/KingOfPop.dir/build.make CMakeFiles/KingOfPop.dir/clean
-.PHONY : CMakeFiles/KingOfPop.dir/clean
-
-#=============================================================================
 # Target rules for target CMakeFiles/NameYourIssue.dir
 
 # All Build rule for target.
 CMakeFiles/NameYourIssue.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=13,14,15,16 "Built target NameYourIssue"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=9,10,11,12 "Built target NameYourIssue"
 .PHONY : CMakeFiles/NameYourIssue.dir/all
 
 # Build rule for subdir invocation for target.

@@ -26,8 +26,7 @@ typedef struct
 } InstructionEntry;
 
 // Structure for parsing JSON
-typedef struct
-{
+typedef struct {
     InstructionEntry *instructions;
     size_t size;
 } Instruction;
@@ -109,16 +108,85 @@ unsigned int RegMapTable[ENTRY] = { // On initialization, all architectural regi
 //     62, 63 }; // array that keeps track of the physical registers that are free
 // // on initialization 32-63 are free
 
-// Free List
-unsigned int FreeList[REGS] = {
-    32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
-    42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
-    52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
-    62, 63, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1}; // array that keeps track of the physical registers that are free
-// on initialization 32-63 are free
+// // Free List
+// unsigned int FreeList[REGS] = {
+//     32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+//     42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
+//     52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
+//     62, 63, -1, -1, -1, -1, -1, -1, -1, -1,
+//     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+//     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+//     -1, -1, -1, -1}; // array that keeps track of the physical registers that are free
+// // on initialization 32-63 are free
+
+// Define a struct for a node in the double linked list
+typedef struct FreeListNode {
+    int value; // The value of the register
+    struct FreeListNode *prev; // Pointer to the previous node
+    struct FreeListNode *next; // Pointer to the next node
+} FreeListNode;
+
+// FreeList
+typedef struct {
+    FreeListNode *head; // Pointer to the head of the list
+    FreeListNode *tail; // Pointer to the tail of the list
+} FreeList;
+
+// Function to initialize the double linked list
+FreeList initFreeList() {
+    FreeList list;
+    list.head = NULL;
+    list.tail = NULL;
+
+    // Create nodes for each register and link them together
+    for (int i = (REGS - 1); i >= 32; i--) {
+        FreeListNode *newNode = (FreeListNode *)malloc(sizeof(FreeListNode));
+        newNode->value = i;
+        newNode->prev = NULL;
+        newNode->next = list.head;
+        if (list.head != NULL) {
+            (list.head)->prev = newNode; // Link the previous head to the new node
+        }
+        list.head = newNode; // Set the new node as the head
+    }
+
+    return list;
+}
+
+FreeList FreeList = initFreeList(); // Initialize the FreeList
+
+// Function to pop the first element of the list
+int popFreeList(FreeList *list) {
+    if (list->head == NULL) {
+        return -1; // If the list is empty, return -1
+    }
+    int value = list->head->value; // Get the value of the head
+    FreeListNode *temp = list->head; // Store the head in a temporary variable
+    list->head = list->head->next; // Move the head to the next node
+    if (list->head != NULL) {
+        list->head->prev = NULL; // Set the previous node of the new head to NULL
+    } else {
+        list->tail = NULL; // If the list is empty, set the tail to NULL
+    }
+    free(temp); // Free the memory of the old head
+    return value; // Return the value of the old head
+}
+
+// Function to push a value to the end of the list
+void pushFreeList(FreeList *list, int value) {
+    FreeListNode *newNode = (FreeListNode *)malloc(sizeof(FreeListNode)); // Create a new node
+    newNode->value = value; // Set the value of the new node
+    newNode->next = NULL; // Set the next node to NULL
+    if (list->tail != NULL) {
+        list->tail->next = newNode; // Link the old tail to the new node
+        newNode->prev = list->tail; // Link the new node to the old tail
+    } else {
+        list->head = newNode; // If the list is empty, set the new node as the head
+        newNode->prev = NULL; // Set the previous node to NULL
+    }
+    list->tail = newNode; // Set the new node as the tail
+}
+
 
 // Busy Bit Table
 bool BusyBitTable[REGS] = {false}; // whether the value of a specific physical register will be generated from the Execution stage
@@ -265,8 +333,7 @@ IntegerQueueEntry popReadyIQE()
     return temp;
 }
 
-typedef struct
-{
+typedef struct {
     IntegerQueueEntry instr;
 } ALUEntry;
 

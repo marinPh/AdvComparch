@@ -1037,6 +1037,8 @@ int parser(char *file_name)
     Output the system state in JSON format to a file
 */
 void outputSystemStateJSON(FILE *file) {
+    fprintf(outputFile, "{\n");
+
     fprintf(file, "  \"ActiveList\": [\n");
     for (int i = 0; i < ActiveList.ALSize; ++i) {
         fprintf(file, "    {\n");
@@ -1055,7 +1057,16 @@ void outputSystemStateJSON(FILE *file) {
     }
     fprintf(file, "],\n");
 
-    fprintf(file, "  \"DecodedPCs\": [],\n");
+    fprintf(file, "  \"DecodedPCs\": [\n");
+    // Output DecodedPCs array
+    for (unsigned int i = 0; i < DIR.DIRSize; ++i) {
+        fprintf(file, "    %u", DIR.DIRarray[i]);
+        if (i < DIR.DIRSize - 1) {
+            fprintf(file, ",");
+        }
+        fprintf(file, "\n");
+    }
+    fprintf(file, "  ],\n");
 
     fprintf(file, "  \"Exception\": %s,\n", (exception ? "true" : "false"));
     fprintf(file, "  \"ExceptionPC\": %u,\n", ePC);
@@ -1068,7 +1079,21 @@ void outputSystemStateJSON(FILE *file) {
     }
     fprintf(file, "],\n");
 
-    fprintf(file, "  \"IntegerQueue\": [],\n");
+    fprintf(file, "  \"IntegerQueue\": [\n");
+    for (int i = 0; i < IntegerQueue.IQSize; ++i) {
+        fprintf(file, "    {\n");
+        fprintf(file, "      \"DestRegister\": %d,\n", IntegerQueue.IQarray[i].DestRegister);
+        fprintf(file, "      \"OpAIsReady\": %s,\n", IntegerQueue.IQarray[i].OpAIsReady ? "true" : "false");
+        fprintf(file, "      \"OpARegTag\": %d,\n", IntegerQueue.IQarray[i].OpARegTag);
+        fprintf(file, "      \"OpAValue\": %d,\n", IntegerQueue.IQarray[i].OpAValue);
+        fprintf(file, "      \"OpBIsReady\": %s,\n", IntegerQueue.IQarray[i].OpBIsReady ? "true" : "false");
+        fprintf(file, "      \"OpBRegTag\": %d,\n", IntegerQueue.IQarray[i].OpBRegTag);
+        fprintf(file, "      \"OpBValue\": %d,\n", IntegerQueue.IQarray[i].OpBValue);
+        fprintf(file, "      \"OpCode\": \"%s\",\n", IntegerQueue.IQarray[i].OpCode);
+        fprintf(file, "      \"PC\": %d\n", IntegerQueue.IQarray[i].PC);
+        fprintf(file, "    }%s\n", (i < IntegerQueue.IQSize - 1) ? "," : ""); // Add comma if not the last element
+    }
+    fprintf(file, "  ],\n");
 
     fprintf(file, "  \"PC\": %u,\n", PC);
 
@@ -1083,6 +1108,8 @@ void outputSystemStateJSON(FILE *file) {
         fprintf(file, "%s%d", (i > 0 ? ", " : ""), RegMapTable[i]);
     }
     fprintf(file, "]");  
+
+    fprintf(file, "}\n");
 }
 
 int log(int i) {
@@ -1130,7 +1157,7 @@ int main(int argc, char *argv[])
     log(LOG); // TODO dumpStateIntoLog()
 
     // 2. Loop for cycle-by-cycle iterations
-    while (!(noInstruction() && activeListIsEmpty())) 
+    while (!(noInstruction() && activeListIsEmpty())) // TODO 
     {
         log(LOGCOMMA); // Add comma if not the first cycle and not the last element logged
 

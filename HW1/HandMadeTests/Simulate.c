@@ -57,6 +57,10 @@ int main(int argc, char *argv[])
     // 3. Loop for cycle-by-cycle iterations
     while (!(noInstruction() && activeListIsEmpty()))  
     {
+        printf("No instruction: %d\n", noInstruction());
+        printf("Active list is empty: %d\n", activeListIsEmpty());
+        printf("Cycle: %d\n", !(noInstruction() && activeListIsEmpty()));
+        //showActiveList();
         slog(output_file, LOGCOMMA); // Add comma if not the first cycle and not the last element logged
 
         // do propagation

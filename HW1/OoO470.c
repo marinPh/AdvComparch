@@ -19,7 +19,8 @@ Instruction instrs = {NULL, 0};
 
 // Program Counter unsigned integer pointing to the next instruction to fetch.
 unsigned int PC = 0;
-struct {
+struct
+{
     ActiveListEntry ALarray[ENTRY];
     int ALSize;
 } ActiveList;
@@ -27,11 +28,13 @@ struct {
 /*
     Check if there are no more instructions to fetch
 */
-int noInstruction() {
+int noInstruction()
+{
     printf("No instruction to fetch\n");
     return finished; // set by the Commit stage
 }
- struct {
+struct
+{
     unsigned int *DIRarray; // array that buffers instructions that have been decoded but have not been renamed and dispatched yet
     unsigned int DIRSize;   // size of the DIR
 } DIR;
@@ -76,27 +79,27 @@ int pushDIR(unsigned int instr)
 
 // Physical Register File
 
- unsigned long PhysRegFile[REGS]; // 64 registers
+unsigned long PhysRegFile[REGS]; // 64 registers
 
- FreeList freeList;
+FreeList freeList;
 
- struct {
+struct
+{
     forwardingTableEntry table[INSTR];
     int size;
 } forwardingTable;
 
-
 // Integer Queue
 // always 32 entries myx but can be less, need to check if it is full
 
- struct {
+struct
+{
     IntegerQueueEntry IQarray[ENTRY];
     int IQSize;
 } IntegerQueue;
 
 ALUEntry ALU1[INSTR];
 ALUEntry ALU2[INSTR]; // TODO 4 ALUs not 2 => max 4 instructions
-
 
 // Exception Flag
 bool exception = false;
@@ -115,69 +118,81 @@ unsigned int RegMapTable[ENTRY] = { // On initialization, all architectural regi
 // 32 architectural registers, 64 physical registers
 
 // Function to initialize the double linked list
-void initFreeList() { // on initialization 32-63 are free
+void initFreeList()
+{ // on initialization 32-63 are free
 
     freeList.head = NULL;
     freeList.tail = NULL;
 
     // Create nodes for each register and link them together
-    
-    for (int i = (REGS - 1); i >= 32; i--) {
+
+    for (int i = (REGS - 1); i >= 32; i--)
+    {
         FreeListNode *newNode = (FreeListNode *)malloc(sizeof(FreeListNode));
-        if (i == (REGS - 1)) {
+        if (i == (REGS - 1))
+        {
             freeList.tail = newNode; // Set the last node as the tail
         }
         newNode->value = i;
         newNode->prev = NULL;
         newNode->next = freeList.head;
-        //printf("newNode->value: %d\n", newNode->value);
-        if (freeList.head != NULL) {
+        // printf("newNode->value: %d\n", newNode->value);
+        if (freeList.head != NULL)
+        {
             (freeList.head)->prev = newNode; // Link the previous head to the new node
         }
         freeList.head = newNode; // Set the new node as the head
     }
-    //printf("FreeList initialized\n");
-    //printf("freeList.head->value: %d\n", freeList.head->value);
-    //printf("freelist: %p\n", freeList);
-
+    // printf("FreeList initialized\n");
+    // printf("freeList.head->value: %d\n", freeList.head->value);
+    // printf("freelist: %p\n", freeList);
 }
 
 // Function to pop the first element of the list
-int popFreeList() {
-    if (freeList.head == NULL) {
+int popFreeList()
+{
+    if (freeList.head == NULL)
+    {
         return -1; // If the list is empty, return -1
     }
-    int value = freeList.head->value; // Get the value of the head
-    FreeListNode *temp = freeList.head; // Store the head in a temporary variable
+    int value = freeList.head->value;    // Get the value of the head
+    FreeListNode *temp = freeList.head;  // Store the head in a temporary variable
     freeList.head = freeList.head->next; // Move the head to the next node
-    if (freeList.head != NULL) {
+    if (freeList.head != NULL)
+    {
         freeList.head->prev = NULL; // Set the previous node of the new head to NULL
-    } else {
+    }
+    else
+    {
         freeList.tail = NULL; // If the list is empty, set the tail to NULL
     }
-    free(temp); // Free the memory of the old head
+    free(temp);   // Free the memory of the old head
     return value; // Return the value of the old head
 }
 
 // Function to push a value to the end of the list
-int pushFreeList(int value) {
+int pushFreeList(int value)
+{
     FreeListNode *newNode = (FreeListNode *)malloc(sizeof(FreeListNode)); // Create a new node
-    if (newNode == NULL) {
+    if (newNode == NULL)
+    {
         return -1; // If memory allocation fails, return
     }
     newNode->value = value; // Set the value of the new node
-    newNode->next = NULL; // Set the next node to NULL
-    if (freeList.tail != NULL) {
+    newNode->next = NULL;   // Set the next node to NULL
+    if (freeList.tail != NULL)
+    {
         freeList.tail->next = newNode; // Link the old tail to the new node
         newNode->prev = freeList.tail; // Link the new node to the old tail
-    } else {
+    }
+    else
+    {
         freeList.head = newNode; // If the list is empty, set the new node as the head
-        newNode->prev = NULL; // Set the previous node to NULL
+        newNode->prev = NULL;    // Set the previous node to NULL
     }
     freeList.tail = newNode; // Set the new node as the tail
-    return 0; 
+    return 0;
 }
-
 
 // Busy Bit Table
 bool BusyBitTable[REGS] = {false}; // whether the value of a specific physical register will be generated from the Execution stage
@@ -185,7 +200,8 @@ bool BusyBitTable[REGS] = {false}; // whether the value of a specific physical r
 /*
     Check if the Active List is empty
 */
-int activeListIsEmpty() {
+int activeListIsEmpty()
+{
     return ActiveList.ALSize == 0;
 }
 
@@ -251,7 +267,6 @@ bool isOpBusy(int reg)
 {
     return BusyBitTable[reg];
 }
-
 
 void initForwardingTable()
 {
@@ -363,8 +378,9 @@ void RDS()
         IntegerQueue.IQarray[IntegerQueue.IQSize].DestRegister = newReg;
         IntegerQueue.IQarray[IntegerQueue.IQSize].PC = currentPc;
         const char *tempOpCode = instrs.instructions[currentPc].opcode;
-        if(strncmp(tempOpCode, "addi",4) == 0){
-            strncpy(tempOpCode, "add",4);
+        if (strncmp(tempOpCode, "addi", 4) == 0)
+        {
+            strncpy(tempOpCode, "add", 4);
         }
         strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode, tempOpCode);
 
@@ -423,7 +439,7 @@ void RDS()
             }
         }
 
-        //printf("newReg: %d for:%d\n", newReg, instrs.instructions[currentPc].dest);
+        // printf("newReg: %d for:%d\n", newReg, instrs.instructions[currentPc].dest);
         RegMapTable[instrs.instructions[currentPc].dest] = newReg;
         BusyBitTable[newReg] = true;
         IntegerQueue.IQSize += 1;
@@ -504,7 +520,6 @@ void Issue()
     }
 }
 
-
 void Execute()
 {
     int temp;
@@ -528,25 +543,25 @@ void Execute()
             temp = (ALU2[i]).instr.OpAValue * (ALU2[i]).instr.OpBValue;
         }
         else if (strcmp((ALU2[i]).instr.OpCode, "divu") == 0)
-        {/*
-            if ((ALU2[i]).instr.OpBValue == 0)
-            {
-                int j = findActiveIndex((ALU2[i]).instr.PC);
-                ActiveList.ALarray[j].Exception = true;
-                ActiveList.ALarray[j].Done = true;
-                continue;
-            }*/
+        { 
+             if ((ALU2[i]).instr.OpBValue == 0)
+             {
+                 int j = findActiveIndex((ALU2[i]).instr.PC);
+                 ActiveList.ALarray[j].Exception = true;
+                 ActiveList.ALarray[j].Done = true;
+                 continue;
+             }
             temp = (ALU2[i]).instr.OpAValue / (ALU2[i]).instr.OpBValue;
         }
         else if (strcmp((ALU2[i]).instr.OpCode, "remu") == 0)
-        {/*
-            if ((ALU2[i]).instr.OpBValue == 0)
-            {
-                int j = findActiveIndex((ALU2[i]).instr.PC);
-                ActiveList.ALarray[j].Exception = true;
-                ActiveList.ALarray[j].Done = true;
-                continue;
-            }*/
+        { 
+             if ((ALU2[i]).instr.OpBValue == 0)
+             {
+                 int j = findActiveIndex((ALU2[i]).instr.PC);
+                 ActiveList.ALarray[j].Exception = true;
+                 ActiveList.ALarray[j].Done = true;
+                 continue;
+             }
             temp = (ALU2[i]).instr.OpAValue % (ALU2[i]).instr.OpBValue;
         }
         else
@@ -594,56 +609,58 @@ void Commit()
         if (ALU2[i].instr.DestRegister >= 0)
         {                                                  // if DestRegister is available (i.e. >=0)
             int index = findActiveIndex(ALU2[i].instr.PC); // find the index of the instruction with PC in the Active List
-            //printf("index: %d\n", index);
+            printf("index: %d\n", index);
             if (index >= 0)
             {                                          // if the instruction is in the Active List
                 ActiveList.ALarray[index].Done = true; // set the Done flag to true
             }
         }
-
-        for (size_t i = 0; i < ActiveList.ALSize; i++)
-        {
-            if (ActiveList.ALarray[0].Done)
-            { // if the first instruction is done, we need to remove it from the Active List
-
-                if (ActiveList.ALarray[0].Exception)
-                {
-                    ePC = ActiveList.ALarray[0].PC;
-                    exception = true;
-                    Exception();
-                    break; // TODO
-                }
-                else
-                {
-                    //printf("we are entering new territory\n");
-                    int archReg = ActiveList.ALarray[0].LogicalDestination;
-                    //printf("archReg: %d\n", archReg);
-                    int physReg = RegMapTable[archReg];
-
-                    BusyBitTable[physReg] = false; // value is not generated from the Execution stage anymore
-                    //printf("physReg: %d\n", physReg);
-
-                    if (pushFreeList(physReg) == -1)
-                        break; // if the Free List is full, do nothing   TODO
-                    popAL();
-                }
-            }
-            else
-                break; // if DestRegister is NOT available, do nothing
-            // TODO "an instruction is met that is not completed yet"
-        }
     }
 
-    // if the PC is equal to the size of the instructions, there are no more instructions to fetch
-   
+    int maxIndex = min(INSTR, ActiveList.ALSize);
+    for (size_t i = 0; i < maxIndex; i++)
+    {
+        if (ActiveList.ALarray[0].Done)
+        { // if the first instruction is done, we need to remove it from the Active List
+
+            if (ActiveList.ALarray[0].Exception)
+            {
+                ePC = ActiveList.ALarray[0].PC;
+                exception = true;
+                Exception();
+                break; // TODO
+            }
+            else
+            {
+                // printf("we are entering new territory\n");
+                int archReg = ActiveList.ALarray[0].LogicalDestination;
+                // printf("archReg: %d\n", archReg);
+                int physReg = RegMapTable[archReg];
+
+                BusyBitTable[physReg] = false; // value is not generated from the Execution stage anymore
+                // printf("physReg: %d\n", physReg);
+
+                if (pushFreeList(physReg) == -1)
+                    break; // if the Free List is full, do nothing   TODO
+                popAL();
+                printf("ALSize: %d\n", ActiveList.ALSize);
+            }
+        }
+        else
+            break; // if DestRegister is NOT available, do nothing
+        // TODO "an instruction is met that is not completed yet"
+    }
+
     if (PC == instrs.size)
     {
         printf("PC: %d\n", PC);
         printf("instrs.size: %d\n", instrs.size);
         finished = true;
-        //free(instrs.instructions);
+        // free(instrs.instructions);
     }
 }
+
+// if the PC is equal to the size of the instructions, there are no more instructions to fetch
 
 void Exception()
 {
@@ -753,14 +770,16 @@ void showRegMapTable()
     }
 }
 
-void showFreeList() {
+void showFreeList()
+{
     printf("FreeList: \n");
     printf("freelist: %p\n", freeList);
     // go through the Free List and print the registers
     FreeListNode *current = freeList.head;
     printf("FreeList: ");
     printf("head: %p tail: %p\n", freeList.head, freeList.tail);
-    while (current != NULL) {
+    while (current != NULL)
+    {
         printf("%d ", current->value);
         current = current->next;
     }
@@ -821,15 +840,15 @@ void showALU()
 /*
     Initialize the system
 */
-void init() {
+void init()
+{
     initFreeList();
     initALU();
     initForwardingTable();
 }
 
-
 //---------------------------------------------
-// JSON 
+// JSON
 
 /*
     Parser for JSON file
@@ -975,11 +994,13 @@ int parser(char *file_name)
 /*
     Output the system state in JSON format to a file
 */
-void outputSystemStateJSON(FILE *file) {
+void outputSystemStateJSON(FILE *file)
+{
     fprintf(file, "{\n");
 
     fprintf(file, "  \"ActiveList\": [\n");
-    for (int i = 0; i < ActiveList.ALSize; ++i) {
+    for (int i = 0; i < ActiveList.ALSize; ++i)
+    {
         fprintf(file, "    {\n");
         fprintf(file, "      \"Done\": %s,\n", ActiveList.ALarray[i].Done ? "true" : "false");
         fprintf(file, "      \"Exception\": %s,\n", ActiveList.ALarray[i].Exception ? "true" : "false");
@@ -991,16 +1012,19 @@ void outputSystemStateJSON(FILE *file) {
     fprintf(file, "  ],\n");
 
     fprintf(file, "  \"BusyBitTable\": [");
-    for (int i = 0; i < REGS; i++) {
+    for (int i = 0; i < REGS; i++)
+    {
         fprintf(file, "%s%s", (i > 0 ? ", " : ""), (BusyBitTable[i] ? "true" : "false"));
     }
     fprintf(file, "],\n");
 
     fprintf(file, "  \"DecodedPCs\": [\n");
     // Output DecodedPCs array
-    for (unsigned int i = 0; i < DIR.DIRSize; ++i) {
+    for (unsigned int i = 0; i < DIR.DIRSize; ++i)
+    {
         fprintf(file, "    %u", DIR.DIRarray[i]);
-        if (i < DIR.DIRSize - 1) {
+        if (i < DIR.DIRSize - 1)
+        {
             fprintf(file, ",");
         }
         fprintf(file, "\n");
@@ -1012,14 +1036,16 @@ void outputSystemStateJSON(FILE *file) {
 
     fprintf(file, "  \"FreeList\": [");
     FreeListNode *current = freeList.head;
-    while (current != NULL) {
+    while (current != NULL)
+    {
         fprintf(file, "%s%d", (current != freeList.head ? ", " : ""), current->value);
         current = current->next;
     }
     fprintf(file, "],\n");
 
     fprintf(file, "  \"IntegerQueue\": [\n");
-    for (int i = 0; i < IntegerQueue.IQSize; ++i) {
+    for (int i = 0; i < IntegerQueue.IQSize; ++i)
+    {
         fprintf(file, "    {\n");
         fprintf(file, "      \"DestRegister\": %d,\n", IntegerQueue.IQarray[i].DestRegister);
         fprintf(file, "      \"OpAIsReady\": %s,\n", IntegerQueue.IQarray[i].OpAIsReady ? "true" : "false");
@@ -1037,46 +1063,57 @@ void outputSystemStateJSON(FILE *file) {
     fprintf(file, "  \"PC\": %u,\n", PC);
 
     fprintf(file, "  \"PhysicalRegisterFile\": [");
-    for (int i = 0; i < REGS; i++) {
+    for (int i = 0; i < REGS; i++)
+    {
         fprintf(file, "%s%d", (i > 0 ? ", " : ""), PhysRegFile[i]);
     }
     fprintf(file, "],\n");
 
     fprintf(file, "  \"RegisterMapTable\": [");
-    for (int i = 0; i < ENTRY; i++) {
+    for (int i = 0; i < ENTRY; i++)
+    {
         fprintf(file, "%s%d", (i > 0 ? ", " : ""), RegMapTable[i]);
     }
-    fprintf(file, "]");  
+    fprintf(file, "]");
 
     fprintf(file, "}\n");
 }
 
-int slog(char *f_out, int i) {
+int slog(char *f_out, int i)
+{
     FILE *outputFile = fopen(f_out, "a"); // Open file for writing
-    if (outputFile == NULL) {
+    if (outputFile == NULL)
+    {
         perror("Error opening file");
         return 1;
     }
-    
-    if (i == 0) { // Initial '{' in output JSON file
+
+    if (i == 0)
+    { // Initial '{' in output JSON file
         fprintf(outputFile, "[\n");
-    } else if (i == 1) { // Final '}' in output JSON file
+    }
+    else if (i == 1)
+    { // Final '}' in output JSON file
         fprintf(outputFile, "]\n");
-    } else if (i == 2) { // Add comma if not the first cycle and not the last element logged
+    }
+    else if (i == 2)
+    { // Add comma if not the first cycle and not the last element logged
         fprintf(outputFile, ",\n");
-    } else {
+    }
+    else
+    {
         // Call the function to output the JSON representation to the file
         outputSystemStateJSON(outputFile);
     }
-    
+
     fclose(outputFile); // Close the file
     return 0;
 }
 
-
 //---------------------------------------------
 void propagate()
 {
+    
     // 5. Commit
     Commit();
     // 4. Execute
@@ -1088,5 +1125,3 @@ void propagate()
     // 1. Fetch & Decode
     FetchAndDecode();
 }
-
-

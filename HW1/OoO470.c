@@ -352,6 +352,7 @@ void RDS()
         // add the instruction to the Active List
 
         unsigned int currentPc = popDIR();
+        printf("currentPc: %d\n", currentPc);
 
         ActiveList.ALarray[ActiveList.ALSize].LogicalDestination = instrs.instructions[currentPc].dest;
         ActiveList.ALarray[ActiveList.ALSize].OldDestination = RegMapTable[instrs.instructions[currentPc].dest];
@@ -361,7 +362,10 @@ void RDS()
         // add the instruction to the Integer Queue
         IntegerQueue.IQarray[IntegerQueue.IQSize].DestRegister = newReg;
         IntegerQueue.IQarray[IntegerQueue.IQSize].PC = currentPc;
-        const char *tempOpCode = instrs.instructions[i].opcode;
+        const char *tempOpCode = instrs.instructions[currentPc].opcode;
+        if(strncmp(tempOpCode, "addi",4) == 0){
+            strncpy(tempOpCode, "add",4);
+        }
         strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode, tempOpCode);
 
         // we want to check if the source registers are ready
@@ -370,12 +374,11 @@ void RDS()
         // and we give the value of src2 to IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue
         // if opcode is not "addi" then we need to check if both src1 and src2 are ready
         // and we give the value of src1 to IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue
-        int forwardIndexA = forwardable(RegMapTable[instrs.instructions[i].src1]);
-
-        if (isOpBusy(RegMapTable[instrs.instructions[i].src1]))
+        int forwardIndexA = forwardable(RegMapTable[instrs.instructions[currentPc].src1]);
+        if (isOpBusy(RegMapTable[instrs.instructions[currentPc].src1]))
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = false;
-            IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = RegMapTable[instrs.instructions[i].src1];
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = RegMapTable[instrs.instructions[currentPc].src1];
         }
         else if (forwardIndexA >= 0)
         {
@@ -386,25 +389,25 @@ void RDS()
         else
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = true;
-            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue = PhysRegFile[RegMapTable[instrs.instructions[i].src1]];
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue = PhysRegFile[RegMapTable[instrs.instructions[currentPc].src1]];
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = -1;
         }
 
         // B operand is always ready for addi
-        if (strcmp(instrs.instructions[i].opcode, "addi") == 0)
+        if (strcmp(instrs.instructions[currentPc].opcode, "addi") == 0)
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
-            IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = instrs.instructions[i].src2;
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = instrs.instructions[currentPc].src2;
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = -1;
         }
         else
         {
-            int forwardIndexB = forwardable(RegMapTable[instrs.instructions[i].src2]);
+            int forwardIndexB = forwardable(RegMapTable[instrs.instructions[currentPc].src2]);
 
-            if (isOpBusy(RegMapTable[instrs.instructions[i].src2]))
+            if (isOpBusy(RegMapTable[instrs.instructions[currentPc].src2]))
             {
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = false;
-                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = RegMapTable[instrs.instructions[i].src2];
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = RegMapTable[instrs.instructions[currentPc].src2];
             }
             else if (forwardIndexB >= 0)
             {
@@ -415,7 +418,7 @@ void RDS()
             else
             {
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
-                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = PhysRegFile[RegMapTable[instrs.instructions[i].src2]];
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = PhysRegFile[RegMapTable[instrs.instructions[currentPc].src2]];
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = -1;
             }
         }
@@ -525,11 +528,25 @@ void Execute()
             temp = (ALU2[i]).instr.OpAValue * (ALU2[i]).instr.OpBValue;
         }
         else if (strcmp((ALU2[i]).instr.OpCode, "divu") == 0)
-        {
+        {/*
+            if ((ALU2[i]).instr.OpBValue == 0)
+            {
+                int j = findActiveIndex((ALU2[i]).instr.PC);
+                ActiveList.ALarray[j].Exception = true;
+                ActiveList.ALarray[j].Done = true;
+                continue;
+            }*/
             temp = (ALU2[i]).instr.OpAValue / (ALU2[i]).instr.OpBValue;
         }
         else if (strcmp((ALU2[i]).instr.OpCode, "remu") == 0)
-        {
+        {/*
+            if ((ALU2[i]).instr.OpBValue == 0)
+            {
+                int j = findActiveIndex((ALU2[i]).instr.PC);
+                ActiveList.ALarray[j].Exception = true;
+                ActiveList.ALarray[j].Done = true;
+                continue;
+            }*/
             temp = (ALU2[i]).instr.OpAValue % (ALU2[i]).instr.OpBValue;
         }
         else
@@ -618,9 +635,13 @@ void Commit()
     }
 
     // if the PC is equal to the size of the instructions, there are no more instructions to fetch
+   
     if (PC == instrs.size)
     {
+        printf("PC: %d\n", PC);
+        printf("instrs.size: %d\n", instrs.size);
         finished = true;
+        //free(instrs.instructions);
     }
 }
 

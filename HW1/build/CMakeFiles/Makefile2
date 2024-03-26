@@ -63,10 +63,7 @@ CMAKE_BINARY_DIR = /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/OhMyDIR.dir/all
-all: CMakeFiles/FrenchDispatch.dir/all
-all: CMakeFiles/NameYourIssue.dir/all
-all: CMakeFiles/CommitmentIsScary.dir/all
+all: CMakeFiles/FullyFunk.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -74,115 +71,34 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/OhMyDIR.dir/clean
-clean: CMakeFiles/FrenchDispatch.dir/clean
-clean: CMakeFiles/NameYourIssue.dir/clean
-clean: CMakeFiles/CommitmentIsScary.dir/clean
+clean: CMakeFiles/FullyFunk.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/OhMyDIR.dir
+# Target rules for target CMakeFiles/FullyFunk.dir
 
 # All Build rule for target.
-CMakeFiles/OhMyDIR.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=13,14,15,16 "Built target OhMyDIR"
-.PHONY : CMakeFiles/OhMyDIR.dir/all
+CMakeFiles/FullyFunk.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=1,2,3,4 "Built target FullyFunk"
+.PHONY : CMakeFiles/FullyFunk.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/OhMyDIR.dir/rule: cmake_check_build_system
+CMakeFiles/FullyFunk.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 4
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/OhMyDIR.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/FullyFunk.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 0
-.PHONY : CMakeFiles/OhMyDIR.dir/rule
+.PHONY : CMakeFiles/FullyFunk.dir/rule
 
 # Convenience name for target.
-OhMyDIR: CMakeFiles/OhMyDIR.dir/rule
-.PHONY : OhMyDIR
+FullyFunk: CMakeFiles/FullyFunk.dir/rule
+.PHONY : FullyFunk
 
 # clean rule for target.
-CMakeFiles/OhMyDIR.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/clean
-.PHONY : CMakeFiles/OhMyDIR.dir/clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/FrenchDispatch.dir
-
-# All Build rule for target.
-CMakeFiles/FrenchDispatch.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=5,6,7,8 "Built target FrenchDispatch"
-.PHONY : CMakeFiles/FrenchDispatch.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/FrenchDispatch.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 4
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/FrenchDispatch.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 0
-.PHONY : CMakeFiles/FrenchDispatch.dir/rule
-
-# Convenience name for target.
-FrenchDispatch: CMakeFiles/FrenchDispatch.dir/rule
-.PHONY : FrenchDispatch
-
-# clean rule for target.
-CMakeFiles/FrenchDispatch.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/clean
-.PHONY : CMakeFiles/FrenchDispatch.dir/clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/NameYourIssue.dir
-
-# All Build rule for target.
-CMakeFiles/NameYourIssue.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=9,10,11,12 "Built target NameYourIssue"
-.PHONY : CMakeFiles/NameYourIssue.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/NameYourIssue.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 4
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/NameYourIssue.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 0
-.PHONY : CMakeFiles/NameYourIssue.dir/rule
-
-# Convenience name for target.
-NameYourIssue: CMakeFiles/NameYourIssue.dir/rule
-.PHONY : NameYourIssue
-
-# clean rule for target.
-CMakeFiles/NameYourIssue.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/clean
-.PHONY : CMakeFiles/NameYourIssue.dir/clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/CommitmentIsScary.dir
-
-# All Build rule for target.
-CMakeFiles/CommitmentIsScary.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num=1,2,3,4 "Built target CommitmentIsScary"
-.PHONY : CMakeFiles/CommitmentIsScary.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/CommitmentIsScary.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 4
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/CommitmentIsScary.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 0
-.PHONY : CMakeFiles/CommitmentIsScary.dir/rule
-
-# Convenience name for target.
-CommitmentIsScary: CMakeFiles/CommitmentIsScary.dir/rule
-.PHONY : CommitmentIsScary
-
-# clean rule for target.
-CMakeFiles/CommitmentIsScary.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/clean
-.PHONY : CMakeFiles/CommitmentIsScary.dir/clean
+CMakeFiles/FullyFunk.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/clean
+.PHONY : CMakeFiles/FullyFunk.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

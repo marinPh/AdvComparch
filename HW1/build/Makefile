@@ -117,162 +117,48 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named OhMyDIR
+# Target rules for targets named FullyFunk
 
 # Build rule for target.
-OhMyDIR: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 OhMyDIR
-.PHONY : OhMyDIR
+FullyFunk: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 FullyFunk
+.PHONY : FullyFunk
 
 # fast build rule for target.
-OhMyDIR/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/build
-.PHONY : OhMyDIR/fast
+FullyFunk/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/build
+.PHONY : FullyFunk/fast
 
-#=============================================================================
-# Target rules for targets named FrenchDispatch
-
-# Build rule for target.
-FrenchDispatch: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 FrenchDispatch
-.PHONY : FrenchDispatch
-
-# fast build rule for target.
-FrenchDispatch/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/build
-.PHONY : FrenchDispatch/fast
-
-#=============================================================================
-# Target rules for targets named NameYourIssue
-
-# Build rule for target.
-NameYourIssue: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 NameYourIssue
-.PHONY : NameYourIssue
-
-# fast build rule for target.
-NameYourIssue/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/build
-.PHONY : NameYourIssue/fast
-
-#=============================================================================
-# Target rules for targets named CommitmentIsScary
-
-# Build rule for target.
-CommitmentIsScary: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CommitmentIsScary
-.PHONY : CommitmentIsScary
-
-# fast build rule for target.
-CommitmentIsScary/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/build
-.PHONY : CommitmentIsScary/fast
-
-HandMadeTests/CommitmentIsScary.o: HandMadeTests/CommitmentIsScary.c.o
-.PHONY : HandMadeTests/CommitmentIsScary.o
+HandMadeTests/FullyFunk.o: HandMadeTests/FullyFunk.c.o
+.PHONY : HandMadeTests/FullyFunk.o
 
 # target to build an object file
-HandMadeTests/CommitmentIsScary.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/HandMadeTests/CommitmentIsScary.c.o
-.PHONY : HandMadeTests/CommitmentIsScary.c.o
+HandMadeTests/FullyFunk.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/HandMadeTests/FullyFunk.c.o
+.PHONY : HandMadeTests/FullyFunk.c.o
 
-HandMadeTests/CommitmentIsScary.i: HandMadeTests/CommitmentIsScary.c.i
-.PHONY : HandMadeTests/CommitmentIsScary.i
-
-# target to preprocess a source file
-HandMadeTests/CommitmentIsScary.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/HandMadeTests/CommitmentIsScary.c.i
-.PHONY : HandMadeTests/CommitmentIsScary.c.i
-
-HandMadeTests/CommitmentIsScary.s: HandMadeTests/CommitmentIsScary.c.s
-.PHONY : HandMadeTests/CommitmentIsScary.s
-
-# target to generate assembly for a file
-HandMadeTests/CommitmentIsScary.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/HandMadeTests/CommitmentIsScary.c.s
-.PHONY : HandMadeTests/CommitmentIsScary.c.s
-
-HandMadeTests/FrenchDispatch.o: HandMadeTests/FrenchDispatch.c.o
-.PHONY : HandMadeTests/FrenchDispatch.o
-
-# target to build an object file
-HandMadeTests/FrenchDispatch.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/HandMadeTests/FrenchDispatch.c.o
-.PHONY : HandMadeTests/FrenchDispatch.c.o
-
-HandMadeTests/FrenchDispatch.i: HandMadeTests/FrenchDispatch.c.i
-.PHONY : HandMadeTests/FrenchDispatch.i
+HandMadeTests/FullyFunk.i: HandMadeTests/FullyFunk.c.i
+.PHONY : HandMadeTests/FullyFunk.i
 
 # target to preprocess a source file
-HandMadeTests/FrenchDispatch.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/HandMadeTests/FrenchDispatch.c.i
-.PHONY : HandMadeTests/FrenchDispatch.c.i
+HandMadeTests/FullyFunk.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/HandMadeTests/FullyFunk.c.i
+.PHONY : HandMadeTests/FullyFunk.c.i
 
-HandMadeTests/FrenchDispatch.s: HandMadeTests/FrenchDispatch.c.s
-.PHONY : HandMadeTests/FrenchDispatch.s
-
-# target to generate assembly for a file
-HandMadeTests/FrenchDispatch.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/HandMadeTests/FrenchDispatch.c.s
-.PHONY : HandMadeTests/FrenchDispatch.c.s
-
-HandMadeTests/NameYourIssue.o: HandMadeTests/NameYourIssue.c.o
-.PHONY : HandMadeTests/NameYourIssue.o
-
-# target to build an object file
-HandMadeTests/NameYourIssue.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/HandMadeTests/NameYourIssue.c.o
-.PHONY : HandMadeTests/NameYourIssue.c.o
-
-HandMadeTests/NameYourIssue.i: HandMadeTests/NameYourIssue.c.i
-.PHONY : HandMadeTests/NameYourIssue.i
-
-# target to preprocess a source file
-HandMadeTests/NameYourIssue.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/HandMadeTests/NameYourIssue.c.i
-.PHONY : HandMadeTests/NameYourIssue.c.i
-
-HandMadeTests/NameYourIssue.s: HandMadeTests/NameYourIssue.c.s
-.PHONY : HandMadeTests/NameYourIssue.s
+HandMadeTests/FullyFunk.s: HandMadeTests/FullyFunk.c.s
+.PHONY : HandMadeTests/FullyFunk.s
 
 # target to generate assembly for a file
-HandMadeTests/NameYourIssue.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/HandMadeTests/NameYourIssue.c.s
-.PHONY : HandMadeTests/NameYourIssue.c.s
-
-HandMadeTests/OhMyDIR.o: HandMadeTests/OhMyDIR.c.o
-.PHONY : HandMadeTests/OhMyDIR.o
-
-# target to build an object file
-HandMadeTests/OhMyDIR.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o
-.PHONY : HandMadeTests/OhMyDIR.c.o
-
-HandMadeTests/OhMyDIR.i: HandMadeTests/OhMyDIR.c.i
-.PHONY : HandMadeTests/OhMyDIR.i
-
-# target to preprocess a source file
-HandMadeTests/OhMyDIR.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.i
-.PHONY : HandMadeTests/OhMyDIR.c.i
-
-HandMadeTests/OhMyDIR.s: HandMadeTests/OhMyDIR.c.s
-.PHONY : HandMadeTests/OhMyDIR.s
-
-# target to generate assembly for a file
-HandMadeTests/OhMyDIR.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.s
-.PHONY : HandMadeTests/OhMyDIR.c.s
+HandMadeTests/FullyFunk.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/HandMadeTests/FullyFunk.c.s
+.PHONY : HandMadeTests/FullyFunk.c.s
 
 Lib/cJSON.o: Lib/cJSON.c.o
 .PHONY : Lib/cJSON.o
 
 # target to build an object file
 Lib/cJSON.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/Lib/cJSON.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/Lib/cJSON.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/Lib/cJSON.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/Lib/cJSON.c.o
 .PHONY : Lib/cJSON.c.o
 
 Lib/cJSON.i: Lib/cJSON.c.i
@@ -280,10 +166,7 @@ Lib/cJSON.i: Lib/cJSON.c.i
 
 # target to preprocess a source file
 Lib/cJSON.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/Lib/cJSON.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/Lib/cJSON.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/Lib/cJSON.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/Lib/cJSON.c.i
 .PHONY : Lib/cJSON.c.i
 
 Lib/cJSON.s: Lib/cJSON.c.s
@@ -291,10 +174,7 @@ Lib/cJSON.s: Lib/cJSON.c.s
 
 # target to generate assembly for a file
 Lib/cJSON.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/Lib/cJSON.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/Lib/cJSON.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/Lib/cJSON.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/Lib/cJSON.c.s
 .PHONY : Lib/cJSON.c.s
 
 OoO470.o: OoO470.c.o
@@ -302,10 +182,7 @@ OoO470.o: OoO470.c.o
 
 # target to build an object file
 OoO470.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/OoO470.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/OoO470.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/OoO470.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/OoO470.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/OoO470.c.o
 .PHONY : OoO470.c.o
 
 OoO470.i: OoO470.c.i
@@ -313,10 +190,7 @@ OoO470.i: OoO470.c.i
 
 # target to preprocess a source file
 OoO470.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/OoO470.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/OoO470.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/OoO470.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/OoO470.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/OoO470.c.i
 .PHONY : OoO470.c.i
 
 OoO470.s: OoO470.c.s
@@ -324,10 +198,7 @@ OoO470.s: OoO470.c.s
 
 # target to generate assembly for a file
 OoO470.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/OhMyDIR.dir/build.make CMakeFiles/OhMyDIR.dir/OoO470.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/OoO470.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/OoO470.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/OoO470.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/OoO470.c.s
 .PHONY : OoO470.c.s
 
 # Help Target
@@ -338,22 +209,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... CommitmentIsScary"
-	@echo "... FrenchDispatch"
-	@echo "... NameYourIssue"
-	@echo "... OhMyDIR"
-	@echo "... HandMadeTests/CommitmentIsScary.o"
-	@echo "... HandMadeTests/CommitmentIsScary.i"
-	@echo "... HandMadeTests/CommitmentIsScary.s"
-	@echo "... HandMadeTests/FrenchDispatch.o"
-	@echo "... HandMadeTests/FrenchDispatch.i"
-	@echo "... HandMadeTests/FrenchDispatch.s"
-	@echo "... HandMadeTests/NameYourIssue.o"
-	@echo "... HandMadeTests/NameYourIssue.i"
-	@echo "... HandMadeTests/NameYourIssue.s"
-	@echo "... HandMadeTests/OhMyDIR.o"
-	@echo "... HandMadeTests/OhMyDIR.i"
-	@echo "... HandMadeTests/OhMyDIR.s"
+	@echo "... FullyFunk"
+	@echo "... HandMadeTests/FullyFunk.o"
+	@echo "... HandMadeTests/FullyFunk.i"
+	@echo "... HandMadeTests/FullyFunk.s"
 	@echo "... Lib/cJSON.o"
 	@echo "... Lib/cJSON.i"
 	@echo "... Lib/cJSON.s"

@@ -33,9 +33,10 @@ int main(int argc, char *argv[])
     }
 
     char* def_input = "../given_tests/01/input.json";
+    def_input = argv[1];
 
     // 0. Parse the JSON file
-    if (parser(argv[1]) != 0)
+    if (parser(def_input) != 0)
     {
         printf("Failed to parse the JSON file.\n");
         return 1;

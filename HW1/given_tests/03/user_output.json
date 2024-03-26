@@ -82,7 +82,7 @@
       "OpAValue": 0,
       "OpBIsReady": true,
       "OpBRegTag": -1,
-      "OpBValue": 0,
+      "OpBValue": 10,
       "OpCode": "add",
       "PC": 0
     },
@@ -93,7 +93,7 @@
       "OpAValue": 0,
       "OpBIsReady": true,
       "OpBRegTag": -1,
-      "OpBValue": 0,
+      "OpBValue": 20,
       "OpCode": "add",
       "PC": 1
     },
@@ -104,7 +104,7 @@
       "OpAValue": 0,
       "OpBIsReady": true,
       "OpBRegTag": -1,
-      "OpBValue": 0,
+      "OpBValue": 30,
       "OpCode": "add",
       "PC": 2
     },
@@ -115,7 +115,7 @@
       "OpAValue": 0,
       "OpBIsReady": true,
       "OpBRegTag": -1,
-      "OpBValue": 0,
+      "OpBValue": 40,
       "OpCode": "add",
       "PC": 3
     }
@@ -201,7 +201,7 @@
       "OpAValue": 0,
       "OpBIsReady": true,
       "OpBRegTag": -1,
-      "OpBValue": 0,
+      "OpBValue": 50,
       "OpCode": "add",
       "PC": 4
     },
@@ -212,7 +212,7 @@
       "OpAValue": 0,
       "OpBIsReady": true,
       "OpBRegTag": -1,
-      "OpBValue": 0,
+      "OpBValue": 60,
       "OpCode": "add",
       "PC": 5
     },
@@ -223,7 +223,7 @@
       "OpAValue": 0,
       "OpBIsReady": true,
       "OpBRegTag": -1,
-      "OpBValue": 0,
+      "OpBValue": 70,
       "OpCode": "add",
       "PC": 6
     },
@@ -234,7 +234,7 @@
       "OpAValue": 0,
       "OpBIsReady": true,
       "OpBRegTag": -1,
-      "OpBValue": 0,
+      "OpBValue": 80,
       "OpCode": "add",
       "PC": 7
     }
@@ -349,7 +349,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "mulu",
+      "OpCode": "",
       "PC": 8
     },
     {
@@ -360,7 +360,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "mulu",
+      "OpCode": "",
       "PC": 9
     },
     {
@@ -371,7 +371,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "mulu",
+      "OpCode": "",
       "PC": 10
     },
     {
@@ -382,7 +382,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "mulu",
+      "OpCode": "",
       "PC": 11
     }
   ],
@@ -496,7 +496,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "mulu",
+      "OpCode": "",
       "PC": 12
     },
     {
@@ -507,7 +507,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "mulu",
+      "OpCode": "",
       "PC": 13
     },
     {
@@ -518,7 +518,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "mulu",
+      "OpCode": "",
       "PC": 14
     },
     {
@@ -529,12 +529,12 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "mulu",
+      "OpCode": "",
       "PC": 15
     }
   ],
   "PC": 20,
-  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 60, 70, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   "RegisterMapTable": [44, 45, 47, 46, 40, 41, 42, 43, 8, 36, 37, 38, 39, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]}
 ,
 {
@@ -643,7 +643,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "mulu",
+      "OpCode": "",
       "PC": 13
     },
     {
@@ -654,7 +654,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "mulu",
+      "OpCode": "",
       "PC": 14
     },
     {
@@ -665,7 +665,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "mulu",
+      "OpCode": "",
       "PC": 15
     },
     {
@@ -676,7 +676,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 16
     },
     {
@@ -687,7 +687,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 17
     },
     {
@@ -698,7 +698,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 18
     },
     {
@@ -709,12 +709,12 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 19
     }
   ],
   "PC": 24,
-  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 60, 70, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   "RegisterMapTable": [44, 45, 47, 46, 48, 49, 50, 51, 8, 36, 37, 38, 39, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]}
 ,
 {
@@ -819,7 +819,7 @@
       "OpBIsReady": true,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 16
     },
     {
@@ -830,7 +830,7 @@
       "OpBIsReady": true,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 17
     },
     {
@@ -841,7 +841,7 @@
       "OpBIsReady": true,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 18
     },
     {
@@ -852,7 +852,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 20
     },
     {
@@ -863,7 +863,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 21
     },
     {
@@ -874,7 +874,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 22
     },
     {
@@ -885,12 +885,12 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 23
     }
   ],
   "PC": 24,
-  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 60, 70, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   "RegisterMapTable": [55, 52, 53, 54, 48, 49, 50, 51, 8, 36, 37, 38, 39, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]}
 ,
 {
@@ -988,7 +988,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 21
     },
     {
@@ -999,7 +999,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 22
     },
     {
@@ -1010,12 +1010,12 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "sub",
+      "OpCode": "",
       "PC": 23
     }
   ],
   "PC": 24,
-  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 60, 70, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   "RegisterMapTable": [55, 52, 53, 54, 48, 49, 50, 51, 8, 36, 37, 38, 39, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]}
 ,
 {
@@ -1086,7 +1086,7 @@
   "IntegerQueue": [
   ],
   "PC": 24,
-  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 60, 70, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   "RegisterMapTable": [55, 52, 53, 54, 48, 49, 50, 51, 8, 36, 37, 38, 39, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]}
 ,
 {
@@ -1129,7 +1129,7 @@
   "IntegerQueue": [
   ],
   "PC": 24,
-  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 60, 70, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   "RegisterMapTable": [55, 52, 53, 54, 48, 49, 50, 51, 8, 36, 37, 38, 39, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]}
 ,
 {
@@ -1144,6 +1144,6 @@
   "IntegerQueue": [
   ],
   "PC": 24,
-  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "PhysicalRegisterFile": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 60, 70, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   "RegisterMapTable": [55, 52, 53, 54, 48, 49, 50, 51, 8, 36, 37, 38, 39, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]}
 ]

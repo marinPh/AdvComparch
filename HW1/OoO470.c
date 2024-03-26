@@ -383,10 +383,12 @@ void RDS()
         // add the instruction to the Integer Queue
         IntegerQueue.IQarray[IntegerQueue.IQSize].DestRegister = newReg;
         IntegerQueue.IQarray[IntegerQueue.IQSize].PC = currentPc;
-        const char *tempOpCode = instrs.instructions[currentPc].opcode;
-        if (strncmp(tempOpCode, "addi", 4) == 0)
+        char *tempOpCode = "";
+        if (strncmp(instrs.instructions[currentPc].opcode, "addi", 4) == 0)
         {
-            strncpy(tempOpCode, "add", 4);
+            tempOpCode = "add";
+        }else{
+            //strcmp(tempOpCode,instrs.instructions[currentPc].opcode);
         }
         strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode, tempOpCode);
 

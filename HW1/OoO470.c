@@ -41,6 +41,14 @@ Instruction instrs = {NULL, 0};
 // Program Counter unsigned integer pointing to the next instruction to fetch.
 unsigned int PC = 0;
 
+/*
+    Check if there are no more instructions to fetch
+*/
+int noInstruction() {
+    printf("No instruction to fetch\n");
+    return instrs.size == PC; // if the PC is equal to the size of the instructions, there are no more instructions to fetch
+}
+
 // Physical Register File
 unsigned long PhysRegFile[REGS]; // 64 registers of 64 bits each
 
@@ -208,6 +216,13 @@ struct {
     int ALSize;
 } ActiveList;
 
+/*
+    Check if the Active List is empty
+*/
+int activeListIsEmpty() {
+    return ActiveList.ALSize == 0;
+}
+
 
 // Entry in Integer Queue
 typedef struct
@@ -345,7 +360,6 @@ void FetchAndDecode()
 
     // Decode the instructions
     // get first 4 instructions from buffer
-    // read JSON file until the end
 
     /*
      When the Commit stage
@@ -1003,33 +1017,6 @@ int parser(char *file_name)
     cJSON_Delete(root);
     free(json_data);
 
-    // // Initialize the Free List
-    // FreeList = (unsigned int *)malloc((REGS - 32) * sizeof(unsigned int));
-    // for (int i = 0; i < (REGS - 32); i++) {
-    //     FreeList[i] = 32 + i;
-    // }
-
-    // // Fetch & Decode
-    // FetchAndDecode();
-
-    // // Rename
-    // Rename();
-
-    // // Dispatch
-    // Dispatch();
-
-    // // Issue
-    // Issue();
-
-    // // Execute
-    // Execute();
-
-    // // Write Result
-    // WriteResult();
-
-    // // Commit
-    // Commit();
-
     return 0;
 }
 
@@ -1037,7 +1024,7 @@ int parser(char *file_name)
     Output the system state in JSON format to a file
 */
 void outputSystemStateJSON(FILE *file) {
-    fprintf(outputFile, "{\n");
+    fprintf(file, "{\n");
 
     fprintf(file, "  \"ActiveList\": [\n");
     for (int i = 0; i < ActiveList.ALSize; ++i) {
@@ -1136,6 +1123,20 @@ int log(int i) {
 
 
 //---------------------------------------------
+void propagate()
+{
+    // 5. Commit
+    Commit();
+    // 4. Execute
+    Execute();
+    // 3. Issue
+    Issue();
+    // 2. Rename & Dispatch
+    RDS();
+    // 1. Fetch & Decode
+    FetchAndDecode();
+}
+
 int main(int argc, char *argv[])
 {
     // Check if the correct number of arguments is provided
@@ -1157,7 +1158,7 @@ int main(int argc, char *argv[])
     log(LOG); // TODO dumpStateIntoLog()
 
     // 2. Loop for cycle-by-cycle iterations
-    while (!(noInstruction() && activeListIsEmpty())) // TODO 
+    while (!(noInstruction() && activeListIsEmpty()))  
     {
         log(LOGCOMMA); // Add comma if not the first cycle and not the last element logged
 
@@ -1165,7 +1166,7 @@ int main(int argc, char *argv[])
         // if you have multiple modules, propagate each of them
         propagate();
         // advance clock, start next cycle
-        latch();
+        //latch();
         // dump the state
         log(LOG); // TODO dumpStateIntoLog()
     }

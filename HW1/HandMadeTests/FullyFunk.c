@@ -4,7 +4,16 @@
 
 int main(int argc, char *argv[]) {
 
-  parser("../given_tests/01/input.json");
+    // get from argv the path to the input file and output file
+
+char *input_file = argv[1];
+char *output_file = argv[2];
+if (argc != 3) {
+    printf("Usage: %s <input_file> <output_file>\n", argv[0]);
+    return 1;
+}
+
+  parser(input_file);
 
   Init();
   

@@ -335,9 +335,11 @@ void RDS()
     if (DIR.DIRSize == 0)
         return;
 
-    // Rename the instructions
+    // Rename either all instructions in DIR or none      TODO 
 
-    unsigned int index = min(DIR.DIRSize, INSTR);
+    unsigned int index = min(DIR.DIRSize, INSTR); 
+    prinf("index for Renaming: %d\n", index); // TODO
+
     for (int i = 0; i < index; i++)
     {
         int newReg = popFreeList();
@@ -353,15 +355,18 @@ void RDS()
 
         unsigned int currentPc = popDIR();
 
+        // TODO Check there is enough space 
+
         ActiveList.ALarray[ActiveList.ALSize].LogicalDestination = instrs.instructions[currentPc].dest;
         ActiveList.ALarray[ActiveList.ALSize].OldDestination = RegMapTable[instrs.instructions[currentPc].dest];
         ActiveList.ALarray[ActiveList.ALSize].PC = currentPc;
         ActiveList.ALarray[ActiveList.ALSize].Done = false;
         ActiveList.ALSize += 1;
         // add the instruction to the Integer Queue
-        IntegerQueue.IQarray[IntegerQueue.IQSize].DestRegister = newReg;
-        IntegerQueue.IQarray[IntegerQueue.IQSize].PC = currentPc;
-        const char *tempOpCode = instrs.instructions[i].opcode;
+        IntegerQueue.IQarray[IntegerQueue.IQSize].DestRegister = newReg; // DestRegister
+        IntegerQueue.IQarray[IntegerQueue.IQSize].PC = currentPc; // PC 
+
+        const char *tempOpCode = instrs.instructions[i].opcode; // OpCode
         strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode, tempOpCode);
 
         // we want to check if the source registers are ready
@@ -373,7 +378,7 @@ void RDS()
         int forwardIndexA = forwardable(RegMapTable[instrs.instructions[i].src1]);
 
         if (isOpBusy(RegMapTable[instrs.instructions[i].src1]))
-        {
+        { // if src1 the register is busy
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = false;
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = RegMapTable[instrs.instructions[i].src1];
         }
@@ -422,8 +427,10 @@ void RDS()
 
         //printf("newReg: %d for:%d\n", newReg, instrs.instructions[currentPc].dest);
         RegMapTable[instrs.instructions[currentPc].dest] = newReg;
+        PhysRegFile[newReg]  = 0;  // set the value of the physical register to 0  TODO 
         BusyBitTable[newReg] = true;
-        IntegerQueue.IQSize += 1;
+
+        IntegerQueue.IQSize += 1;  // TODO size is increased => depends on size of DIR
     }
 }
 
@@ -472,6 +479,7 @@ ActiveListEntry popALBack()
 */
 void Issue()
 {
+    printf('IntegerQueue.IQSize: %d\n', IntegerQueue.IQSize);  // TODO 
     for (size_t i = 0; i < IntegerQueue.IQSize; i++)
     {
         // putting every forwardable reg into corresponding integerquueentry
@@ -543,25 +551,14 @@ void Execute()
         forwardingTable.table[i].value = temp;
 
         // if DestRegister is not -1 then we need to update the value of the physical register and set the busy bit to false
-        // printf("ALU2[%d].instr.DestRegister: %d\n", i, (ALU2[i]).instr.DestRegister);
         if (physDestReg >= 0)
         {
-            // printf("ALU2[%d].instr.DestRegister: %d\n", i, (ALU2[i]).instr.DestRegister);
-            // printf("temp: %d\n", temp);
-            // printf("PhysRegFile[(ALU2[i]).instr.DestRegister]: %lu\n", PhysRegFile[(ALU2[i]).instr.DestRegister]);
             PhysRegFile[physDestReg] = temp;
-            // printf("PhysRegFile[(ALU2[i]).instr.DestRegister]: %lu\n", PhysRegFile[(ALU2[i]).instr.DestRegister]);
             BusyBitTable[physDestReg] = false;
         }
 
-        // printf("ALU2[%d]: %d <- ALU1[%d]: %d \n", i, (ALU2[i]).instr.DestRegister,i, (ALU1[i]).instr.DestRegister);
-
         // Pass the instruction to the next stage
         ALU2[i].instr = ALU1[i].instr;
-
-        // print the pointer of ALU2[i].instr and ALU1[i].instr
-        // printf("ALU2[%d]: %p <- ALU1[%d]: %p \n", i, &ALU2[i].instr, i, &ALU1[i].instr);
-        // printf("ALU2[%d]: %d\n",i, (ALU2[i]).instr.DestRegister);
     }
 }
 
@@ -1061,9 +1058,9 @@ void propagate()
     // 4. Execute
     Execute();
     // 3. Issue
-    Issue();
+    Issue(); // TODO will read the values just put in forwarding table by Execute
     // 2. Rename & Dispatch
-    RDS();
+    RDS();  // TODO will read the values just put in forwarding table by Execute
     // 1. Fetch & Decode
     FetchAndDecode();
 }

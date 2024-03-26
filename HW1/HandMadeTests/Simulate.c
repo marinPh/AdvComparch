@@ -71,8 +71,8 @@ int main(int argc, char *argv[])
     // 4. save the output JSON log
     slog(output_file, ENDLOG); // TODO saveLog() necessary ? 
 
-    // Free memory
-    //free(instrs.instructions);
+    // // Free memory
+    // free(instrs.instructions);
 
     return 0;
 }

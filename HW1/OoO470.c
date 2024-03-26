@@ -344,11 +344,9 @@ void RDS()
         return;
     }
 
-    else
-        backPressureRDS = false;
+    else backPressureRDS = false;
 
-    if (DIR.DIRSize == 0)
-        return;
+    if (DIR.DIRSize == 0) return;
 
     // Rename either all instructions in DIR or none      TODO 
 
@@ -358,8 +356,7 @@ void RDS()
     for (int i = 0; i < index; i++)
     {
         int newReg = popFreeList();
-        if (newReg < 0)
-            return;
+        if (newReg < 0) return;
         // printf("newReg: %d\n", newReg);
         // printf("DIR.DIRarray[i]: %d\n", DIR.DIRarray[i]);
         //  make it busy
@@ -407,7 +404,7 @@ void RDS()
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = -1;
         }
         else
-        {
+        { // if src1 is ready in the physical register file
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = true;
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue = PhysRegFile[RegMapTable[instrs.instructions[currentPc].src1]];
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = -1;
@@ -502,11 +499,12 @@ void Issue()
     {
         // putting every forwardable reg into corresponding integerquueentry
         int forwardIndexA = forwardable(IntegerQueue.IQarray[i].OpARegTag);
-        if (forwardIndexA >= 0)
-        {
+        if (forwardIndexA >= 0) 
+        { // if the register is in the forwarding table
             IntegerQueue.IQarray[i].OpAIsReady = true;
             IntegerQueue.IQarray[i].OpAValue = forwardingTable.table[forwardIndexA].value;
         }
+
         int forwardIndexB = forwardable(IntegerQueue.IQarray[i].OpBRegTag);
         if (forwardIndexB >= 0)
         {
@@ -571,12 +569,10 @@ void Execute()
              }
             temp = (ALU2[i]).instr.OpAValue % (ALU2[i]).instr.OpBValue;
         }
-        else
-        {
-            temp = 0;
-        }
+        else temp = 0;
 
         int physDestReg = ALU2[i].instr.DestRegister;
+
         // update the forwarding table
         forwardingTable.table[i].reg = physDestReg;
         forwardingTable.table[i].value = temp;

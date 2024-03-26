@@ -32,6 +32,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    char* def_input = "../given_tests/01/input.json";
+
     // 0. Parse the JSON file
     if (parser(argv[1]) != 0)
     {

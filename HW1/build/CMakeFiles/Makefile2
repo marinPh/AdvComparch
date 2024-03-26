@@ -78,6 +78,8 @@ clean: CMakeFiles/FrenchDispatch.dir/clean
 clean: CMakeFiles/NameYourIssue.dir/clean
 clean: CMakeFiles/CommitmentIsScary.dir/clean
 clean: CMakeFiles/Simulate.dir/clean
+clean: CMakeFiles/debugC.dir/clean
+clean: CMakeFiles/debug.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -183,6 +185,58 @@ Simulate: CMakeFiles/Simulate.dir/rule
 CMakeFiles/Simulate.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/clean
 .PHONY : CMakeFiles/Simulate.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/debugC.dir
+
+# All Build rule for target.
+CMakeFiles/debugC.dir/all: CMakeFiles/CommitmentIsScary.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/debugC.dir/build.make CMakeFiles/debugC.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/debugC.dir/build.make CMakeFiles/debugC.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num= "Built target debugC"
+.PHONY : CMakeFiles/debugC.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/debugC.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 4
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/debugC.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 0
+.PHONY : CMakeFiles/debugC.dir/rule
+
+# Convenience name for target.
+debugC: CMakeFiles/debugC.dir/rule
+.PHONY : debugC
+
+# clean rule for target.
+CMakeFiles/debugC.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/debugC.dir/build.make CMakeFiles/debugC.dir/clean
+.PHONY : CMakeFiles/debugC.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/debug.dir
+
+# All Build rule for target.
+CMakeFiles/debug.dir/all: CMakeFiles/Simulate.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/debug.dir/build.make CMakeFiles/debug.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/debug.dir/build.make CMakeFiles/debug.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles --progress-num= "Built target debug"
+.PHONY : CMakeFiles/debug.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/debug.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 4
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/debug.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1/build/CMakeFiles 0
+.PHONY : CMakeFiles/debug.dir/rule
+
+# Convenience name for target.
+debug: CMakeFiles/debug.dir/rule
+.PHONY : debug
+
+# clean rule for target.
+CMakeFiles/debug.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/debug.dir/build.make CMakeFiles/debug.dir/clean
+.PHONY : CMakeFiles/debug.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

@@ -1,1 +1,1 @@
-/usr/bin/cc -rdynamic CMakeFiles/NameYourIssue.dir/HandMadeTests/NameYourIssue.c.o CMakeFiles/NameYourIssue.dir/Lib/cJSON.c.o CMakeFiles/NameYourIssue.dir/OoO470.c.o -o NameYourIssue 
+/usr/bin/cc  -g -rdynamic CMakeFiles/NameYourIssue.dir/HandMadeTests/NameYourIssue.c.o CMakeFiles/NameYourIssue.dir/Lib/cJSON.c.o CMakeFiles/NameYourIssue.dir/OoO470.c.o -o NameYourIssue 

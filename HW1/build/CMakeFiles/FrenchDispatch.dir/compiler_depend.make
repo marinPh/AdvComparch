@@ -221,7 +221,8 @@ CMakeFiles/FrenchDispatch.dir/OoO470.c.o: ../OoO470.c \
   /usr/lib/gcc/x86_64-linux-gnu/11/include/stdbool.h \
   ../lib/cJSON.h \
   ../lib/cJSON_Utils.h \
-  ../lib/cJSON.h
+  ../lib/cJSON.h \
+  ../OoO470.h
 
 
 ../Lib/cJSON.h:

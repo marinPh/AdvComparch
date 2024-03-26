@@ -168,6 +168,32 @@ Simulate/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/build
 .PHONY : Simulate/fast
 
+#=============================================================================
+# Target rules for targets named debugC
+
+# Build rule for target.
+debugC: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 debugC
+.PHONY : debugC
+
+# fast build rule for target.
+debugC/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/debugC.dir/build.make CMakeFiles/debugC.dir/build
+.PHONY : debugC/fast
+
+#=============================================================================
+# Target rules for targets named debug
+
+# Build rule for target.
+debug: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 debug
+.PHONY : debug
+
+# fast build rule for target.
+debug/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/debug.dir/build.make CMakeFiles/debug.dir/build
+.PHONY : debug/fast
+
 HandMadeTests/CommitmentIsScary.o: HandMadeTests/CommitmentIsScary.c.o
 .PHONY : HandMadeTests/CommitmentIsScary.o
 
@@ -338,6 +364,8 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... debug"
+	@echo "... debugC"
 	@echo "... CommitmentIsScary"
 	@echo "... FrenchDispatch"
 	@echo "... NameYourIssue"

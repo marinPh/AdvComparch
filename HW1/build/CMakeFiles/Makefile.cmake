@@ -43,4 +43,6 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/NameYourIssue.dir/DependInfo.cmake"
   "CMakeFiles/CommitmentIsScary.dir/DependInfo.cmake"
   "CMakeFiles/Simulate.dir/DependInfo.cmake"
+  "CMakeFiles/debugC.dir/DependInfo.cmake"
+  "CMakeFiles/debug.dir/DependInfo.cmake"
   )

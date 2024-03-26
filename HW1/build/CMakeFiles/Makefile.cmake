@@ -39,6 +39,8 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
+  "CMakeFiles/FrenchDispatch.dir/DependInfo.cmake"
+  "CMakeFiles/NameYourIssue.dir/DependInfo.cmake"
   "CMakeFiles/CommitmentIsScary.dir/DependInfo.cmake"
   "CMakeFiles/Simulate.dir/DependInfo.cmake"
   )

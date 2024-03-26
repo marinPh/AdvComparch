@@ -17,6 +17,10 @@ Instruction instrs = {NULL, 0};
 
 // Program Counter unsigned integer pointing to the next instruction to fetch.
 unsigned int PC = 0;
+struct {
+    ActiveListEntry ALarray[ENTRY];
+    int ALSize;
+} ActiveList;
 
 /*
     Check if there are no more instructions to fetch
@@ -25,6 +29,10 @@ int noInstruction() {
     printf("No instruction to fetch\n");
     return instrs.size == PC; // if the PC is equal to the size of the instructions, there are no more instructions to fetch
 }
+ struct {
+    unsigned int *DIRarray; // array that buffers instructions that have been decoded but have not been renamed and dispatched yet
+    unsigned int DIRSize;   // size of the DIR
+} DIR;
 
 // popDIR and realloc DIRarray
 int popDIR()
@@ -64,6 +72,30 @@ int pushDIR(unsigned int instr)
     return 0;
 }
 
+// Physical Register File
+
+ unsigned long PhysRegFile[REGS]; // 64 registers
+
+ FreeList freeList;
+
+ struct {
+    forwardingTableEntry table[INSTR];
+    int size;
+} forwardingTable;
+
+
+// Integer Queue
+// always 32 entries myx but can be less, need to check if it is full
+
+ struct {
+    IntegerQueueEntry IQarray[ENTRY];
+    int IQSize;
+} IntegerQueue;
+
+ALUEntry ALU1[INSTR];
+ALUEntry ALU2[INSTR]; // TODO 4 ALUs not 2 => max 4 instructions
+
+
 // Exception Flag
 bool exception = false;
 
@@ -96,15 +128,15 @@ void initFreeList() { // on initialization 32-63 are free
         newNode->value = i;
         newNode->prev = NULL;
         newNode->next = freeList.head;
-        printf("newNode->value: %d\n", newNode->value);
+        //printf("newNode->value: %d\n", newNode->value);
         if (freeList.head != NULL) {
             (freeList.head)->prev = newNode; // Link the previous head to the new node
         }
         freeList.head = newNode; // Set the new node as the head
     }
-    printf("FreeList initialized\n");
-    printf("freeList.head->value: %d\n", freeList.head->value);
-    printf("freelist: %p\n", freeList);
+    //printf("FreeList initialized\n");
+    //printf("freeList.head->value: %d\n", freeList.head->value);
+    //printf("freelist: %p\n", freeList);
 
 }
 
@@ -386,7 +418,7 @@ void RDS()
             }
         }
 
-        printf("newReg: %d for:%d\n", newReg, instrs.instructions[currentPc].dest);
+        //printf("newReg: %d for:%d\n", newReg, instrs.instructions[currentPc].dest);
         RegMapTable[instrs.instructions[currentPc].dest] = newReg;
         BusyBitTable[newReg] = true;
         IntegerQueue.IQSize += 1;
@@ -543,7 +575,7 @@ void Commit()
         if (ALU2[i].instr.DestRegister >= 0)
         {                                                  // if DestRegister is available (i.e. >=0)
             int index = findActiveIndex(ALU2[i].instr.PC); // find the index of the instruction with PC in the Active List
-            printf("index: %d\n", index);
+            //printf("index: %d\n", index);
             if (index >= 0)
             {                                          // if the instruction is in the Active List
                 ActiveList.ALarray[index].Done = true; // set the Done flag to true
@@ -564,13 +596,13 @@ void Commit()
                 }
                 else
                 {
-                    printf("we are entering new territory\n");
+                    //printf("we are entering new territory\n");
                     int archReg = ActiveList.ALarray[0].LogicalDestination;
-                    printf("archReg: %d\n", archReg);
+                    //printf("archReg: %d\n", archReg);
                     int physReg = RegMapTable[archReg];
 
                     BusyBitTable[physReg] = false; // value is not generated from the Execution stage anymore
-                    printf("physReg: %d\n", physReg);
+                    //printf("physReg: %d\n", physReg);
 
                     if (pushFreeList(physReg) == -1)
                         break; // if the Free List is full, do nothing   TODO
@@ -990,17 +1022,17 @@ void outputSystemStateJSON(FILE *file) {
     fprintf(file, "}\n");
 }
 
-int log(char *f_out, int i) {
-    FILE *outputFile = fopen(f_out, "w"); // Open file for writing
+int slog(char *f_out, int i) {
+    FILE *outputFile = fopen(f_out, "a"); // Open file for writing
     if (outputFile == NULL) {
         perror("Error opening file");
         return 1;
     }
     
     if (i == 0) { // Initial '{' in output JSON file
-        fprintf(outputFile, "{\n");
+        fprintf(outputFile, "[\n");
     } else if (i == 1) { // Final '}' in output JSON file
-        fprintf(outputFile, "}\n");
+        fprintf(outputFile, "]\n");
     } else if (i == 2) { // Add comma if not the first cycle and not the last element logged
         fprintf(outputFile, ",\n");
     } else {

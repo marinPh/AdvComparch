@@ -267,6 +267,7 @@ def compareCycleData(i: dict, r: dict) -> bool:
     return True
 
 # Now it is the final comparison
+print(f"Comparing {len(INPUT)} cycles with {len(REFERENCE)} cycles.")
 if len(INPUT) != len(REFERENCE):
     print(f"[{RED}Error{RESET}][CycleData] Cycle count mismatched!")
     exit(1)

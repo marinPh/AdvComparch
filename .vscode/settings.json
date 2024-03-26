@@ -56,5 +56,9 @@
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
-  "cmake.sourceDirectory": "/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1"
+  "cmake.sourceDirectory": "/mnt/c/Users/marin/Documents/Ma2/ACA/AdvComparch/HW1",
+  "files.associations": {
+    "cmath": "c",
+    "*.tcc": "c"
+  }
 }

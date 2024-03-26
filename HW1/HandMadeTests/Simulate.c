@@ -49,15 +49,15 @@ int main(int argc, char *argv[])
     // 1. Initialize the system
     init();
 
-    log(output_file, BEGINLOG); // Initial '{' in output JSON file
+    slog(output_file, BEGINLOG); // Initial '{' in output JSON file
 
     // 2. Dump the state of the reset system
-    log(output_file, LOG); // TODO dumpStateIntoLog()
+    slog(output_file, LOG); // TODO dumpStateIntoLog()
 
     // 3. Loop for cycle-by-cycle iterations
     while (!(noInstruction() && activeListIsEmpty()))  
     {
-        log(output_file, LOGCOMMA); // Add comma if not the first cycle and not the last element logged
+        slog(output_file, LOGCOMMA); // Add comma if not the first cycle and not the last element logged
 
         // do propagation
         // if you have multiple modules, propagate each of them
@@ -65,11 +65,11 @@ int main(int argc, char *argv[])
         // advance clock, start next cycle
         //latch();
         // dump the state
-        log(output_file, LOG); // TODO dumpStateIntoLog()
+        slog(output_file, LOG); // TODO dumpStateIntoLog()
     }
     // Final '}' in output JSON file
     // 4. save the output JSON log
-    log(output_file, ENDLOG); // TODO saveLog() necessary ? 
+    slog(output_file, ENDLOG); // TODO saveLog() necessary ? 
 
     // Free memory
     //free(instrs.instructions);

@@ -8,4 +8,5 @@
 cmake ./build
 cd build 
 make
+mv Simulate ../
 cd ..

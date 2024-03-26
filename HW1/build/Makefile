@@ -117,48 +117,48 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named FullyFunk
+# Target rules for targets named Simulate
 
 # Build rule for target.
-FullyFunk: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 FullyFunk
-.PHONY : FullyFunk
+Simulate: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Simulate
+.PHONY : Simulate
 
 # fast build rule for target.
-FullyFunk/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/build
-.PHONY : FullyFunk/fast
+Simulate/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/build
+.PHONY : Simulate/fast
 
-HandMadeTests/FullyFunk.o: HandMadeTests/FullyFunk.c.o
-.PHONY : HandMadeTests/FullyFunk.o
+HandMadeTests/Simulate.o: HandMadeTests/Simulate.c.o
+.PHONY : HandMadeTests/Simulate.o
 
 # target to build an object file
-HandMadeTests/FullyFunk.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/HandMadeTests/FullyFunk.c.o
-.PHONY : HandMadeTests/FullyFunk.c.o
+HandMadeTests/Simulate.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/HandMadeTests/Simulate.c.o
+.PHONY : HandMadeTests/Simulate.c.o
 
-HandMadeTests/FullyFunk.i: HandMadeTests/FullyFunk.c.i
-.PHONY : HandMadeTests/FullyFunk.i
+HandMadeTests/Simulate.i: HandMadeTests/Simulate.c.i
+.PHONY : HandMadeTests/Simulate.i
 
 # target to preprocess a source file
-HandMadeTests/FullyFunk.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/HandMadeTests/FullyFunk.c.i
-.PHONY : HandMadeTests/FullyFunk.c.i
+HandMadeTests/Simulate.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/HandMadeTests/Simulate.c.i
+.PHONY : HandMadeTests/Simulate.c.i
 
-HandMadeTests/FullyFunk.s: HandMadeTests/FullyFunk.c.s
-.PHONY : HandMadeTests/FullyFunk.s
+HandMadeTests/Simulate.s: HandMadeTests/Simulate.c.s
+.PHONY : HandMadeTests/Simulate.s
 
 # target to generate assembly for a file
-HandMadeTests/FullyFunk.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/HandMadeTests/FullyFunk.c.s
-.PHONY : HandMadeTests/FullyFunk.c.s
+HandMadeTests/Simulate.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/HandMadeTests/Simulate.c.s
+.PHONY : HandMadeTests/Simulate.c.s
 
 Lib/cJSON.o: Lib/cJSON.c.o
 .PHONY : Lib/cJSON.o
 
 # target to build an object file
 Lib/cJSON.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/Lib/cJSON.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/Lib/cJSON.c.o
 .PHONY : Lib/cJSON.c.o
 
 Lib/cJSON.i: Lib/cJSON.c.i
@@ -166,7 +166,7 @@ Lib/cJSON.i: Lib/cJSON.c.i
 
 # target to preprocess a source file
 Lib/cJSON.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/Lib/cJSON.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/Lib/cJSON.c.i
 .PHONY : Lib/cJSON.c.i
 
 Lib/cJSON.s: Lib/cJSON.c.s
@@ -174,7 +174,7 @@ Lib/cJSON.s: Lib/cJSON.c.s
 
 # target to generate assembly for a file
 Lib/cJSON.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/Lib/cJSON.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/Lib/cJSON.c.s
 .PHONY : Lib/cJSON.c.s
 
 OoO470.o: OoO470.c.o
@@ -182,7 +182,7 @@ OoO470.o: OoO470.c.o
 
 # target to build an object file
 OoO470.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/OoO470.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/OoO470.c.o
 .PHONY : OoO470.c.o
 
 OoO470.i: OoO470.c.i
@@ -190,7 +190,7 @@ OoO470.i: OoO470.c.i
 
 # target to preprocess a source file
 OoO470.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/OoO470.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/OoO470.c.i
 .PHONY : OoO470.c.i
 
 OoO470.s: OoO470.c.s
@@ -198,7 +198,7 @@ OoO470.s: OoO470.c.s
 
 # target to generate assembly for a file
 OoO470.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/FullyFunk.dir/build.make CMakeFiles/FullyFunk.dir/OoO470.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/OoO470.c.s
 .PHONY : OoO470.c.s
 
 # Help Target
@@ -209,10 +209,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... FullyFunk"
-	@echo "... HandMadeTests/FullyFunk.o"
-	@echo "... HandMadeTests/FullyFunk.i"
-	@echo "... HandMadeTests/FullyFunk.s"
+	@echo "... Simulate"
+	@echo "... HandMadeTests/Simulate.o"
+	@echo "... HandMadeTests/Simulate.i"
+	@echo "... HandMadeTests/Simulate.s"
 	@echo "... Lib/cJSON.o"
 	@echo "... Lib/cJSON.i"
 	@echo "... Lib/cJSON.s"

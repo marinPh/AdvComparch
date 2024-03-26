@@ -33,25 +33,6 @@ typedef struct {
     size_t size;
 } Instruction;
 
-// Program Counter unsigned integer pointing to the next instruction to fetch.
-extern unsigned int PC;
-// Physical Register File
-extern unsigned long PhysRegFile[REGS]; // 64 registers
-
-// Decoded Instruction Register
-extern struct {
-    unsigned int *DIRarray; // array that buffers instructions that have been decoded but have not been renamed and dispatched yet
-    unsigned int DIRSize;   // size of the DIR
-} DIR;
-
-// Exception Flag
-extern bool exception;
-// Exception PC
-extern unsigned int ePC;
-
-extern bool backPressureRDS;
-extern unsigned int RegMapTable[ENTRY];
-extern bool BusyBitTable[REGS];
 
 // Define a struct for a node in the double linked list
 typedef struct FreeListNode {
@@ -66,7 +47,7 @@ typedef struct {
     FreeListNode *tail; // Pointer to the tail of the list
 } FreeList;
 
-extern FreeList freeList;
+
 
 // Entry in the Active List
 typedef struct {
@@ -79,10 +60,7 @@ typedef struct {
 
 // Active List
 // instructions that have been dispatched but have not yet completed, renamed instruction
-extern struct {
-    ActiveListEntry ALarray[ENTRY];
-    int ALSize;
-} ActiveList;
+
 
 // Forwarding Table
 typedef struct {
@@ -90,10 +68,6 @@ typedef struct {
     int value; // the value that is forwarded
 } forwardingTableEntry;
 
-extern struct {
-    forwardingTableEntry table[INSTR];
-    int size;
-} forwardingTable;
 
 // Entry in Integer Queue
 typedef struct {
@@ -108,19 +82,12 @@ typedef struct {
     int PC;
 } IntegerQueueEntry;
 
-// Integer Queue
-// always 32 entries myx but can be less, need to check if it is full
-extern struct {
-    IntegerQueueEntry IQarray[ENTRY];
-    int IQSize;
-} IntegerQueue;
+
 
 typedef struct {
     IntegerQueueEntry instr;
 } ALUEntry;
 
-ALUEntry ALU1[INSTR];
-ALUEntry ALU2[INSTR]; // TODO 4 ALUs not 2 => max 4 instructions
 
 void showPhysRegFile();
 void showActiveList();
@@ -134,7 +101,7 @@ int parser(char* file_name);
 void Commit();
 void Exception();
 bool isOpBusy(int reg);
-bool forwardable(int reg);
+int forwardable(int reg);
 void FetchAndDecode();
 void RDS();
 void Issue();
@@ -146,7 +113,7 @@ void showForwardingTable();
 void init();
 
 void outputSystemStateJSON(FILE *file); 
-int log(char *output_file, int mode);
+int slog(char *f_out, int i);
 
 void propagate();
 

@@ -117,6 +117,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named CommitmentIsScary
+
+# Build rule for target.
+CommitmentIsScary: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CommitmentIsScary
+.PHONY : CommitmentIsScary
+
+# fast build rule for target.
+CommitmentIsScary/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/build
+.PHONY : CommitmentIsScary/fast
+
+#=============================================================================
 # Target rules for targets named Simulate
 
 # Build rule for target.
@@ -128,6 +141,30 @@ Simulate: cmake_check_build_system
 Simulate/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/build
 .PHONY : Simulate/fast
+
+HandMadeTests/CommitmentIsScary.o: HandMadeTests/CommitmentIsScary.c.o
+.PHONY : HandMadeTests/CommitmentIsScary.o
+
+# target to build an object file
+HandMadeTests/CommitmentIsScary.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/HandMadeTests/CommitmentIsScary.c.o
+.PHONY : HandMadeTests/CommitmentIsScary.c.o
+
+HandMadeTests/CommitmentIsScary.i: HandMadeTests/CommitmentIsScary.c.i
+.PHONY : HandMadeTests/CommitmentIsScary.i
+
+# target to preprocess a source file
+HandMadeTests/CommitmentIsScary.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/HandMadeTests/CommitmentIsScary.c.i
+.PHONY : HandMadeTests/CommitmentIsScary.c.i
+
+HandMadeTests/CommitmentIsScary.s: HandMadeTests/CommitmentIsScary.c.s
+.PHONY : HandMadeTests/CommitmentIsScary.s
+
+# target to generate assembly for a file
+HandMadeTests/CommitmentIsScary.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/HandMadeTests/CommitmentIsScary.c.s
+.PHONY : HandMadeTests/CommitmentIsScary.c.s
 
 HandMadeTests/Simulate.o: HandMadeTests/Simulate.c.o
 .PHONY : HandMadeTests/Simulate.o
@@ -158,6 +195,7 @@ Lib/cJSON.o: Lib/cJSON.c.o
 
 # target to build an object file
 Lib/cJSON.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/Lib/cJSON.c.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/Lib/cJSON.c.o
 .PHONY : Lib/cJSON.c.o
 
@@ -166,6 +204,7 @@ Lib/cJSON.i: Lib/cJSON.c.i
 
 # target to preprocess a source file
 Lib/cJSON.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/Lib/cJSON.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/Lib/cJSON.c.i
 .PHONY : Lib/cJSON.c.i
 
@@ -174,6 +213,7 @@ Lib/cJSON.s: Lib/cJSON.c.s
 
 # target to generate assembly for a file
 Lib/cJSON.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/Lib/cJSON.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/Lib/cJSON.c.s
 .PHONY : Lib/cJSON.c.s
 
@@ -182,6 +222,7 @@ OoO470.o: OoO470.c.o
 
 # target to build an object file
 OoO470.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/OoO470.c.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/OoO470.c.o
 .PHONY : OoO470.c.o
 
@@ -190,6 +231,7 @@ OoO470.i: OoO470.c.i
 
 # target to preprocess a source file
 OoO470.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/OoO470.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/OoO470.c.i
 .PHONY : OoO470.c.i
 
@@ -198,6 +240,7 @@ OoO470.s: OoO470.c.s
 
 # target to generate assembly for a file
 OoO470.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/OoO470.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/OoO470.c.s
 .PHONY : OoO470.c.s
 
@@ -209,7 +252,11 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... CommitmentIsScary"
 	@echo "... Simulate"
+	@echo "... HandMadeTests/CommitmentIsScary.o"
+	@echo "... HandMadeTests/CommitmentIsScary.i"
+	@echo "... HandMadeTests/CommitmentIsScary.s"
 	@echo "... HandMadeTests/Simulate.o"
 	@echo "... HandMadeTests/Simulate.i"
 	@echo "... HandMadeTests/Simulate.s"

@@ -5,7 +5,7 @@ int main(int argc, char *argv[]) {
     printf("Hello, World!\n");
   parser("../given_tests/01/input.json");
 
-  Init();
+  init();
   printf("%s", "init\n");
   
 
@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
     showFreeList();
   //showIntegerQueue();
     showActiveList();
+    showALU();
     //showIntegerQueue();
     Commit();
     printf("Commit, [%d]\n", i);

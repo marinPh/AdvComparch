@@ -117,6 +117,32 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named FrenchDispatch
+
+# Build rule for target.
+FrenchDispatch: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 FrenchDispatch
+.PHONY : FrenchDispatch
+
+# fast build rule for target.
+FrenchDispatch/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/build
+.PHONY : FrenchDispatch/fast
+
+#=============================================================================
+# Target rules for targets named NameYourIssue
+
+# Build rule for target.
+NameYourIssue: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 NameYourIssue
+.PHONY : NameYourIssue
+
+# fast build rule for target.
+NameYourIssue/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/build
+.PHONY : NameYourIssue/fast
+
+#=============================================================================
 # Target rules for targets named CommitmentIsScary
 
 # Build rule for target.
@@ -166,6 +192,54 @@ HandMadeTests/CommitmentIsScary.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/HandMadeTests/CommitmentIsScary.c.s
 .PHONY : HandMadeTests/CommitmentIsScary.c.s
 
+HandMadeTests/FrenchDispatch.o: HandMadeTests/FrenchDispatch.c.o
+.PHONY : HandMadeTests/FrenchDispatch.o
+
+# target to build an object file
+HandMadeTests/FrenchDispatch.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/HandMadeTests/FrenchDispatch.c.o
+.PHONY : HandMadeTests/FrenchDispatch.c.o
+
+HandMadeTests/FrenchDispatch.i: HandMadeTests/FrenchDispatch.c.i
+.PHONY : HandMadeTests/FrenchDispatch.i
+
+# target to preprocess a source file
+HandMadeTests/FrenchDispatch.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/HandMadeTests/FrenchDispatch.c.i
+.PHONY : HandMadeTests/FrenchDispatch.c.i
+
+HandMadeTests/FrenchDispatch.s: HandMadeTests/FrenchDispatch.c.s
+.PHONY : HandMadeTests/FrenchDispatch.s
+
+# target to generate assembly for a file
+HandMadeTests/FrenchDispatch.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/HandMadeTests/FrenchDispatch.c.s
+.PHONY : HandMadeTests/FrenchDispatch.c.s
+
+HandMadeTests/NameYourIssue.o: HandMadeTests/NameYourIssue.c.o
+.PHONY : HandMadeTests/NameYourIssue.o
+
+# target to build an object file
+HandMadeTests/NameYourIssue.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/HandMadeTests/NameYourIssue.c.o
+.PHONY : HandMadeTests/NameYourIssue.c.o
+
+HandMadeTests/NameYourIssue.i: HandMadeTests/NameYourIssue.c.i
+.PHONY : HandMadeTests/NameYourIssue.i
+
+# target to preprocess a source file
+HandMadeTests/NameYourIssue.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/HandMadeTests/NameYourIssue.c.i
+.PHONY : HandMadeTests/NameYourIssue.c.i
+
+HandMadeTests/NameYourIssue.s: HandMadeTests/NameYourIssue.c.s
+.PHONY : HandMadeTests/NameYourIssue.s
+
+# target to generate assembly for a file
+HandMadeTests/NameYourIssue.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/HandMadeTests/NameYourIssue.c.s
+.PHONY : HandMadeTests/NameYourIssue.c.s
+
 HandMadeTests/Simulate.o: HandMadeTests/Simulate.c.o
 .PHONY : HandMadeTests/Simulate.o
 
@@ -195,6 +269,8 @@ Lib/cJSON.o: Lib/cJSON.c.o
 
 # target to build an object file
 Lib/cJSON.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/Lib/cJSON.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/Lib/cJSON.c.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/Lib/cJSON.c.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/Lib/cJSON.c.o
 .PHONY : Lib/cJSON.c.o
@@ -204,6 +280,8 @@ Lib/cJSON.i: Lib/cJSON.c.i
 
 # target to preprocess a source file
 Lib/cJSON.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/Lib/cJSON.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/Lib/cJSON.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/Lib/cJSON.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/Lib/cJSON.c.i
 .PHONY : Lib/cJSON.c.i
@@ -213,6 +291,8 @@ Lib/cJSON.s: Lib/cJSON.c.s
 
 # target to generate assembly for a file
 Lib/cJSON.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/Lib/cJSON.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/Lib/cJSON.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/Lib/cJSON.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/Lib/cJSON.c.s
 .PHONY : Lib/cJSON.c.s
@@ -222,6 +302,8 @@ OoO470.o: OoO470.c.o
 
 # target to build an object file
 OoO470.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/OoO470.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/OoO470.c.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/OoO470.c.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/OoO470.c.o
 .PHONY : OoO470.c.o
@@ -231,6 +313,8 @@ OoO470.i: OoO470.c.i
 
 # target to preprocess a source file
 OoO470.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/OoO470.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/OoO470.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/OoO470.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/OoO470.c.i
 .PHONY : OoO470.c.i
@@ -240,6 +324,8 @@ OoO470.s: OoO470.c.s
 
 # target to generate assembly for a file
 OoO470.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FrenchDispatch.dir/build.make CMakeFiles/FrenchDispatch.dir/OoO470.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NameYourIssue.dir/build.make CMakeFiles/NameYourIssue.dir/OoO470.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CommitmentIsScary.dir/build.make CMakeFiles/CommitmentIsScary.dir/OoO470.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Simulate.dir/build.make CMakeFiles/Simulate.dir/OoO470.c.s
 .PHONY : OoO470.c.s
@@ -253,10 +339,18 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... CommitmentIsScary"
+	@echo "... FrenchDispatch"
+	@echo "... NameYourIssue"
 	@echo "... Simulate"
 	@echo "... HandMadeTests/CommitmentIsScary.o"
 	@echo "... HandMadeTests/CommitmentIsScary.i"
 	@echo "... HandMadeTests/CommitmentIsScary.s"
+	@echo "... HandMadeTests/FrenchDispatch.o"
+	@echo "... HandMadeTests/FrenchDispatch.i"
+	@echo "... HandMadeTests/FrenchDispatch.s"
+	@echo "... HandMadeTests/NameYourIssue.o"
+	@echo "... HandMadeTests/NameYourIssue.i"
+	@echo "... HandMadeTests/NameYourIssue.s"
 	@echo "... HandMadeTests/Simulate.o"
 	@echo "... HandMadeTests/Simulate.i"
 	@echo "... HandMadeTests/Simulate.s"

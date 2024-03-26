@@ -13,6 +13,8 @@
 
 #define min(x, y) ((x) < (y) ? (x) : (y))
 
+bool finished = false;
+
 Instruction instrs = {NULL, 0};
 
 // Program Counter unsigned integer pointing to the next instruction to fetch.
@@ -27,7 +29,7 @@ struct {
 */
 int noInstruction() {
     printf("No instruction to fetch\n");
-    return instrs.size == PC; // if the PC is equal to the size of the instructions, there are no more instructions to fetch
+    return finished; // set by the Commit stage
 }
  struct {
     unsigned int *DIRarray; // array that buffers instructions that have been decoded but have not been renamed and dispatched yet
@@ -613,6 +615,12 @@ void Commit()
                 break; // if DestRegister is NOT available, do nothing
             // TODO "an instruction is met that is not completed yet"
         }
+    }
+
+    // if the PC is equal to the size of the instructions, there are no more instructions to fetch
+    if (PC == instrs.size)
+    {
+        finished = true;
     }
 }
 

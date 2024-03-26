@@ -15,4 +15,4 @@ set(SOURCE_FILES
 #add_executable(NameYourIssue HandMadeTests/NameYourIssue.c ${SOURCE_FILES})
 #add_executable(CommitmentIsScary HandMadeTests/CommitmentIsScary.c ${SOURCE_FILES})
 
-add_executable(FullyFunk HandMadeTests/FullyFunk.c ${SOURCE_FILES})
+add_executable(Simulate HandMadeTests/Simulate.c ${SOURCE_FILES})

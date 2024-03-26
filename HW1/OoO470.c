@@ -758,7 +758,10 @@ void showBusyBitTable()
     printf("BusyBitTable\n");
     for (size_t i = 0; i < REGS; i++)
     {
-        printf("%d ", BusyBitTable[i]);
+        if(BusyBitTable[i]){
+           printf("%d ", i);
+        }
+        
     }
     printf("\n");
 }

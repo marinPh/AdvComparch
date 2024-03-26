@@ -10,12 +10,12 @@ int main(int argc, char *argv[]) {
   
 
   
-  for (int i = 0; i < 40; i++) {
+  for (int i = 0; i < 4; i++) {
     //showForwardingTable();
     //showALU();
     //showPhysRegFile();
     //showActiveList();
-    //showBusyBitTable();
+    showBusyBitTable();
     //showRegMapTable();
     //showDIR();
     //showFreeList();

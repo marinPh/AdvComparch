@@ -9,32 +9,9 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+#include "OoO470.h"
 
-#define REGS 64
-#define ENTRY 32
-#define INSTR 4
-#define OPCODE 5
 #define min(x, y) ((x) < (y) ? (x) : (y))
-
-#define BEGINLOG 0
-#define ENDLOG 1
-#define LOGCOMMA 2
-#define LOG 3
-
-// Structure for parsing JSON entry
-typedef struct
-{
-    char opcode[OPCODE]; // 4 characters + null terminator
-    int dest;
-    int src1;
-    int src2;
-} InstructionEntry;
-
-// Structure for parsing JSON
-typedef struct {
-    InstructionEntry *instructions;
-    size_t size;
-} Instruction;
 
 Instruction instrs = {NULL, 0};
 
@@ -48,16 +25,6 @@ int noInstruction() {
     printf("No instruction to fetch\n");
     return instrs.size == PC; // if the PC is equal to the size of the instructions, there are no more instructions to fetch
 }
-
-// Physical Register File
-unsigned long PhysRegFile[REGS]; // 64 registers of 64 bits each
-
-// Decoded Instruction Register
-struct
-{
-    unsigned int *DIRarray; // array that buffers instructions that have been decoded but have not been renamed and dispatched yet
-    unsigned int DIRSize;   // size of the DIR
-} DIR;
 
 // popDIR and realloc DIRarray
 int popDIR()
@@ -113,22 +80,6 @@ unsigned int RegMapTable[ENTRY] = { // On initialization, all architectural regi
     30, 31}; // array that maps architectural register names to physical register names
 // 32 architectural registers, 64 physical registers
 
-
-// Define a struct for a node in the double linked list
-typedef struct FreeListNode {
-    int value; // The value of the register
-    struct FreeListNode *prev; // Pointer to the previous node
-    struct FreeListNode *next; // Pointer to the next node
-} FreeListNode;
-
-// FreeList
-typedef struct {
-    FreeListNode *head; // Pointer to the head of the list
-    FreeListNode *tail; // Pointer to the tail of the list
-} FreeList;
-
-FreeList freeList; // Initialize the FreeList
-
 // Function to initialize the double linked list
 void initFreeList() { // on initialization 32-63 are free
 
@@ -156,8 +107,6 @@ void initFreeList() { // on initialization 32-63 are free
     printf("freelist: %p\n", freeList);
 
 }
-
-FreeList freeList; // Initialize the FreeList
 
 // Function to pop the first element of the list
 int popFreeList() {
@@ -199,52 +148,12 @@ int pushFreeList(int value) {
 // Busy Bit Table
 bool BusyBitTable[REGS] = {false}; // whether the value of a specific physical register will be generated from the Execution stage
 
-// Entry in the Active List
-typedef struct
-{
-    bool Done;
-    bool Exception;
-    int LogicalDestination; // the architectural register that the instruction writes to
-    int OldDestination;
-    int PC;
-} ActiveListEntry;
-
-// Active List
-// instructions that have been dispatched but have not yet completed, renamed instruction
-struct {
-    ActiveListEntry ALarray[ENTRY];
-    int ALSize;
-} ActiveList;
-
 /*
     Check if the Active List is empty
 */
 int activeListIsEmpty() {
     return ActiveList.ALSize == 0;
 }
-
-
-// Entry in Integer Queue
-typedef struct
-{
-    int DestRegister;
-    bool OpAIsReady;
-    int OpARegTag; // for cheking forwarding
-    int OpAValue;
-    bool OpBIsReady;
-    int OpBRegTag;
-    int OpBValue;
-    char OpCode[OPCODE]; // 4 characters + null terminator
-    int PC;
-} IntegerQueueEntry;
-
-// Integer Queue
-// always 32 entries myx but can be less, need to check if it is full
-struct
-{
-    IntegerQueueEntry IQarray[ENTRY];
-    int IQSize;
-} IntegerQueue;
 
 IntegerQueueEntry createNop()
 {
@@ -295,13 +204,6 @@ IntegerQueueEntry popReadyIQE()
     return temp;
 }
 
-typedef struct {
-    IntegerQueueEntry instr;
-} ALUEntry;
-
-ALUEntry ALU1[INSTR];
-ALUEntry ALU2[INSTR]; // TODO 4 ALUs not 2 => max 4 instructions
-
 void initALU()
 {
     for (size_t i = 0; i < INSTR; i++)
@@ -316,18 +218,6 @@ bool isOpBusy(int reg)
     return BusyBitTable[reg];
 }
 
-// Forwarding Table
-typedef struct
-{
-    int reg;   // the physical register that the value is forwarded to
-    int value; // the value that is forwarded
-} forwardingTableEntry;
-
-struct
-{
-    forwardingTableEntry table[INSTR];
-    int size;
-} forwardingTable;
 
 void initForwardingTable()
 {
@@ -397,10 +287,8 @@ void FetchAndDecode()
 }
 
 // Rename
-
 void RDS()
 {
-
     if (ActiveList.ALSize == ENTRY || IntegerQueue.IQSize == ENTRY)
     {
         backPressureRDS = true;
@@ -869,8 +757,11 @@ void showALU()
     }
 }
 
-void Init(){
-   initFreeList();
+/*
+    Initialize the system
+*/
+void init() {
+    initFreeList();
     initALU();
     initForwardingTable();
 }
@@ -1099,8 +990,8 @@ void outputSystemStateJSON(FILE *file) {
     fprintf(file, "}\n");
 }
 
-int log(int i) {
-    FILE *outputFile = fopen("system_state.json", "w"); // Open file for writing
+int log(char *f_out, int i) {
+    FILE *outputFile = fopen(f_out, "w"); // Open file for writing
     if (outputFile == NULL) {
         perror("Error opening file");
         return 1;
@@ -1135,49 +1026,6 @@ void propagate()
     RDS();
     // 1. Fetch & Decode
     FetchAndDecode();
-}
-
-int main(int argc, char *argv[])
-{
-    // Check if the correct number of arguments is provided
-    if (argc != 2)
-    {
-        return 1;
-    }
-
-    // 0. Parse the JSON file
-    if (parser(argv[1]) != 0)
-    {
-        printf("Failed to parse the JSON file.\n");
-        return 1;
-    }
-
-    log(BEGINLOG); // Initial '{' in output JSON file
-
-    // 1. Dump the state of the reset system
-    log(LOG); // TODO dumpStateIntoLog()
-
-    // 2. Loop for cycle-by-cycle iterations
-    while (!(noInstruction() && activeListIsEmpty()))  
-    {
-        log(LOGCOMMA); // Add comma if not the first cycle and not the last element logged
-
-        // do propagation
-        // if you have multiple modules, propagate each of them
-        propagate();
-        // advance clock, start next cycle
-        //latch();
-        // dump the state
-        log(LOG); // TODO dumpStateIntoLog()
-    }
-    // Final '}' in output JSON file
-    // 3. save the output JSON log
-    log(ENDLOG); // TODO saveLog() necessary ? 
-
-    // Free memory
-    //free(instrs.instructions);
-
-    return 0;
 }
 
 

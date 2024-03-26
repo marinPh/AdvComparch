@@ -16,6 +16,11 @@
 #define OPCODE 5
 #define min(x, y) ((x) < (y) ? (x) : (y))
 
+#define BEGINLOG 0
+#define ENDLOG 1
+#define LOGCOMMA 2
+#define LOG 3
+
 // Structure for parsing JSON entry
 typedef struct
 {
@@ -1032,16 +1037,29 @@ int parser(char *file_name)
     Output the system state in JSON format to a file
 */
 void outputSystemStateJSON(FILE *file) {
-    fprintf(file, "{\n");
-    fprintf(file, "  \"ActiveList\": [],\n");
+    fprintf(file, "  \"ActiveList\": [\n");
+    for (int i = 0; i < ActiveList.ALSize; ++i) {
+        fprintf(file, "    {\n");
+        fprintf(file, "      \"Done\": %s,\n", ActiveList.ALarray[i].Done ? "true" : "false");
+        fprintf(file, "      \"Exception\": %s,\n", ActiveList.ALarray[i].Exception ? "true" : "false");
+        fprintf(file, "      \"LogicalDestination\": %d,\n", ActiveList.ALarray[i].LogicalDestination);
+        fprintf(file, "      \"OldDestination\": %d,\n", ActiveList.ALarray[i].OldDestination);
+        fprintf(file, "      \"PC\": %d\n", ActiveList.ALarray[i].PC);
+        fprintf(file, "    }%s\n", (i < ActiveList.ALSize - 1) ? "," : ""); // Add comma if not the last element
+    }
+    fprintf(file, "  ],\n");
+
     fprintf(file, "  \"BusyBitTable\": [");
     for (int i = 0; i < REGS; i++) {
         fprintf(file, "%s%s", (i > 0 ? ", " : ""), (BusyBitTable[i] ? "true" : "false"));
     }
     fprintf(file, "],\n");
+
     fprintf(file, "  \"DecodedPCs\": [],\n");
+
     fprintf(file, "  \"Exception\": %s,\n", (exception ? "true" : "false"));
     fprintf(file, "  \"ExceptionPC\": %u,\n", ePC);
+
     fprintf(file, "  \"FreeList\": [");
     FreeListNode *current = freeList.head;
     while (current != NULL) {
@@ -1049,32 +1067,88 @@ void outputSystemStateJSON(FILE *file) {
         current = current->next;
     }
     fprintf(file, "],\n");
+
     fprintf(file, "  \"IntegerQueue\": [],\n");
+
     fprintf(file, "  \"PC\": %u,\n", PC);
+
     fprintf(file, "  \"PhysicalRegisterFile\": [");
     for (int i = 0; i < REGS; i++) {
         fprintf(file, "%s%d", (i > 0 ? ", " : ""), PhysRegFile[i]);
     }
     fprintf(file, "],\n");
+
     fprintf(file, "  \"RegisterMapTable\": [");
     for (int i = 0; i < ENTRY; i++) {
         fprintf(file, "%s%d", (i > 0 ? ", " : ""), RegMapTable[i]);
     }
-    fprintf(file, "]\n");
-    fprintf(file, "}\n");
+    fprintf(file, "]");  
 }
 
-int wrapper() {
+int log(int i) {
     FILE *outputFile = fopen("system_state.json", "w"); // Open file for writing
     if (outputFile == NULL) {
         perror("Error opening file");
         return 1;
     }
     
-    // Call the function to output the JSON representation to the file
-    outputSystemStateJSON(outputFile);
+    if (i == 0) { // Initial '{' in output JSON file
+        fprintf(outputFile, "{\n");
+    } else if (i == 1) { // Final '}' in output JSON file
+        fprintf(outputFile, "}\n");
+    } else if (i == 2) { // Add comma if not the first cycle and not the last element logged
+        fprintf(outputFile, ",\n");
+    } else {
+        // Call the function to output the JSON representation to the file
+        outputSystemStateJSON(outputFile);
+    }
     
     fclose(outputFile); // Close the file
+    return 0;
+}
+
+
+//---------------------------------------------
+int main(int argc, char *argv[])
+{
+    // Check if the correct number of arguments is provided
+    if (argc != 2)
+    {
+        return 1;
+    }
+
+    // 0. Parse the JSON file
+    if (parser(argv[1]) != 0)
+    {
+        printf("Failed to parse the JSON file.\n");
+        return 1;
+    }
+
+    log(BEGINLOG); // Initial '{' in output JSON file
+
+    // 1. Dump the state of the reset system
+    log(LOG); // TODO dumpStateIntoLog()
+
+    // 2. Loop for cycle-by-cycle iterations
+    while (!(noInstruction() && activeListIsEmpty())) 
+    {
+        log(LOGCOMMA); // Add comma if not the first cycle and not the last element logged
+
+        // do propagation
+        // if you have multiple modules, propagate each of them
+        propagate();
+        // advance clock, start next cycle
+        latch();
+        // dump the state
+        log(LOG); // TODO dumpStateIntoLog()
+    }
+    // Final '}' in output JSON file
+    // 3. save the output JSON log
+    log(ENDLOG); // TODO saveLog() necessary ? 
+
+    // Free memory
+    //free(instrs.instructions);
+
     return 0;
 }
 

@@ -383,14 +383,15 @@ void RDS()
         // add the instruction to the Integer Queue
         IntegerQueue.IQarray[IntegerQueue.IQSize].DestRegister = newReg;
         IntegerQueue.IQarray[IntegerQueue.IQSize].PC = currentPc;
-        char *tempOpCode = "";
-        if (strncmp(instrs.instructions[currentPc].opcode, "addi", 4) == 0)
+        bool wasIMM = false;
+        if (strncmp(instrs.instructions[currentPc].opcode, "addi", 5) == 0)
         {
-            tempOpCode = "add";
+            strncpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode, "add",4);
+            wasIMM = true;
         }else{
-            //strcmp(tempOpCode,instrs.instructions[currentPc].opcode);
+            strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode,instrs.instructions[currentPc].opcode );
         }
-        strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode, tempOpCode);
+        
 
         // we want to check if the source registers are ready
         // if they are ready, we want to forward the value to the Integer Queue
@@ -418,7 +419,7 @@ void RDS()
         }
 
         // B operand is always ready for addi
-        if (strcmp(instrs.instructions[currentPc].opcode, "addi") == 0)
+        if (wasIMM)
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = instrs.instructions[currentPc].src2;

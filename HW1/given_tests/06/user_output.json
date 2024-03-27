@@ -337,7 +337,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 8
     },
     {
@@ -348,7 +348,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 9
     },
     {
@@ -359,7 +359,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 10
     }
   ],

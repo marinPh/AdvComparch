@@ -10,26 +10,26 @@ int main(int argc, char *argv[]) {
   
 
   
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 4; i++) {
     //showForwardingTable();
     //showALU();
     //showPhysRegFile();
     //showActiveList();
-    //showBusyBitTable();
-    showRegMapTable();
+    showBusyBitTable();
+    //showRegMapTable();
     //showDIR();
-    showFreeList();
-  //showIntegerQueue();
+    //showFreeList();
+   showIntegerQueue();
     showActiveList();
-    showALU();
+    //showALU();
     //showIntegerQueue();
     Commit();
     printf("Commit, [%d]\n", i);
     Execute();
     //showALU();
     printf("Execute, [%d]\n", i);
+
     Issue();
- 
     printf("Issue, [%d]\n", i);
     RDS();
     printf("RDS, [%d]\n", i);

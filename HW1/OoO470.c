@@ -98,6 +98,10 @@ struct
     int IQSize;
 } IntegerQueue;
 
+void initIQ(){
+    IntegerQueue.IQSize = 0;
+}
+
 ALUEntry ALU1[INSTR];
 ALUEntry ALU2[INSTR]; // TODO 4 ALUs not 2 => max 4 instructions
 
@@ -378,10 +382,12 @@ void RDS()
         // add the instruction to the Integer Queue
         IntegerQueue.IQarray[IntegerQueue.IQSize].DestRegister = newReg;
         IntegerQueue.IQarray[IntegerQueue.IQSize].PC = currentPc;
-        const char *tempOpCode = instrs.instructions[currentPc].opcode;
-        if (strncmp(tempOpCode, "addi", 4) == 0)
+        char *tempOpCode = "";
+        if (strncmp(instrs.instructions[currentPc].opcode, "addi", 4) == 0)
         {
-            strncpy(tempOpCode, "add", 4);
+            tempOpCode = "add";
+        }else{
+            //strcmp(tempOpCode,instrs.instructions[currentPc].opcode);
         }
         strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode, tempOpCode);
 
@@ -392,16 +398,16 @@ void RDS()
         // if opcode is not "addi" then we need to check if both src1 and src2 are ready
         // and we give the value of src1 to IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue
         int forwardIndexA = forwardable(RegMapTable[instrs.instructions[currentPc].src1]);
-        if (isOpBusy(RegMapTable[instrs.instructions[currentPc].src1]))
-        { // if src1 the register is busy
-            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = false;
-            IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = RegMapTable[instrs.instructions[currentPc].src1];
-        }
-        else if (forwardIndexA >= 0)
+        if (forwardIndexA >= 0)
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = true;
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpAValue = forwardingTable.table[forwardIndexA].value;
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = -1;
+        }
+        else if (isOpBusy(RegMapTable[instrs.instructions[currentPc].src1]))
+        { // if src1 the register is busy
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpAIsReady = false;
+            IntegerQueue.IQarray[IntegerQueue.IQSize].OpARegTag = RegMapTable[instrs.instructions[currentPc].src1];
         }
         else
         { // if src1 is ready in the physical register file
@@ -421,16 +427,16 @@ void RDS()
         {
             int forwardIndexB = forwardable(RegMapTable[instrs.instructions[currentPc].src2]);
 
-            if (isOpBusy(RegMapTable[instrs.instructions[currentPc].src2]))
-            {
-                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = false;
-                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = RegMapTable[instrs.instructions[currentPc].src2];
-            }
-            else if (forwardIndexB >= 0)
+            if (forwardIndexB >= 0)
             {
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = forwardingTable.table[forwardIndexB].value;
                 IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = -1;
+            }
+            else if (isOpBusy(RegMapTable[instrs.instructions[currentPc].src2]))
+            {
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = false;
+                IntegerQueue.IQarray[IntegerQueue.IQSize].OpBRegTag = RegMapTable[instrs.instructions[currentPc].src2];
             }
             else
             {
@@ -461,7 +467,6 @@ int findActiveIndex(int PC)
     }
     return -1;
 }
-// TODO: change how ALU works as they are passed by reference
 
 /*
     Pop the first element of the Active List
@@ -493,8 +498,11 @@ ActiveListEntry popALBack()
     Issue max 4 ready instructions to the ALU
 */
 void Issue()
-{
-    printf('IntegerQueue.IQSize: %d\n', IntegerQueue.IQSize);  // TODO 
+{printf("IntegerQueue -> %p", IntegerQueue.IQSize);
+fflush(stdout);
+
+    //printf('IntegerQueue.IQSize: %u \n', IntegerQueue.IQSize);  // TODO 
+    //fflush(stdout);
     for (size_t i = 0; i < IntegerQueue.IQSize; i++)
     {
         // putting every forwardable reg into corresponding integerquueentry
@@ -527,9 +535,11 @@ void Issue()
 
 void Execute()
 {
+    // Pass the instruction to the next stage
+       
     int temp;
     for (int i = 0; i < INSTR; i++)
-    {
+    {  ALU2[i].instr = ALU1[i].instr;
         // printf("ALU2[%d].instr.OpCode: %s\n", i, ALU2[i].instr.OpCode);
         if (strcmp((ALU2[i]).instr.OpCode, "addi") == 0)
         {
@@ -554,9 +564,9 @@ void Execute()
                  int j = findActiveIndex((ALU2[i]).instr.PC);
                  ActiveList.ALarray[j].Exception = true;
                  ActiveList.ALarray[j].Done = true;
-                 continue;
-             }
-            temp = (ALU2[i]).instr.OpAValue / (ALU2[i]).instr.OpBValue;
+                 
+             }else{
+            temp = (ALU2[i]).instr.OpAValue / (ALU2[i]).instr.OpBValue;}
         }
         else if (strcmp((ALU2[i]).instr.OpCode, "remu") == 0)
         { 
@@ -566,8 +576,8 @@ void Execute()
                  ActiveList.ALarray[j].Exception = true;
                  ActiveList.ALarray[j].Done = true;
                  continue;
-             }
-            temp = (ALU2[i]).instr.OpAValue % (ALU2[i]).instr.OpBValue;
+             }else{
+            temp = (ALU2[i]).instr.OpAValue % (ALU2[i]).instr.OpBValue;}
         }
         else temp = 0;
 
@@ -581,11 +591,10 @@ void Execute()
         if (physDestReg >= 0)
         {
             PhysRegFile[physDestReg] = temp;
-            BusyBitTable[physDestReg] = false;
+            //BusyBitTable[physDestReg] = false;
         }
 
-        // Pass the instruction to the next stage
-        ALU2[i].instr = ALU1[i].instr;
+        
     }
 }
 
@@ -748,7 +757,10 @@ void showBusyBitTable()
     printf("BusyBitTable\n");
     for (size_t i = 0; i < REGS; i++)
     {
-        printf("%d ", BusyBitTable[i]);
+        if(BusyBitTable[i]){
+           printf("%d ", i);
+        }
+        
     }
     printf("\n");
 }
@@ -834,6 +846,7 @@ void showALU()
 */
 void init()
 {
+    initIQ();
     initFreeList();
     initALU();
     initForwardingTable();

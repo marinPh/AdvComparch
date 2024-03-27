@@ -2,8 +2,8 @@
 *.cmake
 *.cmake
 Makefile
-HW1/build/
+HW1/build/*
 HW1/Makefile
-HW1/CMakeFiles/
+HW1/CMakeFiles/*
 HW1/cmake_install.cmake
 HW1/CMakeCache.txt

@@ -83,11 +83,16 @@ unsigned long PhysRegFile[REGS]; // 64 registers
 
 FreeList freeList;
 
-struct
+typedef struct
 {
     forwardingTableEntry table[INSTR];
     int size;
-} forwardingTable;
+} ForwardingTable;
+
+ForwardingTable forwardingTable;
+ForwardingTable usedForwardingTable;
+
+
 
 // Integer Queue
 // always 32 entries myx but can be less, need to check if it is full
@@ -279,6 +284,9 @@ void initForwardingTable()
     {
         forwardingTable.table[i].reg = -1;
         forwardingTable.table[i].value = 0;
+
+        usedForwardingTable.table[i].reg = -1;
+        usedForwardingTable.table[i].value = 0;
     }
 }
 
@@ -516,18 +524,19 @@ void Issue()
     {
         // putting every forwardable reg into corresponding integerquueentry
         int forwardIndexA = forwardable(IntegerQueue.IQarray[i].OpARegTag);
-        if (forwardIndexA >= 0)
+        if (forwardIndexA >= 0 && !IntegerQueue.IQarray[i].OpAIsReady)
         { // if the register is in the forwarding table
             IntegerQueue.IQarray[i].OpAIsReady = true;
             IntegerQueue.IQarray[i].OpAValue = forwardingTable.table[forwardIndexA].value;
         }
 
         int forwardIndexB = forwardable(IntegerQueue.IQarray[i].OpBRegTag);
-        if (forwardIndexB >= 0)
-        {
+        if (forwardIndexB >= 0 && !IntegerQueue.IQarray[i].OpBIsReady)
+        { // if the register is in the forwarding table
             IntegerQueue.IQarray[i].OpBIsReady = true;
             IntegerQueue.IQarray[i].OpBValue = forwardingTable.table[forwardIndexB].value;
         }
+        
     }
     // scan for the 4 available entries in the Integer Queue
     int index = min(IntegerQueue.IQSize, INSTR);
@@ -600,14 +609,17 @@ void Execute()
         int physDestReg = ALU2[i].instr.DestRegister;
 
         // update the forwarding table
-        forwardingTable.table[i].reg = physDestReg;
-        forwardingTable.table[i].value = temp;
+        usedForwardingTable.table[i].reg = physDestReg;
+        usedForwardingTable.table[i].value = temp;
+
+
+
 
         // if DestRegister is not -1 then we need to update the value of the physical register and set the busy bit to false
         if (physDestReg >= 0)
         {
-            PhysRegFile[physDestReg] = temp;
-            // BusyBitTable[physDestReg] = false;
+            //PhysRegFile[physDestReg] = temp;
+            //BusyBitTable[physDestReg] = false;
         }
     }
 }
@@ -617,7 +629,15 @@ void Execute()
 */
 void Commit()
 {
-    // TODO "until 4 are pciked" => ?
+    // TODO: "until 4 are pciked" => ?
+
+    //shift the forwarding table
+
+    for (size_t i = 0; i < INSTR; i++)
+    {
+        forwardingTable.table[i] = usedForwardingTable.table[i];
+    }
+
     for (size_t i = 0; i < INSTR; i++)
     { // MAX 4 instructions
 
@@ -630,6 +650,19 @@ void Commit()
                 ActiveList.ALarray[index].Done = true; // set the Done flag to true
             }
         }
+    }
+
+    // commit all values from the forwarding table
+
+    for(int i=0; i<INSTR; i++)
+    {
+        int tempReg = forwardingTable.table[i].reg;
+        if(tempReg >= 0)
+        {
+            PhysRegFile[tempReg] = forwardingTable.table[i].value;
+            BusyBitTable[tempReg] = false;
+        }
+        
     }
 
     int maxIndex = min(INSTR, ActiveList.ALSize);
@@ -651,6 +684,7 @@ void Commit()
                 int archReg = ActiveList.ALarray[0].LogicalDestination;
                 // printf("archReg: %d\n", archReg);
                 int physReg = RegMapTable[archReg];
+                 
 
                 BusyBitTable[physReg] = false; // value is not generated from the Execution stage anymore
                 // printf("physReg: %d\n", physReg);
@@ -985,11 +1019,12 @@ int parser(char *file_name)
                     // printf("idk","ok");
                     if (token != NULL)
                     { // check if src2 starts by 'x' if so remove it
-                        if (token[0] == 'x')
+                        if (token[1] == 'x')
                         {
                             token = token + 2;
                             //    printf("Token: %s\n", token);
                             sscanf(token, "%d", &instrs.instructions[instrs.size].src2);
+
                         }
                         else
                         {

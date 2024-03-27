@@ -1,1 +1,0 @@
-/usr/bin/cc  -g -rdynamic CMakeFiles/Simulate.dir/HandMadeTests/Simulate.c.o CMakeFiles/Simulate.dir/Lib/cJSON.c.o CMakeFiles/Simulate.dir/OoO470.c.o -o Simulate 

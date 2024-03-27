@@ -357,7 +357,6 @@ void RDS()
     unsigned int index = min(DIR.DIRSize, INSTR); 
     printf("index for Renaming: %d\n", index); // TODO
 
-
     for (int i = 0; i < index; i++)
     {
         int newReg = popFreeList();
@@ -383,6 +382,7 @@ void RDS()
         // add the instruction to the Integer Queue
         IntegerQueue.IQarray[IntegerQueue.IQSize].DestRegister = newReg;
         IntegerQueue.IQarray[IntegerQueue.IQSize].PC = currentPc;
+<<<<<<< HEAD
         bool wasIMM = false;
         if (strncmp(instrs.instructions[currentPc].opcode, "addi", 5) == 0)
         {
@@ -390,6 +390,14 @@ void RDS()
             wasIMM = true;
         }else{
             strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode,instrs.instructions[currentPc].opcode );
+=======
+        // add the opcode to the Integer Queue
+        char *tempOpCode = "";
+        if (strncmp(instrs.instructions[currentPc].opcode, "addi", 4) == 0) {
+            tempOpCode = "add";
+        } else {
+            tempOpCode = instrs.instructions[currentPc].opcode;
+>>>>>>> 93e620cec8d10a60ac9acd0ac29cc0ae631fafb7
         }
         
 

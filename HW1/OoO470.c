@@ -98,7 +98,8 @@ struct
     int IQSize;
 } IntegerQueue;
 
-void initIQ(){
+void initIQ()
+{
     IntegerQueue.IQSize = 0;
 }
 
@@ -348,19 +349,22 @@ void RDS()
         return;
     }
 
-    else backPressureRDS = false;
+    else
+        backPressureRDS = false;
 
-    if (DIR.DIRSize == 0) return;
+    if (DIR.DIRSize == 0)
+        return;
 
-    // Rename either all instructions in DIR or none      TODO 
+    // Rename either all instructions in DIR or none      TODO
 
-    unsigned int index = min(DIR.DIRSize, INSTR); 
+    unsigned int index = min(DIR.DIRSize, INSTR);
     printf("index for Renaming: %d\n", index); // TODO
 
     for (int i = 0; i < index; i++)
     {
         int newReg = popFreeList();
-        if (newReg < 0) return;
+        if (newReg < 0)
+            return;
         // printf("newReg: %d\n", newReg);
         // printf("DIR.DIRarray[i]: %d\n", DIR.DIRarray[i]);
         //  make it busy
@@ -372,7 +376,7 @@ void RDS()
         unsigned int currentPc = popDIR();
         printf("currentPc: %d\n", currentPc);
 
-        // TODO Check there is enough space 
+        // TODO Check there is enough space
 
         ActiveList.ALarray[ActiveList.ALSize].LogicalDestination = instrs.instructions[currentPc].dest;
         ActiveList.ALarray[ActiveList.ALSize].OldDestination = RegMapTable[instrs.instructions[currentPc].dest];
@@ -382,24 +386,18 @@ void RDS()
         // add the instruction to the Integer Queue
         IntegerQueue.IQarray[IntegerQueue.IQSize].DestRegister = newReg;
         IntegerQueue.IQarray[IntegerQueue.IQSize].PC = currentPc;
-<<<<<<< HEAD
-        bool wasIMM = false;
-        if (strncmp(instrs.instructions[currentPc].opcode, "addi", 5) == 0)
-        {
-            strncpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode, "add",4);
-            wasIMM = true;
-        }else{
-            strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode,instrs.instructions[currentPc].opcode );
-=======
+
         // add the opcode to the Integer Queue
         char *tempOpCode = "";
-        if (strncmp(instrs.instructions[currentPc].opcode, "addi", 4) == 0) {
+        if (strncmp(instrs.instructions[currentPc].opcode, "addi", 4) == 0)
+        {
             tempOpCode = "add";
-        } else {
-            tempOpCode = instrs.instructions[currentPc].opcode;
->>>>>>> 93e620cec8d10a60ac9acd0ac29cc0ae631fafb7
         }
-        
+        else
+        {
+            tempOpCode = instrs.instructions[currentPc].opcode;
+        }
+        strcpy(IntegerQueue.IQarray[IntegerQueue.IQSize].OpCode, tempOpCode);
 
         // we want to check if the source registers are ready
         // if they are ready, we want to forward the value to the Integer Queue
@@ -427,7 +425,7 @@ void RDS()
         }
 
         // B operand is always ready for addi
-        if (wasIMM)
+        if (strncmp(instrs.instructions[currentPc].opcode, "addi", 4) == 0)
         {
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpBIsReady = true;
             IntegerQueue.IQarray[IntegerQueue.IQSize].OpBValue = instrs.instructions[currentPc].src2;
@@ -458,10 +456,10 @@ void RDS()
 
         // printf("newReg: %d for:%d\n", newReg, instrs.instructions[currentPc].dest);
         RegMapTable[instrs.instructions[currentPc].dest] = newReg;
-        PhysRegFile[newReg]  = 0;  // set the value of the physical register to 0  TODO 
+        PhysRegFile[newReg] = 0; // set the value of the physical register to 0  TODO
         BusyBitTable[newReg] = true;
 
-        IntegerQueue.IQSize += 1;  // TODO size is increased => depends on size of DIR
+        IntegerQueue.IQSize += 1; // TODO size is increased => depends on size of DIR
     }
 }
 
@@ -508,16 +506,17 @@ ActiveListEntry popALBack()
     Issue max 4 ready instructions to the ALU
 */
 void Issue()
-{printf("IntegerQueue -> %p", IntegerQueue.IQSize);
-fflush(stdout);
+{
+    printf("IntegerQueue -> %p", IntegerQueue.IQSize);
+    fflush(stdout);
 
-    //printf('IntegerQueue.IQSize: %u \n', IntegerQueue.IQSize);  // TODO 
-    //fflush(stdout);
+    // printf('IntegerQueue.IQSize: %u \n', IntegerQueue.IQSize);  // TODO
+    // fflush(stdout);
     for (size_t i = 0; i < IntegerQueue.IQSize; i++)
     {
         // putting every forwardable reg into corresponding integerquueentry
         int forwardIndexA = forwardable(IntegerQueue.IQarray[i].OpARegTag);
-        if (forwardIndexA >= 0) 
+        if (forwardIndexA >= 0)
         { // if the register is in the forwarding table
             IntegerQueue.IQarray[i].OpAIsReady = true;
             IntegerQueue.IQarray[i].OpAValue = forwardingTable.table[forwardIndexA].value;
@@ -546,10 +545,11 @@ fflush(stdout);
 void Execute()
 {
     // Pass the instruction to the next stage
-       
+
     int temp;
     for (int i = 0; i < INSTR; i++)
-    {  ALU2[i].instr = ALU1[i].instr;
+    {
+        ALU2[i].instr = ALU1[i].instr;
         // printf("ALU2[%d].instr.OpCode: %s\n", i, ALU2[i].instr.OpCode);
         if (strcmp((ALU2[i]).instr.OpCode, "addi") == 0)
         {
@@ -568,28 +568,34 @@ void Execute()
             temp = (ALU2[i]).instr.OpAValue * (ALU2[i]).instr.OpBValue;
         }
         else if (strcmp((ALU2[i]).instr.OpCode, "divu") == 0)
-        { 
-             if ((ALU2[i]).instr.OpBValue == 0)
-             {
-                 int j = findActiveIndex((ALU2[i]).instr.PC);
-                 ActiveList.ALarray[j].Exception = true;
-                 ActiveList.ALarray[j].Done = true;
-                 
-             }else{
-            temp = (ALU2[i]).instr.OpAValue / (ALU2[i]).instr.OpBValue;}
+        {
+            if ((ALU2[i]).instr.OpBValue == 0)
+            {
+                int j = findActiveIndex((ALU2[i]).instr.PC);
+                ActiveList.ALarray[j].Exception = true;
+                ActiveList.ALarray[j].Done = true;
+            }
+            else
+            {
+                temp = (ALU2[i]).instr.OpAValue / (ALU2[i]).instr.OpBValue;
+            }
         }
         else if (strcmp((ALU2[i]).instr.OpCode, "remu") == 0)
-        { 
-             if ((ALU2[i]).instr.OpBValue == 0)
-             {
-                 int j = findActiveIndex((ALU2[i]).instr.PC);
-                 ActiveList.ALarray[j].Exception = true;
-                 ActiveList.ALarray[j].Done = true;
-                 continue;
-             }else{
-            temp = (ALU2[i]).instr.OpAValue % (ALU2[i]).instr.OpBValue;}
+        {
+            if ((ALU2[i]).instr.OpBValue == 0)
+            {
+                int j = findActiveIndex((ALU2[i]).instr.PC);
+                ActiveList.ALarray[j].Exception = true;
+                ActiveList.ALarray[j].Done = true;
+                continue;
+            }
+            else
+            {
+                temp = (ALU2[i]).instr.OpAValue % (ALU2[i]).instr.OpBValue;
+            }
         }
-        else temp = 0;
+        else
+            temp = 0;
 
         int physDestReg = ALU2[i].instr.DestRegister;
 
@@ -601,10 +607,8 @@ void Execute()
         if (physDestReg >= 0)
         {
             PhysRegFile[physDestReg] = temp;
-            //BusyBitTable[physDestReg] = false;
+            // BusyBitTable[physDestReg] = false;
         }
-
-        
     }
 }
 
@@ -767,10 +771,10 @@ void showBusyBitTable()
     printf("BusyBitTable\n");
     for (size_t i = 0; i < REGS; i++)
     {
-        if(BusyBitTable[i]){
-           printf("%d ", i);
+        if (BusyBitTable[i])
+        {
+            printf("%d ", i);
         }
-        
     }
     printf("\n");
 }
@@ -1128,7 +1132,7 @@ int slog(char *f_out, int i)
 //---------------------------------------------
 void propagate()
 {
-    
+
     // 5. Commit
     Commit();
     // 4. Execute
@@ -1136,7 +1140,7 @@ void propagate()
     // 3. Issue
     Issue(); // TODO will read the values just put in forwarding table by Execute
     // 2. Rename & Dispatch
-    RDS();  // TODO will read the values just put in forwarding table by Execute
+    RDS(); // TODO will read the values just put in forwarding table by Execute
     // 1. Fetch & Decode
     FetchAndDecode();
 }

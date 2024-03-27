@@ -953,7 +953,7 @@ int parser(char *file_name)
             {
                 // printf("Token: %s\n", token);
                 // remove the 'x' from the string
-                token = token + 1;
+                token = token + 1; 
                 // printf("Token: %s\n", token);
                 sscanf(token, "%d", &instrs.instructions[instrs.size].dest);
                 // printf("Dest: %d\n", instrs.instructions[instrs.size].dest);
@@ -967,13 +967,13 @@ int parser(char *file_name)
                     // printf("Token: %s\n", token);
                     sscanf(token, "%d", &instrs.instructions[instrs.size].src1);
                     // printf("Src1: %d\n", instrs.instructions[instrs.size].src1);
-                    token = strtok(NULL, "\0");
+                    token = strtok(NULL, "\0"); 
                     // printf("idk","ok");
                     if (token != NULL)
                     { // check if src2 starts by 'x' if so remove it
-                        if (token[0] == 'x')
+                        if (strncmp(token, "x", 1) == 0)
                         {
-                            token = token + 2;
+                            token = token + 2; 
                             //    printf("Token: %s\n", token);
                             sscanf(token, "%d", &instrs.instructions[instrs.size].src2);
                         }

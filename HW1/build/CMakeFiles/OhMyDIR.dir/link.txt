@@ -1,1 +1,0 @@
-/usr/bin/cc -rdynamic CMakeFiles/OhMyDIR.dir/HandMadeTests/OhMyDIR.c.o CMakeFiles/OhMyDIR.dir/Lib/cJSON.c.o CMakeFiles/OhMyDIR.dir/OoO470.c.o -o OhMyDIR 

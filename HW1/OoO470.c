@@ -351,7 +351,7 @@ void RDS()
     // Rename either all instructions in DIR or none      TODO 
 
     unsigned int index = min(DIR.DIRSize, INSTR); 
-    prinf("index for Renaming: %d\n", index); // TODO
+    printf("index for Renaming: %d\n", index); // TODO
 
     for (int i = 0; i < index; i++)
     {

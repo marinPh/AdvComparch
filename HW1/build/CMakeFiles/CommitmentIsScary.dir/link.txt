@@ -1,1 +1,0 @@
-/usr/bin/cc -rdynamic CMakeFiles/CommitmentIsScary.dir/HandMadeTests/CommitmentIsScary.c.o CMakeFiles/CommitmentIsScary.dir/Lib/cJSON.c.o CMakeFiles/CommitmentIsScary.dir/OoO470.c.o -o CommitmentIsScary 

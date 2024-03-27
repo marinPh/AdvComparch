@@ -1,1 +1,0 @@
-/usr/bin/cc -rdynamic CMakeFiles/FullyFunk.dir/HandMadeTests/FullyFunk.c.o CMakeFiles/FullyFunk.dir/Lib/cJSON.c.o CMakeFiles/FullyFunk.dir/OoO470.c.o -o FullyFunk 

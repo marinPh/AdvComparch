@@ -1,1 +1,0 @@
-/usr/bin/cc -rdynamic CMakeFiles/FrenchDispatch.dir/HandMadeTests/FrenchDispatch.c.o CMakeFiles/FrenchDispatch.dir/Lib/cJSON.c.o CMakeFiles/FrenchDispatch.dir/OoO470.c.o -o FrenchDispatch 

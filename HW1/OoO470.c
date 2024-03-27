@@ -592,7 +592,7 @@ void Execute()
         if (physDestReg >= 0)
         {
             PhysRegFile[physDestReg] = temp;
-            BusyBitTable[physDestReg] = false;
+            //BusyBitTable[physDestReg] = false;
         }
 
         

@@ -284,9 +284,11 @@ void initForwardingTable()
     {
         forwardingTable.table[i].reg = -1;
         forwardingTable.table[i].value = 0;
+        forwardingTable.table[i].exception = false;
 
         usedForwardingTable.table[i].reg = -1;
         usedForwardingTable.table[i].value = 0;
+        usedForwardingTable.table[i].exception = false;
     }
 }
 
@@ -299,7 +301,7 @@ int forwardable(int reg)
 {
     for (int i = 0; i < INSTR; i++)
     { // 4 instructions MAX in the forwarding table because 4 ALUs
-        if (forwardingTable.table[i].reg == reg)
+        if (forwardingTable.table[i].reg == reg && !forwardingTable.table[i].exception)
             return i; // if the register is in the forwarding table, return the index
     }
     return -1;
@@ -318,20 +320,8 @@ void FetchAndDecode()
      indicates that an exception is detected, the PC is set to 0x10000
      */
     if (exception)
-    {
-        // set PC at 0x10000
-        PC = 0x10000;
-        // clear Decode Instruction Register
-        size_t size = DIR.DIRSize;
-        for (size_t i = 0; i < size; i++)
-        {
-            popDIR();
-        }
-        if (DIR.DIRSize != 0)
-        {
-            printf("Failed to pop DIR; not empty...\n");
-        }
-    }
+     return;
+    
     // Check Back Pressure
     if (backPressureRDS)
         return;
@@ -380,9 +370,11 @@ void RDS()
         // map the logical destination to the physical register
 
         // add the instruction to the Active List
-
+        
         unsigned int currentPc = popDIR();
-        printf("currentPc: %d\n", currentPc);
+        
+        
+        //printf("currentPc: %d\n", currentPc);
 
         // TODO Check there is enough space
 
@@ -462,7 +454,7 @@ void RDS()
             }
         }
 
-        // printf("newReg: %d for:%d\n", newReg, instrs.instructions[currentPc].dest);
+        // //printf("newReg: %d for:%d\n", newReg, instrs.instructions[currentPc].dest);
         RegMapTable[instrs.instructions[currentPc].dest] = newReg;
         PhysRegFile[newReg] = 0; // set the value of the physical register to 0  TODO
         BusyBitTable[newReg] = true;
@@ -515,8 +507,9 @@ ActiveListEntry popALBack()
 */
 void Issue()
 {
-    printf("IntegerQueue -> %p", IntegerQueue.IQSize);
+    //printf("IntegerQueue -> %p", IntegerQueue.IQSize);
     fflush(stdout);
+    
 
     // printf('IntegerQueue.IQSize: %u \n', IntegerQueue.IQSize);  // TODO
     // fflush(stdout);
@@ -553,6 +546,9 @@ void Issue()
 
 void Execute()
 {
+    if (!BusyBitTable[41]){
+        printf("help help help");
+    }
     // Pass the instruction to the next stage
 
     int temp;
@@ -580,9 +576,10 @@ void Execute()
         {
             if ((ALU2[i]).instr.OpBValue == 0)
             {
-                int j = findActiveIndex((ALU2[i]).instr.PC);
-                ActiveList.ALarray[j].Exception = true;
-                ActiveList.ALarray[j].Done = true;
+               
+                usedForwardingTable.table[i].exception = true;
+                usedForwardingTable.table[i].value = 0;
+                usedForwardingTable.table[i].reg = (ALU2[i]).instr.DestRegister;
             }
             else
             {
@@ -593,10 +590,10 @@ void Execute()
         {
             if ((ALU2[i]).instr.OpBValue == 0)
             {
-                int j = findActiveIndex((ALU2[i]).instr.PC);
-                ActiveList.ALarray[j].Exception = true;
-                ActiveList.ALarray[j].Done = true;
-                continue;
+              
+                usedForwardingTable.table[i].exception = true;
+                usedForwardingTable.table[i].value = 0;
+                usedForwardingTable.table[i].reg = (ALU2[i]).instr.DestRegister;
             }
             else
             {
@@ -624,6 +621,21 @@ void Execute()
     }
 }
 
+int getWantedReg(int reg)
+{
+    int index =-1;
+    int count =0;
+    for(int i=0; i<ActiveList.ALSize; i++)
+    {
+        if(ActiveList.ALarray[i].LogicalDestination == reg)
+        {
+                index = i;
+                break;   
+        }
+    }
+    return index;
+}
+
 /*
     Commit the instructions
 */
@@ -647,7 +659,14 @@ void Commit()
         if(tempReg >= 0)
         {
             PhysRegFile[tempReg] = forwardingTable.table[i].value;
-            BusyBitTable[tempReg] = false;
+            if(tempReg ==41){
+                printf("here officer he is here");
+            }
+            if (!forwardingTable.table[i].exception)
+            {
+                BusyBitTable[tempReg] = false;
+            }
+           
         }
         
     }
@@ -670,16 +689,25 @@ void Commit()
                 // printf("we are entering new territory\n");
                 int archReg = ActiveList.ALarray[0].LogicalDestination;
                 // printf("archReg: %d\n", archReg);
-                int physReg = RegMapTable[archReg];
-                 
-
+                //printf("archReg: %d\n", archReg);
+                int physReg = ActiveList.ALarray[0].OldDestination;
+                
+                if (physReg == 44)
+                {
+                    printf("officer he is here\n");
+                    printf("physReg: %d\n", physReg);
+                }
+                
+                
+                
                 BusyBitTable[physReg] = false; // value is not generated from the Execution stage anymore
                 // printf("physReg: %d\n", physReg);
-
+                
+                //TODO: we need to change  what we push to the free list    
                 if (pushFreeList(physReg) == -1)
                     break; // if the Free List is full, do nothing   TODO
                 popAL();
-                printf("ALSize: %d\n", ActiveList.ALSize);
+                //printf("ALSize: %d\n", ActiveList.ALSize);
             }
         }
         else
@@ -694,10 +722,12 @@ void Commit()
         if (ALU2[i].instr.DestRegister >= 0)
         {                                                  // if DestRegister is available (i.e. >=0)
             int index = findActiveIndex(ALU2[i].instr.PC); // find the index of the instruction with PC in the Active List
-            printf("index: %d\n", index);
+            //printf("index: %d\n", index);
             if (index >= 0)
             {                                          // if the instruction is in the Active List
                 ActiveList.ALarray[index].Done = true; // set the Done flag to true
+                ActiveList.ALarray[index].Exception = forwardingTable.table[i].exception;
+
             }
         }
     }
@@ -706,17 +736,20 @@ void Commit()
 
     if (PC == instrs.size)
     {
-        printf("PC: %d\n", PC);
-        printf("instrs.size: %d\n", instrs.size);
+        //printf("PC: %d\n", PC);
+        //printf("instrs.size: %d\n", instrs.size);
         finished = true;
         // free(instrs.instructions);
     }
 }
 
 // if the PC is equal to the size of the instructions, there are no more instructions to fetch
-
+struct {
+bool state;
+}delay;
 void Exception()
 {
+    PC = 0x10000;
     // reset the Integer Queue
     for (size_t i = 0; i < IntegerQueue.IQSize; i++)
     {
@@ -724,18 +757,24 @@ void Exception()
     }
     IntegerQueue.IQSize = 0;
 
+
     // reset the Execute stage
-    for (size_t i = 0; i < INSTR; i++)
+    initALU();
+    initForwardingTable();
+
+    // reset the DIR
+    for (size_t i = 0; i < DIR.DIRSize; i++)
     {
-        ALU1[i].instr = createNop();
-        ALU2[i].instr = createNop();
+        popDIR();
     }
+    DIR.DIRSize = 0;
+
 
     // reset the Active List
-    while (ActiveList.ALSize > 0)
-    { // TODO
+    
         // pick up 4 instructions from the Active List in reverse PC order
-        for (size_t i = 0; i < INSTR; i++)
+        if (delay.state)
+        {for (size_t i = 0; i < INSTR; i++)
         {
             ActiveListEntry temp = popALBack(); // remove the last instruction from the Active List
 
@@ -748,8 +787,11 @@ void Exception()
             // put the physical register back to the Free List
             if (pushFreeList(physReg) == -1)
                 break; // if the Free List is full, do nothing   TODO
-        }
-    }
+        }}
+
+        delay.state = true;
+       
+    
 }
 
 //---------------------------------------------

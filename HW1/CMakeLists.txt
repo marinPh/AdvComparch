@@ -13,10 +13,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
 # Add the executable
 #add_executable(OhMyDIR HandMadeTests/OhMyDIR.c ${SOURCE_FILES})
-add_executable(FrenchDispatch HandMadeTests/FrenchDispatch.c ${SOURCE_FILES})
+#add_executable(FrenchDispatch HandMadeTests/FrenchDispatch.c ${SOURCE_FILES})
 ##add_executable(KingOfPop HandMadeTests/KingOfPop.c ${SOURCE_FILES})
-add_executable(NameYourIssue HandMadeTests/NameYourIssue.c ${SOURCE_FILES})
-add_executable(CommitmentIsScary HandMadeTests/CommitmentIsScary.c ${SOURCE_FILES})
+#add_executable(NameYourIssue HandMadeTests/NameYourIssue.c ${SOURCE_FILES})
+#add_executable(CommitmentIsScary HandMadeTests/CommitmentIsScary.c ${SOURCE_FILES})
 
 add_executable(Simulate HandMadeTests/Simulate.c ${SOURCE_FILES})
 

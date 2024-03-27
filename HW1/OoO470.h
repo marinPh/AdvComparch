@@ -66,6 +66,7 @@ typedef struct {
 typedef struct {
     int reg;   // the physical register that the value is forwarded to
     int value; // the value that is forwarded
+    bool exception; // if the instruction that produced the value has an exception
 } forwardingTableEntry;
 
 

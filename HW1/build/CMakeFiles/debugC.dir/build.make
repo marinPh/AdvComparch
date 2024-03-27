@@ -66,7 +66,7 @@ include CMakeFiles/debugC.dir/compiler_depend.make
 # Include the progress variables for this target.
 include CMakeFiles/debugC.dir/progress.make
 
-CMakeFiles/debugC: CommitmentIsScary
+CMakeFiles/debugC: ../CommitmentIsScary
 	gdb CommitmentIsScary
 
 debugC: CMakeFiles/debugC

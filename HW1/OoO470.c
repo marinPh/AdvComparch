@@ -658,7 +658,7 @@ void Commit()
         int tempReg = forwardingTable.table[i].reg;
         if(tempReg >= 0)
         {
-            PhysRegFile[tempReg] = forwardingTable.table[i].value;
+            PhysRegFile[tempReg] = (unsigned long) forwardingTable.table[i].value;
             if(tempReg ==41){
                 printf("here officer he is here");
             }
@@ -769,13 +769,21 @@ void Exception()
     }
     DIR.DIRSize = 0;
 
+    if (ActiveList.ALSize == 0)
+        return;
+
 
     // reset the Active List
     
         // pick up 4 instructions from the Active List in reverse PC order
+
         if (delay.state)
         {for (size_t i = 0; i < INSTR; i++)
         {
+            if (ActiveList.ALSize == 0)
+                break;
+            
+            
             ActiveListEntry temp = popALBack(); // remove the last instruction from the Active List
 
             int archReg = temp.LogicalDestination;
@@ -1150,10 +1158,10 @@ void outputSystemStateJSON(FILE *file)
         fprintf(file, "      \"DestRegister\": %d,\n", IntegerQueue.IQarray[i].DestRegister);
         fprintf(file, "      \"OpAIsReady\": %s,\n", IntegerQueue.IQarray[i].OpAIsReady ? "true" : "false");
         fprintf(file, "      \"OpARegTag\": %d,\n", IntegerQueue.IQarray[i].OpARegTag);
-        fprintf(file, "      \"OpAValue\": %d,\n", IntegerQueue.IQarray[i].OpAValue);
+        fprintf(file, "      \"OpAValue\": %lu,\n", IntegerQueue.IQarray[i].OpAValue);
         fprintf(file, "      \"OpBIsReady\": %s,\n", IntegerQueue.IQarray[i].OpBIsReady ? "true" : "false");
         fprintf(file, "      \"OpBRegTag\": %d,\n", IntegerQueue.IQarray[i].OpBRegTag);
-        fprintf(file, "      \"OpBValue\": %d,\n", IntegerQueue.IQarray[i].OpBValue);
+        fprintf(file, "      \"OpBValue\": %lu,\n", IntegerQueue.IQarray[i].OpBValue);
         fprintf(file, "      \"OpCode\": \"%s\",\n", IntegerQueue.IQarray[i].OpCode);
         fprintf(file, "      \"PC\": %d\n", IntegerQueue.IQarray[i].PC);
         fprintf(file, "    }%s\n", (i < IntegerQueue.IQSize - 1) ? "," : ""); // Add comma if not the last element
@@ -1165,14 +1173,14 @@ void outputSystemStateJSON(FILE *file)
     fprintf(file, "  \"PhysicalRegisterFile\": [");
     for (int i = 0; i < REGS; i++)
     {
-        fprintf(file, "%s%d", (i > 0 ? ", " : ""), PhysRegFile[i]);
+        fprintf(file, "%s%lu", (i > 0 ? ", " : ""), PhysRegFile[i]);
     }
     fprintf(file, "],\n");
 
     fprintf(file, "  \"RegisterMapTable\": [");
     for (int i = 0; i < ENTRY; i++)
     {
-        fprintf(file, "%s%d", (i > 0 ? ", " : ""), RegMapTable[i]);
+        fprintf(file, "%s%lu", (i > 0 ? ", " : ""), RegMapTable[i]);
     }
     fprintf(file, "]");
 

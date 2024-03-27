@@ -65,7 +65,7 @@ typedef struct {
 // Forwarding Table
 typedef struct {
     int reg;   // the physical register that the value is forwarded to
-    int value; // the value that is forwarded
+    unsigned long value; // the value that is forwarded
     bool exception; // if the instruction that produced the value has an exception
 } forwardingTableEntry;
 
@@ -75,10 +75,10 @@ typedef struct {
     int DestRegister;
     bool OpAIsReady;
     int OpARegTag; // for cheking forwarding
-    int OpAValue;
+    unsigned long OpAValue;
     bool OpBIsReady;
     int OpBRegTag;
-    int OpBValue;
+    unsigned long OpBValue;
     char OpCode[OPCODE]; // 4 characters + null terminator
     int PC;
 } IntegerQueueEntry;

@@ -309,6 +309,34 @@
 {
   "ActiveList": [
     {
+      "Done": true,
+      "Exception": false,
+      "LogicalDestination": 1,
+      "OldDestination": 1,
+      "PC": 0
+    },
+    {
+      "Done": true,
+      "Exception": false,
+      "LogicalDestination": 2,
+      "OldDestination": 2,
+      "PC": 1
+    },
+    {
+      "Done": true,
+      "Exception": false,
+      "LogicalDestination": 3,
+      "OldDestination": 3,
+      "PC": 2
+    },
+    {
+      "Done": true,
+      "Exception": false,
+      "LogicalDestination": 4,
+      "OldDestination": 4,
+      "PC": 3
+    },
+    {
       "Done": false,
       "Exception": false,
       "LogicalDestination": 0,
@@ -335,7 +363,7 @@
   ],
   "Exception": false,
   "ExceptionPC": 0,
-  "FreeList": [39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 32, 33, 34, 35],
+  "FreeList": [39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63],
   "IntegerQueue": [
     {
       "DestRegister": 37,
@@ -367,6 +395,13 @@
 {
   "ActiveList": [
     {
+      "Done": true,
+      "Exception": false,
+      "LogicalDestination": 0,
+      "OldDestination": 0,
+      "PC": 4
+    },
+    {
       "Done": false,
       "Exception": false,
       "LogicalDestination": 0,
@@ -381,12 +416,12 @@
       "PC": 6
     }
   ],
-  "BusyBitTable": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+  "BusyBitTable": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
   "DecodedPCs": [
   ],
   "Exception": false,
   "ExceptionPC": 0,
-  "FreeList": [39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 32, 33, 34, 35, 38],
+  "FreeList": [39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 32, 33, 34, 35],
   "IntegerQueue": [
     {
       "DestRegister": 38,
@@ -446,6 +481,13 @@
 ,
 {
   "ActiveList": [
+    {
+      "Done": true,
+      "Exception": false,
+      "LogicalDestination": 0,
+      "OldDestination": 36,
+      "PC": 5
+    },
     {
       "Done": false,
       "Exception": false,
@@ -459,7 +501,7 @@
   ],
   "Exception": false,
   "ExceptionPC": 0,
-  "FreeList": [39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 32, 33, 34, 35, 38, 38],
+  "FreeList": [39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 32, 33, 34, 35, 38],
   "IntegerQueue": [
   ],
   "PC": 7,

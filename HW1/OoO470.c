@@ -638,19 +638,6 @@ void Commit()
         forwardingTable.table[i] = usedForwardingTable.table[i];
     }
 
-    for (size_t i = 0; i < INSTR; i++)
-    { // MAX 4 instructions
-
-        if (ALU2[i].instr.DestRegister >= 0)
-        {                                                  // if DestRegister is available (i.e. >=0)
-            int index = findActiveIndex(ALU2[i].instr.PC); // find the index of the instruction with PC in the Active List
-            printf("index: %d\n", index);
-            if (index >= 0)
-            {                                          // if the instruction is in the Active List
-                ActiveList.ALarray[index].Done = true; // set the Done flag to true
-            }
-        }
-    }
 
     // commit all values from the forwarding table
 
@@ -699,6 +686,23 @@ void Commit()
             break; // if DestRegister is NOT available, do nothing
         // TODO "an instruction is met that is not completed yet"
     }
+
+    
+    for (size_t i = 0; i < INSTR; i++)
+    { // MAX 4 instructions
+
+        if (ALU2[i].instr.DestRegister >= 0)
+        {                                                  // if DestRegister is available (i.e. >=0)
+            int index = findActiveIndex(ALU2[i].instr.PC); // find the index of the instruction with PC in the Active List
+            printf("index: %d\n", index);
+            if (index >= 0)
+            {                                          // if the instruction is in the Active List
+                ActiveList.ALarray[index].Done = true; // set the Done flag to true
+            }
+        }
+    }
+
+    
 
     if (PC == instrs.size)
     {

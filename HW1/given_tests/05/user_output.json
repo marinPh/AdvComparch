@@ -349,7 +349,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 8
     },
     {
@@ -360,7 +360,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 9
     },
     {
@@ -371,7 +371,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 10
     },
     {
@@ -382,7 +382,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 11
     }
   ],
@@ -496,7 +496,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 12
     },
     {
@@ -507,7 +507,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 13
     },
     {
@@ -518,7 +518,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 14
     },
     {
@@ -529,7 +529,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 15
     }
   ],
@@ -643,7 +643,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 13
     },
     {
@@ -654,7 +654,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 14
     },
     {
@@ -665,7 +665,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 44,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 15
     },
     {
@@ -856,7 +856,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 20
     },
     {
@@ -867,7 +867,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 21
     },
     {
@@ -878,7 +878,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 22
     },
     {
@@ -889,7 +889,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 23
     }
   ],
@@ -1024,7 +1024,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 21
     },
     {
@@ -1035,7 +1035,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 22
     },
     {
@@ -1046,7 +1046,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 23
     },
     {
@@ -1057,7 +1057,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 24
     },
     {
@@ -1068,7 +1068,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 25
     },
     {
@@ -1079,7 +1079,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 26
     },
     {
@@ -1090,7 +1090,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 27
     }
   ],
@@ -1221,7 +1221,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 25
     },
     {
@@ -1232,7 +1232,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 26
     },
     {
@@ -1243,7 +1243,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 27
     },
     {
@@ -1254,7 +1254,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 59,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 28
     },
     {
@@ -1265,7 +1265,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 59,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 29
     },
     {
@@ -1276,7 +1276,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 59,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 30
     },
     {
@@ -1287,7 +1287,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 59,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 31
     }
   ],
@@ -1390,7 +1390,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 59,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 28
     },
     {
@@ -1401,7 +1401,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 59,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 29
     },
     {
@@ -1412,7 +1412,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 59,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 30
     },
     {
@@ -1423,7 +1423,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 59,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 31
     }
   ],
@@ -1498,7 +1498,7 @@
       "OpBIsReady": true,
       "OpBRegTag": 59,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 30
     },
     {
@@ -1509,7 +1509,7 @@
       "OpBIsReady": true,
       "OpBRegTag": 59,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 31
     }
   ],

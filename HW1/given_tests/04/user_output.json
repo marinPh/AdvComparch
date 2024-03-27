@@ -349,7 +349,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 8
     },
     {
@@ -360,7 +360,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 9
     },
     {
@@ -371,7 +371,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 10
     },
     {
@@ -382,7 +382,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 11
     }
   ],
@@ -496,7 +496,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 12
     },
     {
@@ -507,7 +507,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 13
     },
     {
@@ -518,7 +518,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 14
     },
     {
@@ -529,7 +529,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "sub",
       "PC": 15
     }
   ],
@@ -639,7 +639,7 @@
       "OpBIsReady": true,
       "OpBRegTag": -1,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 16
     },
     {
@@ -650,7 +650,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 48,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 17
     },
     {
@@ -661,7 +661,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 48,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 18
     },
     {
@@ -672,7 +672,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 48,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 19
     }
   ],
@@ -754,7 +754,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 48,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 17
     },
     {
@@ -765,7 +765,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 48,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 18
     },
     {
@@ -776,7 +776,7 @@
       "OpBIsReady": false,
       "OpBRegTag": 48,
       "OpBValue": 0,
-      "OpCode": "",
+      "OpCode": "mulu",
       "PC": 19
     }
   ],

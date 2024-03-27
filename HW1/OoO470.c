@@ -1019,7 +1019,7 @@ int parser(char *file_name)
                     // printf("idk","ok");
                     if (token != NULL)
                     { // check if src2 starts by 'x' if so remove it
-                        if (strncmp(token, "x", 1) == 0)
+                        if (token[1] == 'x')
                         {
                             token = token + 2; 
                             //    printf("Token: %s\n", token);

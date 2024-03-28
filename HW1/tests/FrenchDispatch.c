@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../OoO470.h"
+#include "../lib/OoO470.h"
 
 int main(int argc, char *argv[]) {
     printf("Hello, World!\n");
@@ -13,8 +13,6 @@ int main(int argc, char *argv[]) {
     FetchAndDecode();
     showIntegerQueue();
   }
-
   
-
   return 0;
 }

@@ -63,9 +63,15 @@ in the environment as follows.
 
 ```
 cd /home/root/cs470
+sudo docker run -it -v $(pwd):/Users/poseidon/Desktop/EPFL/MA2/CompArch/AdvComparch cs470
 ./runall.sh
 ./testall.sh
 ```
 
 If you have any questions when installing / running docker, please talk to a TA, we would be happy
 to help.
+
+## Authors
+- Marin Philippe, SCIPER: 326343
+- Emma Gaia Poggiolini, SCIPER: 330757
+

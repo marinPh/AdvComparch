@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+from typing import List
 
 RED = '\x1b[31m'
 GREEN = '\x1b[36m'
@@ -108,7 +109,7 @@ def compareIntegerQueueEntry(i: dict, r:dict) -> bool:
     return True
 
 
-def compareIntegerQueue(i: list[dict], r: list[dict]) -> bool:
+def compareIntegerQueue(i: List[dict], r: List[dict]) -> bool:
     # check whether each entry has the PC.
 
     for el in r:
@@ -180,7 +181,7 @@ def compareActiveListEntry(i: dict, r: dict) -> bool:
     return True
 
 
-def compareActiveList(i: list[dict], r:list[dict]) -> bool:
+def compareActiveList(i: List[dict], r:List[dict]) -> bool:
     # Make sure their count is the same
     if len(i) != len(r):
         print("Mismatched active list size.")
@@ -268,9 +269,9 @@ def compareCycleData(i: dict, r: dict) -> bool:
 
 # Now it is the final comparison
 print(f"Comparing {len(INPUT)} cycles with {len(REFERENCE)} cycles.")
-"""if len(INPUT) != len(REFERENCE):
+if len(INPUT) != len(REFERENCE):
     print(f"[{RED}Error{RESET}][CycleData] Cycle count mismatched!")
-    exit(1)"""
+    exit(1)
 
 for i in range(len(INPUT)):
     if compareCycleData(INPUT[i], REFERENCE[i]) == False:

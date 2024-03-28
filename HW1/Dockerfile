@@ -46,5 +46,5 @@ ARG CACHEBUST=1
 # setup bashrc
 #RUN echo "source /Users/poseidon/Desktop/EPFL/MA1/IntroOS/devel/setup.bash" >> /root/.bashrc
 
-WORKDIR /Users/poseidon/Desktop/EPFL/MA2/CompArch/AdvComparch/HW1
+WORKDIR /home/root/cs470
 CMD /bin/bash

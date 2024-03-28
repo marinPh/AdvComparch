@@ -6,8 +6,8 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
-#include "lib/cJSON.h"
-#include "lib/cJSON_Utils.h"
+#include "cJSON.h"
+#include "cJSON_Utils.h"
 
 #define REGS 64
 #define ENTRY 32

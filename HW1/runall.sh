@@ -1,5 +1,7 @@
 #!/bin/bash
 
+./clean.sh
+
 ./build.sh
 
 for tnum in ./given_tests/*

@@ -4,8 +4,8 @@ project(ACA C)
 
 # Define the list of source files
 set(SOURCE_FILES 
-    Lib/cJSON.c
-    OoO470.c
+    lib/cJSON.c
+    src/OoO470.c
 )
 # Enable debugging information
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
@@ -18,7 +18,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 #add_executable(NameYourIssue HandMadeTests/NameYourIssue.c ${SOURCE_FILES})
 #add_executable(CommitmentIsScary HandMadeTests/CommitmentIsScary.c ${SOURCE_FILES})
 
-add_executable(Simulate HandMadeTests/Simulate.c ${SOURCE_FILES})
+add_executable(Simulate tests/Simulate.c ${SOURCE_FILES})
 
 add_custom_target(debugC
     COMMAND gdb CommitmentIsScary

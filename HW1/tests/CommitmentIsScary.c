@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include "../OoO470.h"
+#include "../lib/OoO470.h"
 
 int main(int argc, char *argv[]) {
-    printf("Hello, World!\n");
+  printf("Hello, World!\n");
   parser("../given_tests/01/input.json");
 
   init();
@@ -10,17 +10,17 @@ int main(int argc, char *argv[]) {
   
 
   
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 100; i++) {
     //showForwardingTable();
     //showALU();
     //showPhysRegFile();
     //showActiveList();
-    showBusyBitTable();
+    //showBusyBitTable();
     //showRegMapTable();
     //showDIR();
     //showFreeList();
-   showIntegerQueue();
-    showActiveList();
+    showIntegerQueue();
+    //showActiveList();
     //showALU();
     //showIntegerQueue();
     Commit();
@@ -36,8 +36,6 @@ int main(int argc, char *argv[]) {
     FetchAndDecode();
     printf("FetchAndDecode, [%d]\n", i);
   }
-
-  
 
   return 0;
 }

@@ -371,15 +371,16 @@ void RDS() {
 
     if (DIR.DIRSize == 0) return;
 
-    // Rename either all instructions in DIR or none      TODO
+    // Rename either all instructions in DIR or none ?     TODO
     unsigned int index = min(DIR.DIRSize, INSTR);
 
     for (int i = 0; i < index; i++) {
         int newReg = popFreeList();
         if (newReg < 0) return; // if the Free List is empty, do nothing
         
-        unsigned int currentPc = popDIR();
-        // TODO Check there is enough space
+        unsigned int currentPc = popDIR(); // DIR can't be popped when empty because index depends on DIR size
+        // if DIR size is 0, index is 0, so this loop will not run
+
         // Add the instruction to the Active List
         ActiveList.ALarray[ActiveList.ALSize].LogicalDestination = instrs.instructions[currentPc].dest;
         ActiveList.ALarray[ActiveList.ALSize].OldDestination = RegMapTable[instrs.instructions[currentPc].dest];

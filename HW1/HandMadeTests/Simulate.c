@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     slog(output_file, LOG); // TODO dumpStateIntoLog()
     int cycle = 0;
     // 3. Loop for cycle-by-cycle iterations
-    while (!(noInstruction() && activeListIsEmpty()))  
+    while (!(noInstruction() && activeListIsEmpty() && !getException()))  
     {
         printf("No instruction: %d\n", noInstruction());
         printf("Active list is empty: %d\n", activeListIsEmpty());

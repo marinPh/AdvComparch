@@ -8,3 +8,6 @@ HW1/CMakeFiles/*
 HW1/cmake_install.cmake
 HW1/CMakeCache.txt
 HW1/given_tests/*
+HW1/Simulate
+
+HW1/given_tests/**

@@ -89,7 +89,7 @@ typedef struct {
     IntegerQueueEntry instr;
 } ALUEntry;
 
-
+bool getException();
 void showPhysRegFile();
 void showActiveList();
 void showFreeList();

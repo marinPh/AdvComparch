@@ -319,7 +319,7 @@ void FetchAndDecode()
      When the Commit stage
      indicates that an exception is detected, the PC is set to 0x10000
      */
-    if (exception)
+    if (exception || finished || PC == 0x10000)
      return;
     
     // Check Back Pressure
@@ -672,6 +672,9 @@ void Commit()
     }
 
     int maxIndex = min(INSTR, ActiveList.ALSize);
+    if (maxIndex <= 0){
+        exception = false;
+        return;}
     for (size_t i = 0; i < maxIndex; i++)
     {
         if (ActiveList.ALarray[0].Done)
@@ -741,6 +744,11 @@ void Commit()
         finished = true;
         // free(instrs.instructions);
     }
+}
+
+bool getException()
+{
+    return exception;
 }
 
 // if the PC is equal to the size of the instructions, there are no more instructions to fetch

@@ -10,5 +10,6 @@
 
 int main()
 {
+    parseInstrunctions("../simulator/program.json", "../given_tests/01/input.json");
     return 0;
 }

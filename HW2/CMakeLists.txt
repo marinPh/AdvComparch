@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_executable(VLIW470
         main.c
-        VLIW470.c)
+        VLIW470.c
+        lib/cJSON.c
+        lib/utils.c)
 
-target_sources(VLIW470 PRIVATE
-        VLIW470.c)

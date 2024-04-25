@@ -11,5 +11,7 @@
 int main()
 {
     parseInstrunctions("../simulator/program.json", "../given_tests/01/input.json");
+    dependencyTable table =fillDepencies();
+    showDepTable(table);
     return 0;
 }

@@ -51,16 +51,7 @@ typedef InstructionEntry Mult;
 typedef InstructionEntry Mem;
 typedef InstructionEntry Br;
 
-typedef struct
-{
-    char ID;
-    unsigned int reg;
-} dependency;
-typedef struct
-{
-    dependency *list;
-    unsigned int size;
-} idList;
+
 
 void pushId(idList *list, char id, unsigned int reg)
 {
@@ -70,22 +61,7 @@ void pushId(idList *list, char id, unsigned int reg)
     list->size++;
 }
 
-typedef struct
-{
-    unsigned int address;
-    char ID;
-    unsigned int dest;
-    idList local;
-    idList loop;
-    idList invariant;
-    idList postL;
-} dependencyEntry;
 
-typedef struct
-{
-    dependencyEntry *dependencies;
-    unsigned int size;
-} dependencyTable;
 
 dependencyTable depTable = {NULL, 0};
 
@@ -101,7 +77,7 @@ dependencyTable dependencyTableInit()
     dependencyTable table = {NULL, 0};
     for (int i = 0; i < instrs.size; i++)
     {
-        dependencyEntry entry = {i, i, instrs.instructions[i].dest, {0, {NULL, 0}}, {0, {NULL, 0}}, {0, {NULL, 0}}, NULL};
+        dependencyEntry entry = {i, 65+i, instrs.instructions[i].dest, {0, {NULL, 0}}, {0, {NULL, 0}}, {0, {NULL, 0}}, NULL};
         pushDependency(&table, entry);
     }
     return table;
@@ -149,13 +125,13 @@ void whatType(int instr1, int instr2, dependencyTable *table)
     return;
 }
 
-dependencyTable fillDepencies(dependencyTable table)
+dependencyTable fillDepencies()
 {
+    dependencyTable table = dependencyTableInit();
     for (int i = 0; i < table.size; i++)
     {
-
+        
         int pot = instrs.instructions[i].dest;
-
         for (int j = i; j < instrs.size; j++)
         {
             // check for each instruction if pot is a dest or src

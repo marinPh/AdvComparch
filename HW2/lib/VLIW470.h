@@ -25,9 +25,9 @@ typedef struct {
     int dest;
     int src1;            // Used as source register or as an immediate value, depending on the instruction type
     int src2;            // Used only by register to register operations (e.g., add, sub, mulu)
-    bool predicate;      // For conditional execution; true or false for TYPE_P, ignored otherwise => modifies processor state only if true, else discarded at commit
+    int imm;             // Immediate value for immediate operations (e.g., addi, ld, mov with immediate)
+    bool predicate;      // For conditional execution; true or false for LOOP types, ignored otherwise => modifies processor state only if true, else discarded at commit
     InstructionType type;// Type of the instruction to handle different formats
-    int address;         // Used for memory operations (ld, st) with an immediate offset
     int loopStart;       // Used for branching operations to store the loop start address
     int cycle;           // Cycles the instruction has been in the execution stage
     bool done;           // True if the instruction has been executed

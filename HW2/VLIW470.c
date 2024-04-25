@@ -193,6 +193,190 @@ int checkAndAdjustIIForInstruction(DependencyTable *table, char instrAddr, Proce
     return 0;  // II was not changed
 }
 
+void registerAllocation(ProcessorState *state, DependencyTable *table) {  // this has TERRIBLE complexity (O(n^2)
+    // Allocate registers to instructions in the VLIW bundle 
+    // based on the DependencyTable
+    // TODO
+
+    int reg = 0;
+
+    for (int i = 0; i < state->bundles.size; i++) {
+        VLIW *vliw = &state->bundles.vliw[i];
+        // ALU1
+        if (vliw->alu1.type != NOP) {
+            // // Check if the instruction is not scheduled yet
+            // if (table->instructions[vliw->alu1.instrAddr].scheduledTime == -1) {
+                // Allocate registers
+                table->instructions[vliw->alu1.instrAddr].dest = reg;  // TODO check if it's the right way to do it
+                vliw->alu1.dest = reg;  // TODO
+                reg++;
+            // }
+        }
+        // ALU2
+        if (vliw->alu2.type != NOP) {
+            // // Check if the instruction is not scheduled yet
+            // if (table->instructions[vliw->alu2.instrAddr].scheduledTime == -1) {
+                // Allocate registers
+                table->instructions[vliw->alu2.instrAddr].dest = reg;  // TODO check if it's the right way to do it
+                vliw->alu2.dest = reg;  // TODO
+                reg++;
+            // }
+        }
+        // MULT
+        if (vliw->mult.type != NOP) {
+            // // Check if the instruction is not scheduled yet
+            // if (table->instructions[vliw->mult.instrAddr].scheduledTime == -1) {
+                // Allocate registers
+                table->instructions[vliw->mult.instrAddr].dest = reg;  // TODO check if it's the right way to do it
+                vliw->mult.dest = reg;  // TODO
+                reg++;
+            // }
+        }
+        // MEM
+        if (vliw->mem.type != NOP) {
+            // // Check if the instruction is not scheduled yet
+            // if (table->instructions[vliw->mem.instrAddr].scheduledTime == -1) {
+                // Allocate registers
+                table->instructions[vliw->mem.instrAddr].dest = reg;  // TODO check if it's the right way to do it
+                vliw->mem.dest = reg;  // TODO
+                reg++;
+            // }
+        }
+        // BR
+        if (vliw->br.type != NOP) {
+            // TODO 
+        }
+
+        // Iterate over the instructions in the DependencyTable and if they have dependencies 
+        // in the localDeps, interloopDeps, invariantDeps or postloopDeps, 
+        // change the source registers to the allocated destination registers of the instructions they depend on
+        for (int j = 0; j < table->size; j++) {
+            DepTableEntry *entry = table->instructions[j];
+            // localDeps
+            if (entry->localDeps == vliw->alu1.instrAddr) {
+                entry->localDeps = vliw->alu1.dest;
+            }
+            if (entry->localDeps == vliw->alu2.instrAddr) {
+                entry->localDeps = vliw->alu2.dest;
+            }
+            if (entry->localDeps == vliw->mult.instrAddr) {
+                entry->localDeps = vliw->mult.dest;
+            }
+            if (entry->localDeps == vliw->mem.instrAddr) {
+                entry->localDeps = vliw->mem.dest;
+            }
+            // interloopDeps
+            if (entry->interloopDeps == vliw->alu1.instrAddr) {
+                entry->interloopDeps = vliw->alu1.dest;
+            }
+            if (entry->interloopDeps == vliw->alu2.instrAddr) {
+                entry->interloopDeps = vliw->alu2.dest;
+            }
+            if (entry->interloopDeps == vliw->mult.instrAddr) {
+                entry->interloopDeps = vliw->mult.dest;
+            }
+            if (entry->interloopDeps == vliw->mem.instrAddr) {
+                entry->interloopDeps = vliw->mem.dest;
+            }
+            // invariantDeps
+            if (entry->invariantDeps == vliw->alu1.instrAddr) {
+                entry->invariantDeps = vliw->alu1.dest;
+            }
+            if (entry->invariantDeps == vliw->alu2.instrAddr) {
+                entry->invariantDeps = vliw->alu2.dest;
+            }
+            if (entry->invariantDeps == vliw->mult.instrAddr) {
+                entry->invariantDeps = vliw->mult.dest;
+            }
+            if (entry->invariantDeps == vliw->mem.instrAddr) {
+                entry->invariantDeps = vliw->mem.dest;
+            }
+            // postloopDeps
+            if (entry->postloopDeps == vliw->alu1.instrAddr) {
+                entry->postloopDeps = vliw->alu1.dest;
+            }
+            if (entry->postloopDeps == vliw->alu2.instrAddr) {
+                entry->postloopDeps = vliw->alu2.dest;
+            }
+            if (entry->postloopDeps == vliw->mult.instrAddr) {
+                entry->postloopDeps = vliw->mult.dest;
+            }
+            if (entry->postloopDeps == vliw->mem.instrAddr) {
+                entry->postloopDeps = vliw->mem.dest;
+            }
+        }
+    }
+
+    // fix interloopDeps
+    // for every instruction in DependencyTable, check if it has an interloop dependency
+    // if yes, schedule a MOV instruction to copy the value of the source register to the destination register
+    for (int j = 0; j < table->size; j++) {  // TODO repetitive.... 
+        DepTableEntry *entry = table->instructions[j];
+        if (entry->interloopDeps != -1) {
+            // save the intruction it has a dependency on
+            // look through the instructions in the dependency table to find the one with the latest schedule time among all those with the same interloopDeps
+            int latestScheduledTime = entry->scheduledTime;
+            int latestScheduledInstrAddr = entry->instrAddr;
+            for (int k = 0; k < table->size; k++) {
+                DepTableEntry *entry2 = table->instructions[k];
+                if (entry2->interloopDeps == entry->interloopDeps) {
+                    if (entry2->scheduledTime > latestScheduledTime) {
+                        latestScheduledTime = entry2->scheduledTime;
+                        latestScheduledInstrAddr = entry2->instrAddr;
+                    }
+                }
+            }
+
+            // schedule a MOV instruction to copy the value of the source register to the destination register
+            // in the VLIW bundle with the latest scheduled instruction if one of the two ALUs is free
+            VLIW *vliw = &state->bundles.vliw[latestScheduledInstrAddr];
+            if (vliw->alu1.type == NOP) {
+                vliw->alu1.type = MOV;
+                vliw->alu1.src1 = table->instructions[entry->interloopDeps].dest;
+                vliw->alu1.dest = entry->dest;   // TODO check if it's the right way to do it
+                // Set the other fields of the MOV instruction
+                vliw->alu1.imm = -1;
+                vliw->alu1.predicate = false;
+                vliw->alu1.loopStart = -1;
+                vliw->alu1.cycle = 0;
+                vliw->alu1.done = false;
+            } else if (vliw->alu2.type == NOP) {
+                vliw->alu2.type = MOV;
+                vliw->alu2.src1 = table->instructions[entry->interloopDeps].dest;
+                vliw->alu2.dest = entry->dest;
+                // Set the other fields of the MOV instruction
+                vliw->alu1.imm = -1;
+                vliw->alu1.predicate = false;
+                vliw->alu1.loopStart = -1;
+                vliw->alu1.cycle = 0;
+                vliw->alu1.done = false;
+            } else {
+                // create a new VLIW bundle
+                state->bundles.size += 1;
+                state->bundles.vliw = (VLIW*)realloc(state->bundles.vliw, state->bundles.size * sizeof(VLIW));
+                state->bundles.vliw[state->bundles.size - 1] = {NOP, NOP, NOP, NOP, NOP};
+
+                VLIW *vliw2 = &state->bundles.vliw[state->bundles.size - 1];
+                vliw2->alu1.type = MOV;
+                vliw2->alu1.src1 = table->instructions[entry->interloopDeps].dest;
+                vliw2->alu1.dest = entry->dest;
+                // Set the other fields of the MOV instruction
+                vliw2->alu1.imm = -1;
+                vliw2->alu1.predicate = false;
+                vliw2->alu1.loopStart = -1;
+                vliw2->alu1.cycle = 0;
+
+                // move the loop instruction to the new VLIW bundle
+                vliw2->br = vliw->br;
+                vliw->br.type = NOP;
+                vliw->br.done = false; 
+            }
+
+        }
+    }
+
+}
+
 
 
 
@@ -316,6 +500,13 @@ void Issue(ProcessorState *state, DependencyTable *table) {         // TODO no l
             
         }
     }
+
+    // Check and adjust the Initiation Interval (II) for the instruction
+    // based on interloop dependencies
+    // checkInterloopDependencies(table, state);  // TODO no loops yet
+
+    // Perform register allocation
+    ...
 }
 
 /**
@@ -329,23 +520,58 @@ void Execute(ProcessorState *state) {
     // ALU1
     state->bundles.vliw[state->PC].alu1.cycle = 1;
     state->bundles.vliw[state->PC].alu1.done  = true;  // even if NOP 
-    if (state->bundles.vliw[state->PC].alu1.type == ADD || state->bundles.vliw[state->PC].alu1.type == ADDI) {
-        state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src1] + state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src2];
-    } else if (state->bundles.vliw[state->PC].alu1.type == SUB) {
-        state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src1] - state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src2];
-    } else if (state->bundles.vliw[state->PC].alu1.type == MOV) {
-        state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src1];
+    switch (state->bundles.vliw[state->PC].alu1.type) {
+        case ADD:
+            state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src1] + state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src2];
+            break;
+        case ADDI:
+            state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src1] + state->bundles.vliw[state->PC].alu1.imm;
+            break;
+        case SUB:
+            state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src1] - state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src2];
+            break;
+        case MOV:
+            if (strcmp(state->bundles.vliw[state->PC].alu1.dest, "LC") == 0) {  // case of mov LC
+                state->LC = state->bundles.vliw[state->PC].alu1.src1;
+                // state->EC = #loop stages i.e. #loop iterations
+                state->Ec = state->bundles.vliw[state->PC].alu2.src1; // TODO check if it's the right way to do it
+            } else if (state->bundles.vliw[state->PC].alu1.imm != -1) {  // case of mov with immediate
+                state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->bundles.vliw[state->PC].alu1.imm;
+            } else {  // case of mov with register
+                state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src1];
+            }
+            break;
+        default:
+            break;
     }
+
 
     // ALU2
     state->bundles.vliw[state->PC].alu2.cycle = 1;
     state->bundles.vliw[state->PC].alu2.done  = true; 
-    if (state->bundles.vliw[state->PC].alu2.type == ADD || state->bundles.vliw[state->PC].alu2.type == ADDI) {
-        state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src1] + state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src2];
-    } else if (state->bundles.vliw[state->PC].alu2.type == SUB) {
-        state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src1] - state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src2];
-    } else if (state->bundles.vliw[state->PC].alu2.type == MOV) {
-        state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src1];
+    switch (state->bundles.vliw[state->PC].alu2.type) {
+        case ADD:
+            state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src1] + state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src2];
+            break;
+        case ADDI:
+            state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src1] + state->bundles.vliw[state->PC].alu2.imm;
+            break;
+        case SUB:
+            state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src1] - state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src2];
+            break;
+        case MOV:
+            if (strcmp(state->bundles.vliw[state->PC].alu2.dest, "LC") == 0) {  // case of mov LC
+                state->LC = state->bundles.vliw[state->PC].alu2.src1;
+                // state->EC = #loop stages i.e. #loop iterations
+                state->Ec = state->bundles.vliw[state->PC].alu2.src1; // TODO check if it's the right way to do it 
+            } else if (state->bundles.vliw[state->PC].alu2.imm != -1) {  // case of mov with immediate
+                state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->bundles.vliw[state->PC].alu2.imm;
+            } else {  // case of mov with register
+                state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src1];
+            }
+            break;
+        default:
+            break;
     }
 
     // MULT
@@ -385,16 +611,34 @@ void Execute(ProcessorState *state) {
     state->bundles.vliw[state->PC].mem.cycle = 1;
     state->bundles.vliw[state->PC].mem.done  = true;
     if (state->bundles.vliw[state->PC].mem.type == LD) {
-        state->PhysRegFile[state->bundles.vliw[state->PC].mem.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].mem.src1] + state->bundles.vliw[state->PC].mem.address;
+        state->PhysRegFile[state->bundles.vliw[state->PC].mem.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].mem.src1] + state->bundles.vliw[state->PC].mem.imm;
     } // TODO store operations are not considered ?? 
 
     // BR (LOOP, LOOP_PIP)
     state->bundles.vliw[state->PC].br.cycle = 1;
     state->bundles.vliw[state->PC].br.done  = true;
-    if (state->bundles.vliw[state->PC].br.type == LOOP) {
-        state->LC = state->bundles.vliw[state->PC].br.loopStart;
-    } else if (state->bundles.vliw[state->PC].br.type == LOOP_PIP) {
-        state->LC = state->bundles.vliw[state->PC].br.loopStart;
+    if (state->bundles.vliw[state->PC].br.type == LOOP) {  // unconditional branch
+        state->PC = state->bundles.vliw[state->PC].br.loopStart;   
+    } else if (state->bundles.vliw[state->PC].br.type == LOOP_PIP) {  // conditional branch
+        if (state->LC > 0) {
+            state->LC -= 1;
+            // state->EC unchanged
+            state->RRB += 1;
+            // enable stage predicate register  TODO ????? always p32 ? 
+            state->PredRegFile[31] = true;
+            state->PC = state->bundles.vliw[state->PC].br.loopStart;
+        } else {
+            if (state->EC > 0) {
+                // state->LC unchanged
+                state->EC -= 1;
+                state->RRB += 1;
+                // disable stage predicate register  TODO ????? 
+                state->PredRegFile[31] = false;
+                state->PC = state->bundles.vliw[state->PC].br.loopStart;
+            } else {
+                //state->PC += 1;  // TODO nothing ? bc was already incremented by FetchAndDecode ? 
+            }
+        }
     }
 }
 
@@ -402,9 +646,24 @@ void Execute(ProcessorState *state) {
  * Commit stage of the pipeline.
  * @param state Pointer to the processor state.
  */
-void Commit(ProcessorState *state) {
+void Commit(ProcessorState *state, DependencyTable *table) {
     // Commit the instructions in the VLIW bundle
     // if done update the register file
     // TODO how to update DepTable? 
     // TODO
+    if (state->bundles.vliw[state->PC].alu1.done) {
+        state->bundles.vliw[state->PC].alu1.done = false;
+    }
+    if (state->bundles.vliw[state->PC].alu2.done) {
+        state->bundles.vliw[state->PC].alu2.done = false;
+    }
+    if (state->bundles.vliw[state->PC].mult.done) {
+        state->bundles.vliw[state->PC].mult.done = false;
+    }
+    if (state->bundles.vliw[state->PC].mem.done) {
+        state->bundles.vliw[state->PC].mem.done = false;
+    }
+    if (state->bundles.vliw[state->PC].br.done) {
+        state->bundles.vliw[state->PC].br.done = false;
+    }
 }

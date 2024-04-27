@@ -1,43 +1,98 @@
 #ifndef VLIW470_H
 #define VLIW470_H
 
-#define OPCODE 5
+#include "utils.h"
+
+#define REGS 96
 #define BUNDLE 5 // Number of instructions executed in parallel
 #define FU 4 // Number of functional unit types: ALU, MULT, MEM, BR
-
-// Instruction types
-// typedef enum {
-//     TYPE_R,     // Register to register operations: add, sub, mulu, mov where dest and source are registers
-//     TYPE_I,     // Immediate operations: addi, ld (load address immediate), mov with immediate
-//     TYPE_S,     // Store type with immediate offset for memory address, NO need to consider them
-//     TYPE_B,     // Branch operations: loop, loop.pip, can NOT be predicated (always executed)
-//     TYPE_P,     // Predicate operations: mov with predicate setting
-//     TYPE_NOP    // No operation
-// } InstructionType;
-
-typedef enum {
-    ADD, ADDI, SUB, MULU, LD, ST, NOP, MOV, LOOP, LOOP_PIP  // NO need to consider store operations
-} InstructionType;
-
-// Instructions
-typedef struct {
-    char opcode[OPCODE]; // 4 characters + null terminator
-    int dest;
-    int src1;            // Used as source register or as an immediate value, depending on the instruction type
-    int src2;            // Used only by register to register operations (e.g., add, sub, mulu)
-    int imm;             // Immediate value for immediate operations (e.g., addi, ld, mov with immediate)
-    bool predicate;      // For conditional execution; true or false for LOOP types, ignored otherwise => modifies processor state only if true, else discarded at commit
-    InstructionType type;// Type of the instruction to handle different formats
-    int loopStart;       // Used for branching operations to store the loop start address
-    int cycle;           // Cycles the instruction has been in the execution stage
-    bool done;           // True if the instruction has been executed
-} InstructionEntry;
 
 // Structure for parsing JSON
 typedef struct {
     InstructionEntry *instructions;
     size_t size;
+    unsigned int loopStart;  // Used for branching operations to store the loop start address
+    unsigned int loopEnd;
 } InstructionsSet;
 
+typedef struct {
+    char ID;
+    unsigned int reg;
+} dependency;
+
+typedef struct {
+    dependency *list;
+    unsigned int size;
+} idList;
+
+typedef struct {
+    unsigned int address;
+    char ID;
+    InstructionType type;
+    unsigned int dest;
+    idList local;
+    idList loop;
+    idList invariant;
+    idList postL;
+    int scheduledTime;
+} DependencyEntry;
+
+typedef struct {
+    DependencyEntry *dependencies;
+    unsigned int size;
+} DependencyTable;
+
+// FUs
+typedef InstructionEntry ALU; 
+typedef InstructionEntry Mult;
+typedef InstructionEntry Mem;
+typedef InstructionEntry Br;
+
+typedef struct {
+    ALU  alu1;
+    ALU  alu2;
+    Mult mult; // 3 cycle latency (all others 1) 
+    Mem  mem;
+    Br   br; 
+} VLIW;
+
+typedef struct {
+    VLIW *vliw;
+    int size;
+} VLIWBundles;
+
+// Dictionary {instruction type: latency}
+int latencies[10] = {1, 1, 1, 3, 1, 1, 1, 1, 1, 1};
+
+typedef struct {
+    unsigned int  PC; // Program Counter
+    unsigned int  LC; // Loop Count
+    unsigned int  EC; // Epilogue Count
+    unsigned int  RRB; // Register Rotation Base
+    unsigned long PhysRegFile[REGS]; // Physical Register File (96 registers, 64 bits each)
+    unsigned long PredRegFile[REGS]; // Predicate Register File
+    unsigned int  FUCount[FU]; // Number of each type of FU: [ALU, MULT, MEM, BR]
+    VLIWBundles   bundles; // VLIW instruction bundles
+    unsigned int  II; // Initiation Interval
+} ProcessorState;
+
+void parseInstrunctions(char* progFile, char* inputFile);
+
+void printInstructions(InstructionsSet instr);
+
+void showDepTable(DependencyTable table);
+DependencyTable fillDepencies();
+
+void initProcessorState(ProcessorState *state);
+
+int getRotatedRegisterIndex(int baseIndex, int rrb);
+int readGeneralRegister(ProcessorState *state, int index);
+bool readPredicateRegister(ProcessorState *state, int index);
+
+int calculateIIRes(InstructionsSet *set, ProcessorState *state);
+
+int checkAndAdjustIIForInstruction(DependencyTable *table, char instrAddr, ProcessorState *state);
+
+void registerAllocation(ProcessorState *state, DependencyTable *table);
 
 #endif /* MIPS_SIMULATOR_H */

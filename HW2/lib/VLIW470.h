@@ -1,20 +1,99 @@
 #ifndef VLIW470_H
 #define VLIW470_H
 
-#define OPCODE 5
+#include "utils.h"
 
-// Instructions
-typedef struct {
-    char opcode[OPCODE]; // 4 characters + null terminator
-    int dest;
-    int src1;
-    int src2;
-} InstructionEntry;
+#define REGS 96
+#define BUNDLE 5 // Number of instructions executed in parallel
+#define FU 4 // Number of functional unit types: ALU, MULT, MEM, BR
 
 // Structure for parsing JSON
 typedef struct {
     InstructionEntry *instructions;
     size_t size;
-} Instruction;
+    unsigned int loopStart;  // Used for branching operations to store the loop start address
+    unsigned int loopEnd;
+} InstructionsSet;
+
+typedef struct {
+    char ID;
+    unsigned int reg;
+} dependency;
+
+typedef struct {
+    dependency *list;
+    unsigned int size;
+} idList;
+
+typedef struct {
+    unsigned int address;
+    char ID;
+    InstructionType type;
+    unsigned int dest;
+    idList local;
+    idList loop;
+    idList invariant;
+    idList postL;
+    int scheduledTime;
+} DependencyEntry;
+
+typedef struct {
+    DependencyEntry *dependencies;
+    unsigned int size;
+} DependencyTable;
+
+// FUs
+typedef InstructionEntry ALU; 
+typedef InstructionEntry Mult;
+typedef InstructionEntry Mem;
+typedef InstructionEntry Br;
+
+typedef struct {
+    ALU  alu1;
+    ALU  alu2;
+    Mult mult; // 3 cycle latency (all others 1) 
+    Mem  mem;
+    Br   br; 
+} VLIW;
+
+typedef struct {
+    VLIW *vliw;
+    int size;
+} VLIWBundles;
+
+// Dictionary {instruction type: latency}
+int latencies[10] = {1, 1, 1, 3, 1, 1, 1, 1, 1, 1};
+
+typedef struct {
+    unsigned int  PC; // Program Counter
+    unsigned int  LC; // Loop Count
+    unsigned int  EC; // Epilogue Count
+    unsigned int  RRB; // Register Rotation Base
+    unsigned long PhysRegFile[REGS]; // Physical Register File (96 registers, 64 bits each)
+    unsigned long PredRegFile[REGS]; // Predicate Register File
+    unsigned int  FUCount[FU]; // Number of each type of FU: [ALU, MULT, MEM, BR]
+    VLIWBundles   bundles; // VLIW instruction bundles
+    unsigned int  II;      // Initiation Interval
+    unsigned int  stage;   // Loop stage 
+} ProcessorState;
+
+void parseInstrunctions(char* progFile, char* inputFile);
+
+void printInstructions(InstructionsSet instr);
+
+void showDepTable(DependencyTable table);
+DependencyTable fillDepencies();
+
+void initProcessorState(ProcessorState *state);
+
+int getRotatedRegisterIndex(int baseIndex, int rrb);
+int readGeneralRegister(ProcessorState *state, int index);
+bool readPredicateRegister(ProcessorState *state, int index);
+
+int calculateIIRes(InstructionsSet *set, ProcessorState *state);
+
+int checkAndAdjustIIForInstruction(DependencyTable *table, char instrAddr, ProcessorState *state);
+
+void registerAllocation(ProcessorState *state, DependencyTable *table);
 
 #endif /* MIPS_SIMULATOR_H */

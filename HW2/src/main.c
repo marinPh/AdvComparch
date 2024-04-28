@@ -7,7 +7,7 @@
 #include "../lib/VLIW470.h"
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
+    if (argc <= 3) {
         printf("Usage: %s <file_name>\n", argv[0]);
         return 1;
     }
@@ -27,11 +27,12 @@ int main(int argc, char *argv[]) {
     // test LOOP (simple)
     scheduleInstructions(state, &table);
 //
-    //registerAllocation(state, &table);
+    registerAllocation(state, &table);
     printf("II: \n");
-    showProcessorState(*state);   
+    //showProcessorState(*state);   
 
-    writeVLIWToJson(&state->bundles, "output.json"); 
+    writeVLIWToJson(&state->bundles, argv[2]); 
+    writeVLIWToJson(&state->bundles, argv[3]);
     printf("output.json created\n");
 
 

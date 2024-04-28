@@ -71,12 +71,12 @@ DependencyTable dependencyTableInit()
  * @param id The ID of the instruction to add as a dependency.
  * @param reg The register that the instruction writes to.
  */
-void pushId(idList *list, char id, unsigned int reg,int src)
+void pushId(idList *list, char id, unsigned int reg, int src)
 {
     list->list = realloc(list->list, (list->size + 1) * sizeof(dependency));
     list->list[list->size].ID = id;
     list->list[list->size].reg = reg;
-    list->list[list->size].src =src;
+    list->list[list->size].src = src;
     list->size++;
 }
 
@@ -91,18 +91,14 @@ void whatType(int instr1, int instr2, DependencyTable *table)
     DependencyEntry *entry = &(table->dependencies[instr2]);
     // printf("instr1: %d, instr2: %d\n", instr1, instr2);
     //  we check if the dest of instr1 is equal to src1 or src2 of instr2
-    
-
-  
 
     if (instrs.instructions[instr1].dest == instrs.instructions[instr2].src1 || instrs.instructions[instr2].src2 == instrs.instructions[instr1].dest)
     {
-        //src is the name of the src that has the dependency
+        // src is the name of the src that has the dependency
         int src = instrs.instructions[instr1].dest == instrs.instructions[instr2].src1 ? 1 : 2;
-       
+
         if (instrs.loopStart != -1)
         { // check if in same block
-        
 
             if (instrs.instructions[instr1].block == instrs.instructions[instr2].block)
             {
@@ -110,11 +106,11 @@ void whatType(int instr1, int instr2, DependencyTable *table)
 
                 if (instr1 < instr2)
                 {
-                    pushId(&entry->local, table->dependencies[instr1].ID, instrs.instructions[instr1].dest,src);
+                    pushId(&entry->local, table->dependencies[instr1].ID, instrs.instructions[instr1].dest, src);
                 }
                 else
                 {
-                    pushId(&entry->loop, table->dependencies[instr1].ID, instrs.instructions[instr1].dest,src);
+                    pushId(&entry->loop, table->dependencies[instr1].ID, instrs.instructions[instr1].dest, src);
                 }
             }
             else
@@ -122,14 +118,14 @@ void whatType(int instr1, int instr2, DependencyTable *table)
                 // check if in post loop means instr1 is in block 1 and instr2 is in block 2
                 if (instrs.instructions[instr1].block == 1 && instrs.instructions[instr2].block == 2)
                 {
-                    pushId(&entry->postL, table->dependencies[instr1].ID, instrs.instructions[instr1].dest,src);
+                    pushId(&entry->postL, table->dependencies[instr1].ID, instrs.instructions[instr1].dest, src);
                 }
                 else
                 {
                     // check if in invariant
                     if (instrs.instructions[instr1].block == 0 && (instrs.instructions[instr2].block == 1 || instrs.instructions[instr2].block == 2))
                     {
-                        pushId(&entry->invariant, table->dependencies[instr1].ID, instrs.instructions[instr1].dest,src);
+                        pushId(&entry->invariant, table->dependencies[instr1].ID, instrs.instructions[instr1].dest, src);
                     }
                 }
             }
@@ -137,7 +133,7 @@ void whatType(int instr1, int instr2, DependencyTable *table)
         else
         {
             // if there is no loop all dependencies are local
-            pushId(&entry->local, table->dependencies[instr1].ID, instrs.instructions[instr1].dest,src);
+            pushId(&entry->local, table->dependencies[instr1].ID, instrs.instructions[instr1].dest, src);
         }
     }
     // printf("returning\n");
@@ -157,23 +153,19 @@ DependencyTable createFillDepencies()
     {
         // printf("i: %d\n", i);
 
-        
         // printf("i: %d\n", i);
 
         int pot = instrs.instructions[i].dest;
         // printf("pot: %d\n", pot);
-        
+
         if (pot == -1)
             continue;
-          
 
-       
         for (int j = i + 1; j < instrs.size; j++)
         {
-            // printf("i: %d, j: %d\n", i, j);
+             printf("i: %d, j: %d\n", i, j);
             //  check for each instruction if pot is a dest or src
-           
-            
+
             whatType(i, j, &table);
             if (instrs.instructions[j].dest == pot)
                 break;
@@ -192,7 +184,7 @@ DependencyTable createFillDepencies()
         }
         // printf("instr: %s\n", instrs.instructions[i].opcode);
     }
-    // printf("returning\n");
+    printf("returning\n");
     // showDepTable(table);
     return table;
 }
@@ -431,12 +423,12 @@ LatestDependency findLatestDependency(DependencyTable *table, DependencyEntry *e
         }
     }
 
-    //printf("index other depends on: %d\n", IDdependsOnOtherSrc);
+    // printf("index other depends on: %d\n", IDdependsOnOtherSrc);
 
     // invariantDeps
     for (int j = 0; j < entry->invariant.size; j++)
     {
-        printf("---->entry->invariant.list[j].ID-65: %d\n", entry->ID-65);
+        printf("---->entry->invariant.list[j].ID-65: %d\n", entry->ID - 65);
         if (entry->invariant.list[j].reg == reg1)
         {
             if (table->dependencies[entry->invariant.list[j].ID - 65].type == MULU)
@@ -538,7 +530,7 @@ LatestDependency findLatestDependency(DependencyTable *table, DependencyEntry *e
     latestDep.scheduledTime = latestScheduledTime;
     latestDep.block = instrs.instructions[IDdependsOn].block;
 
-    //printf("lastestDep other src: %d\n", latestDep.idxOtherSrc);
+    // printf("lastestDep other src: %d\n", latestDep.idxOtherSrc);
     latestDep.idxOtherSrc = IDdependsOnOtherSrc;
     latestDep.destOtherSrc = table->dependencies[IDdependsOnOtherSrc].dest;
     latestDep.scheduledTimeOtherSrc = latestScheduledTimeOtherSrc;
@@ -558,7 +550,7 @@ InstructionEntry *createNewInstruction(
     int cycle,
     bool done)
 {
-InstructionEntry *instr = malloc(sizeof(InstructionEntry));
+    InstructionEntry *instr = malloc(sizeof(InstructionEntry));
     strcpy(instr->opcode, opcode);
     instr->dest = dest;
     instr->src1 = src1;
@@ -614,7 +606,7 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
         }
     }
 
-    //printf("All okay\n");
+    // printf("All okay\n");
 
     // Step 2. change the source registers to the allocated destination registers of the instructions they depend on
     // Iterate over the instructions in the DependencyTable and if they have dependencies
@@ -628,57 +620,60 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
         int reg2 = instrs.instructions[entry->ID - 65].src2; // source register 2
 
         LatestDependency latestDep = findLatestDependency(table, entry);
-        if(entry->ID-65 == 6){
+        if (entry->ID - 65 == 6)
+        {
             printf("-->latestDep.idx: %d\n", latestDep.idx);
             printf("-->latestDep.dest: %d\n", latestDep.dest);
             printf("-->latestDep.idxOtherSrc: %d\n", latestDep.idxOtherSrc);
             printf("-->latestDep.destOtherSrc: %d\n", latestDep.destOtherSrc);
-            
         }
 
-        
         // interloopDeps
         // only check for interloop dependencies if the latest found dependency producer is NOT in BB0
         // (case where there exist 2 producers, one in BB0 and one in BB1, and the consumer is in BB1 or BB2)    TODO consumer in BB2 ?
         if (!(latestDep.block == 0 && latestDep.dest == reg1))
         { // check interloop for reg1
-            //printf("entry->ID-65: %d\n", entry->ID - 65);
+             printf("entry->ID-65: %d\n", entry->ID - 65);
+             printf("latestDep.idx: %d\n", entry->loop.size);
+            
             for (int j = 0; j < entry->loop.size; j++)
             {
+                printf("entry->loop.list[j].ID: %d\n", "?");
                 char id = entry->loop.list[j].ID;
                 char other = entry->ID;
 
                 if (id == other)
                 {
-                    //printf("skipper:\n");
+                    printf("skipper:\n");
 
                     continue;
                 }
 
                 if (entry->loop.list[j].reg == reg1)
                 {
-                    //printf("entry->loop.list[j].ID-65: %d\n", entry->loop.list[j].ID - 65);
+                    // printf("entry->loop.list[j].ID-65: %d\n", entry->loop.list[j].ID - 65);
 
                     if (table->dependencies[entry->loop.list[j].ID - 65].type == MULU)
                     {
-                        //printf("entry->loop.list[j].ID-65: nonono %d\n", entry->loop.list[j].ID - 65);
+                        // printf("entry->loop.list[j].ID-65: nonono %d\n", entry->loop.list[j].ID - 65);
                         if ((table->dependencies[entry->loop.list[j].ID - 65].scheduledTime + 2) > latestDep.scheduledTime)
                         {
-                            //printf("into\n");
+                            // printf("into\n");
                             latestDep.scheduledTime = table->dependencies[entry->loop.list[j].ID - 65].scheduledTime + 2;
                             latestDep.idx = entry->loop.list[j].ID - 65;
                         }
                     }
                     else if (table->dependencies[entry->loop.list[j].ID - 65].scheduledTime > latestDep.scheduledTime)
                     {
-                        //printf("entry->loop.list[j].ID-65 bababa: %d\n", entry->loop.list[j].ID - 65);
+                        // printf("entry->loop.list[j].ID-65 bababa: %d\n", entry->loop.list[j].ID - 65);
                         latestDep.scheduledTime = table->dependencies[entry->loop.list[j].ID - 65].scheduledTime;
                         latestDep.idx = entry->loop.list[j].ID - 65;
                     }
                 }
-                //printf("entry->loop.list[j].ID-65  ---: %d\n", entry->loop.list[j].ID - 65);
+                // printf("entry->loop.list[j].ID-65  ---: %d\n", entry->loop.list[j].ID - 65);
             }
         }
+        printf("latestDep.idx: %d\n", latestDep.idx);
 
         if (!(latestDep.blockOtherSrc == 0 && latestDep.destOtherSrc == reg2))
         { // check interloop for reg2
@@ -703,6 +698,7 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
                 }
             }
         }
+        printf("latestDep.idx: %d\n", latestDep.idx);
 
         // change the source registers to the allocated destination registers of the instructions they depend on
         if (latestDep.idx != -1)
@@ -710,7 +706,8 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
             if (table->dependencies[latestDep.idx].dest == reg1)
             {
                 instrs.instructions[entry->ID - 65].src1 = instrs.instructions[latestDep.idx].dest;
-            } else if (table->dependencies[latestDep.idx].dest == reg2)
+            }
+            else if (table->dependencies[latestDep.idx].dest == reg2)
             {
                 instrs.instructions[entry->ID - 65].src2 = instrs.instructions[latestDep.idx].dest;
             }
@@ -720,12 +717,18 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
             if (table->dependencies[latestDep.idxOtherSrc].dest == reg2)
             {
                 instrs.instructions[entry->ID - 65].src2 = instrs.instructions[latestDep.idxOtherSrc].dest;
-            } else if (table->dependencies[latestDep.idxOtherSrc].dest == reg1)
+            }
+            else if (table->dependencies[latestDep.idxOtherSrc].dest == reg1)
             {
                 instrs.instructions[entry->ID - 65].src1 = instrs.instructions[latestDep.idxOtherSrc].dest;
             }
         }
     }
+    printf(
+        "instr: %s, src1: %d, src2: %d\n",
+        instrs.instructions[0].opcode,
+        instrs.instructions[0].src1,
+        instrs.instructions[0].src2);
 
     // Step 3. fix interloopDeps
     // for every instruction in DependencyTable, check if it has an interloop dependency with itself as a producer
@@ -738,7 +741,7 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
         {
             if (entry->loop.list[k].ID == entry->ID)
             {
-                int reg = entry->loop.list[k].src ==1 ? instrs.instructions[entry->ID - 65].src1 : instrs.instructions[entry->ID - 65].src2;
+                int reg = entry->loop.list[k].src == 1 ? instrs.instructions[entry->ID - 65].src1 : instrs.instructions[entry->ID - 65].src2;
                 // find the last time that the same register was used as a source register
                 int lastUsedTime = -1;
                 int idxLastUsed = -1;
@@ -768,24 +771,21 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
                 // schedule a MOV instruction to copy the value of the source register to the destination register
                 // in the VLIW bundle with the latest scheduled instruction if one of the two ALUs is free
                 VLIW *vliw = &(state->bundles.vliw[lastUsedTime]);
-                
 
                 printf("lastUsedTime: %d\n", lastUsedTime);
 
-                
-
                 if (vliw->alu1->type == NOP)
                 {
-                    //printf("ALU1\n");
-                    vliw->alu1 = createNewInstruction("mov", regDep, instrs.instructions[entry->ID - 65].dest,-1, 0, 0, MOV, 0, false);
+                    // printf("ALU1\n");
+                    vliw->alu1 = createNewInstruction("mov", regDep, instrs.instructions[entry->ID - 65].dest, -1, 0, 0, MOV, 0, false);
                 }
                 else if (vliw->alu2->type == NOP)
                 {
-                    vliw->alu2 = createNewInstruction("mov", regDep, instrs.instructions[entry->ID - 65].dest,-1, 0, 0, MOV, 0, false);
+                    vliw->alu2 = createNewInstruction("mov", regDep, instrs.instructions[entry->ID - 65].dest, -1, 0, 0, MOV, 0, false);
                 }
                 else
                 {
-                    //printf("instruction: %s\n", instrs.instructions[10].opcode);
+                    // printf("instruction: %s\n", instrs.instructions[10].opcode);
 
                     // create a new VLIW bundle
                     state->bundles.size += 1;
@@ -797,7 +797,7 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
                     state->bundles.vliw[state->bundles.size - 1].br = &NOPinstr;
 
                     VLIW *vliw2 = &state->bundles.vliw[state->bundles.size - 1];
-                    vliw2->alu1 = createNewInstruction("mov", regDep, instrs.instructions[entry->ID - 65].dest,-1, 0, 0, MOV, 0, false);
+                    vliw2->alu1 = createNewInstruction("mov", regDep, instrs.instructions[entry->ID - 65].dest, -1, 0, 0, MOV, 0, false);
                     // move the loop instruction to the new VLIW bundle
                     vliw2->br = vliw->br;
                     vliw->br = &NOPinstr;
@@ -805,6 +805,7 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
             }
         }
     }
+    printf("instr: %s, src1: %d, src2: %d\n", instrs.instructions[0].opcode, instrs.instructions[0].src1, instrs.instructions[0].src2);
 
     // Step 4. allocate unused register for all source registers that have no RAW dependency
     // for every instruction in DependencyTable, check if it has a dependency on another instruction
@@ -812,7 +813,7 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
     for (int j = 0; j < table->size; j++)
     {
         DependencyEntry *entry = &table->dependencies[j];
-    
+
         if (entry->local.size == 0 && entry->loop.size == 0 && entry->invariant.size == 0 && entry->postL.size == 0)
         {
             // allocate a register to the source register
@@ -829,8 +830,10 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
             }
         }
     }
-
+    printf("instr: %s, src1: %d, src2: %d\n", instrs.instructions[0].opcode, instrs.instructions[0].src1, instrs.instructions[0].src2);
+if(instrs.loopEnd != -1 ){
     state->bundles.vliw[table->dependencies[instrs.loopEnd].scheduledTime].br->imm = table->dependencies[instrs.loopStart].scheduledTime;
+}
 }
 
 /**
@@ -1374,22 +1377,22 @@ void scheduleInstruction(ProcessorState *state, DependencyEntry *entry, Schedule
 
     if (entry->type == ADD || entry->type == ADDI || entry->type == SUB || entry->type == MOV)
     {
-        //printf("Scheduling instruction %c\n", entry->ID);
+        // printf("Scheduling instruction %c\n", entry->ID);
         while (schedulerState->latestALU1 < state->bundles.size || schedulerState->latestALU2 < state->bundles.size)
         { // latestALU1 == latestALU2 for dependencies
-            //printf("latestALU1 = %d, latestALU2 = %d\n", schedulerState->latestALU1, schedulerState->latestALU2);
+            // printf("latestALU1 = %d, latestALU2 = %d\n", schedulerState->latestALU1, schedulerState->latestALU2);
             if (schedulerState->latestALU1 < state->bundles.size && schedulerState->latestALU1 <= schedulerState->latestALU2)
             { // ALU1 only chosen if it's not later than a free ALU2
-                //printf("latestALU1 = %d\n", schedulerState->latestALU1);
+                // printf("latestALU1 = %d\n", schedulerState->latestALU1);
 
-                //printf("vliw->alu1->type = %d\n", vliw->alu1->type);
+                // printf("vliw->alu1->type = %d\n", vliw->alu1->type);
                 if (vliw->alu1->type == NOP)
                 {
-                    //printf("Scheduling instruction %c in ALU1\n", entry->ID);
+                    // printf("Scheduling instruction %c in ALU1\n", entry->ID);
                     vliw = &state->bundles.vliw[schedulerState->latestALU1]; // take the vliw bundle at the latestALU1 index
                     vliw->alu1 = &instrs.instructions[entry->ID - 65];
                     entry->scheduledTime = schedulerState->latestALU1;
-                    //printf("Scheduled time = %d\n", entry->scheduledTime);
+                    // printf("Scheduled time = %d\n", entry->scheduledTime);
                     schedulerState->latestALU1 += 1;
 
                     scheduled = true;
@@ -1407,7 +1410,7 @@ void scheduleInstruction(ProcessorState *state, DependencyEntry *entry, Schedule
                     vliw = &state->bundles.vliw[schedulerState->latestALU2];
                     vliw->alu2 = &instrs.instructions[entry->ID - 65];
                     entry->scheduledTime = schedulerState->latestALU2;
-                    //printf("Scheduled time = %d\n", entry->scheduledTime);
+                    // printf("Scheduled time = %d\n", entry->scheduledTime);
                     schedulerState->latestALU2 += 1;
 
                     scheduled = true;
@@ -1421,7 +1424,7 @@ void scheduleInstruction(ProcessorState *state, DependencyEntry *entry, Schedule
         }
         if (!scheduled)
         {
-            //printf("Creating new VLIW bundle\n");
+            // printf("Creating new VLIW bundle\n");
             newVLIW(state);
             vliw = &(state->bundles.vliw[state->bundles.size - 1]);
             vliw->alu1 = &instrs.instructions[entry->ID - 65];
@@ -1431,17 +1434,17 @@ void scheduleInstruction(ProcessorState *state, DependencyEntry *entry, Schedule
     }
     else if (entry->type == MULU)
     {
-        //printf("Scheduler state latestMult = %d\n", schedulerState->latestMult);
+        // printf("Scheduler state latestMult = %d\n", schedulerState->latestMult);
         while (schedulerState->latestMult < state->bundles.size)
         {
-            //printf("------>\n");
+            // printf("------>\n");
             if (vliw->mult->type == NOP)
             {
-                //printf("Scheduler state latestMult 2 = %d\n", schedulerState->latestMult);
+                // printf("Scheduler state latestMult 2 = %d\n", schedulerState->latestMult);
                 vliw = &state->bundles.vliw[schedulerState->latestMult];
                 vliw->mult = &instrs.instructions[entry->ID - 65];
                 entry->scheduledTime = schedulerState->latestMult;
-                //printf("Scheduled time = %d\n", entry->scheduledTime);
+                // printf("Scheduled time = %d\n", entry->scheduledTime);
                 schedulerState->latestMult += 1;
 
                 scheduled = true;
@@ -2041,65 +2044,125 @@ void parseInstrunctions(char *inputFile)
     fclose(file2);
 }
 
-
 /**
  * @brief Function to write output of an instruction in a JSON file.
  * @param inst The instruction to convert to a string.
  * @return const char* The string representation of the instruction.
  */
-const char* instructionToString(InstructionEntry *inst) {
-    static char buffer[64];  // Sufficiently large buffer for instruction representation
-    if (inst->type == NOP) {
-        sprintf(buffer, " nop");
-    } else if (inst->type == MOV) {
-        sprintf(buffer, " mov %s, %d", inst->opcode, inst->imm);
-    } else if (inst->type == ADDI) {
-        sprintf(buffer, " addi %s, %s, %d", inst->opcode,, inst->imm);
-    } else if (inst->type == MULU) {
-        sprintf(buffer, " mulu %s, %s, %s", inst->opcode, inst->opcode, inst->opcode);
-    } else if (inst->type == LD) {
-        sprintf(buffer, " ld %s, %d(%s)", inst->opcode, inst->imm, inst->opcode);
-    } else if (inst->type == ST) {
-        sprintf(buffer, " st %s, %d(%s)", inst->opcode, inst->imm, inst->opcode);
-    } else if (inst->type == LOOP) {
-        sprintf(buffer, " loop %d", inst->block);
+const char *instructionToString(InstructionEntry *inst)
+{
+    char *str = malloc(200);
+
+    printf("inst->type = %d\n", inst->type);
+    
+        switch (inst->type)
+        {
+        case ADDI:
+            sprintf(str, "addi x%d, x%d, %d", inst->dest, inst->src1, inst->imm);
+           
+            break;
+        case ADD:
+            sprintf(str, "add x%d, x%d, x%d", inst->dest, inst->src1, inst->src2);
+            break;
+        case SUB:
+            sprintf(str, "sub x%d, x%d, x%d", inst->dest, inst->src1, inst->src2);
+            break;
+        case MOV:
+            switch (inst->dest)
+            {
+            case -3:
+                sprintf(str, "mov LC, x%d", inst->src1);
+                break;
+            case -4:
+                sprintf(str, "mov EC, x%d", inst->src1);
+                break;
+            default:
+                if (inst->predicate >= 0)
+                {
+                    inst->predicate ? sprintf(str, "mov x%d, true", inst->dest ) : sprintf(str, "mov x%d,false", inst->dest);
+                }
+                else if (inst->src2 >= 0)
+                {
+                    sprintf(str, "mov x%d, x%d", inst->dest, inst->src1);
+                }
+                else
+                {
+                    sprintf(str, "mov x%d, %d", inst->dest, inst->imm);
+                }
+                break;
+            }
+            break;
+        case LD:
+            sprintf(str, "ld x%d, %d(x%d)", inst->dest, inst->imm, inst->src1);
+            break;
+        case ST:
+            sprintf(str, "st x%d, %d(x%d)", inst->src2, inst->imm, inst->src1);
+            break;
+
+        case LOOP:
+            sprintf(str, "loop %d", inst->imm);
+            break;
+
+        case LOOP_PIP:
+            sprintf(str, "loop_pip %d", inst->imm);
+            break;
+
+            default:
+         
+            sprintf(str, "nop");
+        }
+        return str;
     }
-    return buffer;
-}
+
 
 /**
  * @brief Function to write the VLIW bundles to a JSON file.
  * @param bundles The VLIW bundles to write.
  * @param filename The name of the file to write to.
  */
-void writeVLIWToJson(VLIWBundles *bundles, const char *filename) {
+void writeVLIWToJson(VLIWBundles *bundles, const char *filename)
+{
     FILE *file = fopen(filename, "w");
-    if (file == NULL) {
+    if (file == NULL)
+    {
         perror("Failed to open file");
         return;
     }
+    char* alu1;
+    char* alu2;
+    char* mult;
+    char* mem;
+    char* br;
 
+printf("bundles->size = %d\n", bundles->size);
+fflush(stdout);
     fprintf(file, "[\n");
-    for (int i = 0; i < bundles->size; i++) {
+    for (int i = 0; i < bundles->size; i++)
+    {
+        printf("i = %d\n", i);
+
         fprintf(file, "  [");
-        fprintf(file, "\"%s\", \"%s\", \"%s\", \"%s\", \"%s\"",
-                instructionToString(bundles->vliw[i].alu1),
-                instructionToString(bundles->vliw[i].alu2),
-                instructionToString(bundles->vliw[i].mult),
-                instructionToString(bundles->vliw[i].mem),
-                instructionToString(bundles->vliw[i].br));
-        
-        if (i < bundles->size - 1) {
+        alu1 = instructionToString(bundles->vliw[i].alu1);
+        alu2 = instructionToString(bundles->vliw[i].alu2);
+        mult = instructionToString(bundles->vliw[i].mult);
+        mem = instructionToString(bundles->vliw[i].mem);
+        br = instructionToString(bundles->vliw[i].br);
+
+        fprintf(file, "  \"%s\", \"%s\", \"%s\", \"%s\", \"%s\"", alu1, alu2, mult, mem, br);
+       
+
+        if (i < bundles->size - 1)
+        {
             fprintf(file, "],\n");
-        } else {
+        }
+        else
+        {
             fprintf(file, "]\n");
         }
     }
     fprintf(file, "]\n");
     fclose(file);
 }
-
-
 
 /*************************************************************
  *

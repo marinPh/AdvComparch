@@ -125,7 +125,7 @@ void parseString(char *instr_string, InstructionEntry *entry)
     else if (entry->type == MOV)
     {
     token = strtok(NULL, " ");
-        // if dest = "pX" then dest = -2 and imm = 0 if false and 1 if true
+        
         if (token[0] == 'p')
         {
             entry->dest = atoi(token + 1);

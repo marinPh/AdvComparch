@@ -1393,11 +1393,12 @@ void parseInstrunctions( char *inputFile) {
       
         parseString(instr_str, &entry);
         pushInstruction(entry);
-        if (entry.opcode[0] == 'l')
+        if (entry.type == LOOP || entry.type == LOOP_PIP)
         {
             instrs.loopStart = entry.imm;
             instrs.loopEnd = i;
         }
+       
         // parse using tokens
     }
     // reread the entries if i< loopStart then block =0, if i>= loopStart and i<= loopEnd then block =1, if i> loopEnd then block =2

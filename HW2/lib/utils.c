@@ -119,7 +119,7 @@ void parseString(char *instr_string, InstructionEntry *entry)
             entry->dest = atoi(token + 1);
             entry->predicate = (strncmp(strtok(NULL, " "), "true", 4) == 0) ? 1 : 0;
         }
-        else if (token[1] == "C")
+        else if (token[1] == 'C')
         {
             //NB: if dest = LC then dest = -3  or dest = EC then dest = -4
             // if dest = LC then dest = -3  or dest = EC then dest = -4
@@ -131,15 +131,18 @@ void parseString(char *instr_string, InstructionEntry *entry)
             {
                 entry->dest = -4; // EC
             }
+            entry->src1 = -1;
+            entry->src2 = -1;
             //check if imm is in hex or dec format, hex starts with 0x and need to be converted to dec
             token = strtok(NULL, " ");
-            if (token[2] == '0' && token[3] == 'x')
+            
+            if (token[0] == '0' && token[1] == 'x')
             {
                 entry->imm = (int)strtol(token + 2, NULL, 16);
             }
             else
             {
-                entry->imm = atoi(token + 2);
+                entry->imm = atoi(token);
             }
         }
         else
@@ -147,6 +150,7 @@ void parseString(char *instr_string, InstructionEntry *entry)
             entry->dest = atoi(token + 1);
             // need to check if there is an imm or a src
             token = strtok(NULL, " ");
+            printf("token for 2C: %s\n", token);
             if (token[0] == 'x')
             {
                 entry->src1 = atoi(token + 1);
@@ -157,7 +161,15 @@ void parseString(char *instr_string, InstructionEntry *entry)
             {
                 entry->src1 = -1;
                 entry->src2 = -1;
-                entry->imm = atoi(token);
+                //check if imm is in hex or dec format, hex starts with 0x and need to be converted to dec
+                if (token[0] == '0' && token[1] == 'x')
+                {
+                    entry->imm = (int)strtol(token + 2, NULL, 16);
+                }
+                else
+                {
+                    entry->imm = atoi(token);
+                }
             }
         }
     } else {  // if opcode is add, addi, sub, mulu

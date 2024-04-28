@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "cJSON.h"
-#include "cJSON_Utils.h"
-#include "VLIW470.h"
+#include "./lib/cJSON.h"
+#include "./lib/cJSON_Utils.h"
+#include "./lib/VLIW470.h"
+#include <stdbool.h>
 
 void parseString(char *instr_string, InstructionEntry *entry)
 {
@@ -77,7 +78,15 @@ void parseString(char *instr_string, InstructionEntry *entry)
         }
         else
         {
-            entry->imm = atoi(token);
+            // check if imm is dec or hex, hex starts with 0x and need to be converted to dec
+            if (token[0] == '0' && token[1] == 'x')
+            {
+                entry->imm = (int)strtol(token, NULL, 16);
+            }
+            else
+            {
+                entry->imm = atoi(token);
+            }
 
             token += 2;
         }
@@ -122,7 +131,16 @@ void parseString(char *instr_string, InstructionEntry *entry)
             {
                 entry->dest = -4; // EC
             }
-            entry->imm = atoi(strtok(NULL, " "));
+            //check if imm is in hex or dec format, hex starts with 0x and need to be converted to dec
+            token = strtok(NULL, " ");
+            if (token[2] == '0' && token[3] == 'x')
+            {
+                entry->imm = (int)strtol(token + 2, NULL, 16);
+            }
+            else
+            {
+                entry->imm = atoi(token + 2);
+            }
         }
         else
         {
@@ -157,7 +175,15 @@ void parseString(char *instr_string, InstructionEntry *entry)
         else
         {
             entry->src2 = -1;
-            entry->imm = atoi(token);
+            //check if imm is dec or hex, hex starts with 0x
+            if (token[0] == '0' && token[1] == 'x')
+            {
+                entry->imm = (int)strtol(token, NULL, 16);
+            }
+            else
+            {
+                entry->imm = atoi(token);
+            }
         }
     }
 }

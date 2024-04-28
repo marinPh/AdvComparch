@@ -1337,16 +1337,10 @@ void pushInstruction(InstructionEntry entry) {
 /**
  * @brief Parse the input file and store the instructions in the instruction set.
  */
-void parseInstrunctions(char *progFile, char *inputFile) {
+void parseInstrunctions( char *inputFile) {
 
-    FILE *file = fopen(progFile, "r");
     FILE *file2 = fopen(inputFile, "r");
-    printf("%p\n", file);
-    if (file == NULL)
-    {
-        printf("Error opening file\n");
-        exit(1);
-    }
+   
     if (file2 == NULL)
     {
         printf("Error opening file\n");
@@ -1360,22 +1354,13 @@ void parseInstrunctions(char *progFile, char *inputFile) {
     //  there is no name prog file looks like this -> [[],[]]
 
     // Get the file size
-    fseek(file, 0, SEEK_END);
-    long file_size = ftell(file);
-    rewind(file); // Go back to the beginning of the file
-
+   
     fseek(file2, 0, SEEK_END);
     long file_size2 = ftell(file2);
     rewind(file2); // Go back to the beginning of the file
 
     // Allocate memory to store the file contents
-    char *json_data = (char *)malloc(file_size + 1);
-    if (json_data == NULL)
-    {
-        printf("Memory allocation failed.\n");
-        fclose(file);
-        return;
-    }
+   
 
     char *json_data2 = (char *)malloc(file_size2 + 1);
     if (json_data2 == NULL)
@@ -1385,47 +1370,16 @@ void parseInstrunctions(char *progFile, char *inputFile) {
         return;
     }
     // Read the file contents into the allocated memory
-    fread(json_data, 1, file_size, file);
-    json_data[file_size] = '\0'; 
 
     fread(json_data2, 1, file_size2, file2);
     json_data2[file_size2] = '\0'; 
 
     // Close the file
 
-    cJSON *root = cJSON_Parse(json_data);
-    printf("%s", *root);
-    if (root == NULL)
-    {
-        const char *error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL)
-        {
-            printf("Error before: %s\n", error_ptr);
-        }
-        cJSON_free(json_data); // Free memory
-        return;
-    }
+
     cJSON *root2 = cJSON_Parse(json_data2);
-
-    // root is an array of 2 arrays of strings
-    cJSON *prog1 = cJSON_GetArrayItem(root, 0);
-    cJSON *prog2 = cJSON_GetArrayItem(root, 1);
-
     // prog1 is an array of strings
-    for (int i = 0; i < cJSON_GetArraySize(prog1)-1; i++)
-    {
-        cJSON *instr = cJSON_GetArrayItem(prog1, i);
-        // convert instr to string
-        char *instr_str = cJSON_Print(instr);
-        // parse instr_str to InstructionEntry eg: "addi x1, x1, 1"
-        InstructionEntry entry;
-     
-        parseString(instr_str, &entry);
-
-        pushInstruction(entry);
  
-        // parse using tokens
-    }
     printf("root2\n");
     for (int i = 0; i < cJSON_GetArraySize(root2); i++)
     {
@@ -1444,22 +1398,6 @@ void parseInstrunctions(char *progFile, char *inputFile) {
         }
         // parse using tokens
     }
-
-    for (int i = 0; i < cJSON_GetArraySize(prog2); i++)
-    {
-        cJSON *instr = cJSON_GetArrayItem(prog2, i);
-        // convert instr to string
-        char *instr_str = cJSON_Print(instr);
-        // parse instr_str to InstructionEntry eg: "addi x1, x1, 1"
-        InstructionEntry entry;
-        
-        parseString(instr_str, &entry);
-  
-        pushInstruction(entry);
-      
-        // parse using tokens
-    }
-
     // reread the entries if i< loopStart then block =0, if i>= loopStart and i<= loopEnd then block =1, if i> loopEnd then block =2
     for (int i = 0; i < instrs.size; i++)
     {
@@ -1476,8 +1414,6 @@ void parseInstrunctions(char *progFile, char *inputFile) {
             instrs.instructions[i].block = 2;
         }
     } 
-
-    fclose(file);
     fclose(file2);
 }
 

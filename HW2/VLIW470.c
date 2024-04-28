@@ -54,7 +54,7 @@ void pushDependency(DependencyTable *table, DependencyEntry entry) {
 DependencyTable dependencyTableInit() {
     DependencyTable table = {NULL, 0};
     for (int i = 0; i < instrs.size; i++) {
-        DependencyEntry entry = {i, 65+i, instrs.instructions[i].type, instrs.instructions[i].dest, {0, {NULL, 0}}, {0, {NULL, 0}}, {0, {NULL, 0}}, NULL, -1};  // TODO postLoop only 1?
+        DependencyEntry entry = {i, 65+i, instrs.instructions[i].type, instrs.instructions[i].dest, {0, {NULL, 0}}, {0, {NULL, 0}}, {0, {NULL, 0}}, {0, {NULL, 0}}, -1}; 
         pushDependency(&table, entry);
     }
     return table;
@@ -65,7 +65,7 @@ DependencyTable dependencyTableInit() {
  * 
  * @return DependencyTable 
  */
-DependencyTable fillDepencies() {
+DependencyTable createFillDepencies() {
     DependencyTable table = dependencyTableInit();
     for (int i = 0; i < table.size; i++) {
         int pot = instrs.instructions[i].dest;
@@ -115,7 +115,6 @@ void whatType(int instr1, int instr2, DependencyTable *table) {
                     }
                 }
             }
-        // TODO } issue x Marin
 
         } else { // TODO:Waring very false
             // if there is no loop all dependencies are local
@@ -178,7 +177,7 @@ int calculateIIRes(InstructionsSet *set, ProcessorState *state) {
 
     // Counting instructions by type
     for (int i = 0; i < set->size; i++) {
-        if (set->instructions[i].type != NOP) { // Ignore NOPs    TODO set->instructions[i].type != ST  
+        if (set->instructions[i].type != NOP) { // Ignore NOPs     
             counts[set->instructions[i].type]++;
         }
     }
@@ -444,10 +443,6 @@ void registerAllocation(ProcessorState *state, DependencyTable *table) {
             vliw->mem->dest = reg; 
             reg++;
         }
-        // BR
-        // if (vliw->br.type != NOP) {
-        //     // TODO 
-        // }
     }
 
     // Step 2. change the source registers to the allocated destination registers of the instructions they depend on
@@ -498,9 +493,6 @@ void registerAllocation(ProcessorState *state, DependencyTable *table) {
             }
         }
 
-
-        // TODO               !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
         // change the source registers to the allocated destination registers of the instructions they depend on
         if (latestDep.idx != -1) {            
             instrs.instructions[entry->ID-65].src1 = instrs.instructions[latestDep.idx].dest;
@@ -522,7 +514,7 @@ void registerAllocation(ProcessorState *state, DependencyTable *table) {
                 int lastUsedTime = -1;
                 int idxLastUsed = -1;
                 int regDep = -1; 
-                for (int l = instrs.loopStart; l < instrs.loopEnd + 1; l++) {
+                for (int l = instrs.loopStart; l < instrs.loopEnd+1; l++) {
                     if (instrs.instructions[l].src1 == instrs.instructions[entry->ID-65].dest || instrs.instructions[l].src2 == instrs.instructions[entry->ID-65].dest) {
                         if (table->dependencies[l].scheduledTime > lastUsedTime) {
                             lastUsedTime = table->dependencies[l].scheduledTime;
@@ -542,8 +534,6 @@ void registerAllocation(ProcessorState *state, DependencyTable *table) {
                     // Set the other fields of the MOV instruction
                     vliw->alu1->imm = 0;
                     vliw->alu1->predicate = 0;
-                    vliw->alu1->cycle = 0;
-                    vliw->alu1->done = false;
                 } else if (vliw->alu2->type == NOP) {
                     vliw->alu2->type = MOV;
                     vliw->alu2->src1 = instrs.instructions[entry->ID-65].dest;
@@ -551,8 +541,6 @@ void registerAllocation(ProcessorState *state, DependencyTable *table) {
                     // Set the other fields of the MOV instruction
                     vliw->alu1->imm = 0;
                     vliw->alu1->predicate = 0;
-                    vliw->alu1->cycle = 0;
-                    vliw->alu1->done = false;
                 } else {
                     // create a new VLIW bundle
                     state->bundles.size += 1;
@@ -570,7 +558,6 @@ void registerAllocation(ProcessorState *state, DependencyTable *table) {
                     // Set the other fields of the MOV instruction
                     vliw2->alu1->imm = -1;
                     vliw2->alu1->predicate = false;
-                    vliw2->alu1->cycle = 0;
 
                     // move the loop instruction to the new VLIW bundle
                     vliw2->br = vliw->br;
@@ -619,7 +606,7 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table) {
         // ALU1
         if (vliw->alu1->type != NOP) {
             // Allocate registers
-            vliw->alu1->dest = offset + ROTATION_START_INDEX + state->RRB;    // TODO keep track somewhere ? of the used regs 
+            vliw->alu1->dest = offset + ROTATION_START_INDEX + state->RRB;    
             offset++;
             offset += state->stage; 
         }
@@ -1249,12 +1236,6 @@ void scheduleInstructions(ProcessorState *state, DependencyTable *table) {
                 scheduleInstruction(state, entry, &schedulerState);
                 schedulerState.latestMem = oldLatest;
             }
-            else if (table->dependencies[IDdependsOn].type == LOOP || table->dependencies[IDdependsOn].type == LOOP_PIP) {  // TODO does this case exist ?
-                int oldLatest = schedulerState.latestBr;
-                schedulerState.latestBr = max(schedulerState.latestBr, latestScheduledTime + 1);
-                scheduleInstruction(state, entry, &schedulerState);
-                schedulerState.latestBr = oldLatest;
-            }
             else {
                 int oldLatest1 = schedulerState.latestALU1;
                 int oldLatest2 = schedulerState.latestALU2;
@@ -1269,7 +1250,7 @@ void scheduleInstructions(ProcessorState *state, DependencyTable *table) {
 //-->   // Interloop dependencies
         // handled right after all of BB1 is scheduled
         if (table->dependencies[instrs.loopEnd].scheduledTime != -1 && table->dependencies[instrs.loopEnd+1].scheduledTime == -1) {
-            for (int i = instrs.loopStart; i < instrs.loopEnd; i++) { // TODO Marin loopEnd or loopEnd+1 ?
+            for (int i = instrs.loopStart; i < instrs.loopEnd+1; i++) { 
                 DependencyEntry *entry = &table->dependencies[i];
 
                 if (entry->loop.size != 0) {
@@ -1502,8 +1483,6 @@ void showInstruction(InstructionEntry instr) {
     printf("Imm: %d\n", instr.imm);
     printf("Pred: %d\n", instr.predicate);
     printf("Type: %d\n", instr.type);
-    printf("Cycle: %d\n", instr.cycle);
-    printf("Done: %d\n", instr.done);
 }
 
 /**

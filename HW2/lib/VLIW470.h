@@ -49,11 +49,11 @@ typedef InstructionEntry Mem;
 typedef InstructionEntry Br;
 
 typedef struct {
-    ALU  alu1;
-    ALU  alu2;
-    Mult mult; // 3 cycle latency (all others 1) 
-    Mem  mem;
-    Br   br; 
+    ALU  *alu1;
+    ALU  *alu2;
+    Mult *mult; // 3 cycle latency (all others 1)
+    Mem  *mem;
+    Br   *br;
 } VLIW;
 
 typedef struct {
@@ -77,12 +77,13 @@ typedef struct {
     unsigned int  stage;   // Loop stage 
 } ProcessorState;
 
-void parseInstrunctions(char* progFile, char* inputFile);
+void parseInstrunctions(char* inputFile);
 
 void printInstructions(InstructionsSet instr);
 
 void showDepTable(DependencyTable table);
-DependencyTable fillDepencies();
+DependencyTable createFillDepencies();
+DependencyTable dependencyTableInit();
 
 void initProcessorState(ProcessorState *state);
 
@@ -92,8 +93,25 @@ bool readPredicateRegister(ProcessorState *state, int index);
 
 int calculateIIRes(InstructionsSet *set, ProcessorState *state);
 
-int checkAndAdjustIIForInstruction(DependencyTable *table, char instrAddr, ProcessorState *state);
+int checkInterloopDependencies(DependencyTable *table, ProcessorState *state);
+int checkAndAdjustIIForInstruction(DependencyTable *table, int i, ProcessorState *state);
 
 void registerAllocation(ProcessorState *state, DependencyTable *table);
+void registerAllocationPip(ProcessorState *state, DependencyTable *table);
+
+VLIW newVLIW(ProcessorState *state);
+
+typedef struct {
+    int latestALU1;
+    int latestALU2;
+    int latestMult;
+    int latestMem;
+    int latestBr;
+} SchedulerState;
+
+void scheduleInstruction(ProcessorState *state, DependencyEntry *entry, SchedulerState *schedulerState);
+void scheduleInstructions(ProcessorState *state, DependencyTable *table);
+void scheduleInstructionsPiP(ProcessorState *state, DependencyTable *table);
+
 
 #endif /* MIPS_SIMULATOR_H */

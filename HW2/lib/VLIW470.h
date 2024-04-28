@@ -45,14 +45,14 @@ typedef struct {
 } DependencyTable;
 
 // FUs
-typedef InstructionEntry ALU; 
+typedef InstructionEntry Alu; 
 typedef InstructionEntry Mult;
 typedef InstructionEntry Mem;
 typedef InstructionEntry Br;
 
 typedef struct {
-    ALU  *alu1;
-    ALU  *alu2;
+    Alu  *alu1;
+    Alu  *alu2;
     Mult *mult; // 3 cycle latency (all others 1)
     Mem  *mem;
     Br   *br;
@@ -116,5 +116,6 @@ void scheduleInstruction(ProcessorState *state, DependencyEntry *entry, Schedule
 void scheduleInstructions(ProcessorState *state, DependencyTable *table);
 void scheduleInstructionsPiP(ProcessorState *state, DependencyTable *table);
 
+void writeVLIWToJson(VLIWBundles *bundles, const char *filename); 
 
 #endif /* MIPS_SIMULATOR_H */

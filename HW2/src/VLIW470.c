@@ -2040,6 +2040,65 @@ void parseInstrunctions(char *inputFile)
     fclose(file2);
 }
 
+
+/**
+ * @brief Function to write output of an instruction in a JSON file.
+ * @param inst The instruction to convert to a string.
+ * @return const char* The string representation of the instruction.
+ */
+const char* instructionToString(InstructionEntry *inst) {
+    static char buffer[64];  // Sufficiently large buffer for instruction representation
+    if (inst->type == NOP) {
+        sprintf(buffer, " nop");
+    } else if (inst->type == MOV) {
+        sprintf(buffer, " mov %s, %d", inst->opcode, inst->imm);
+    } else if (inst->type == ADDI) {
+        sprintf(buffer, " addi %s, %s, %d", inst->opcode, inst->opcode, inst->imm);
+    } else if (inst->type == MULU) {
+        sprintf(buffer, " mulu %s, %s, %s", inst->opcode, inst->opcode, inst->opcode);
+    } else if (inst->type == LD) {
+        sprintf(buffer, " ld %s, %d(%s)", inst->opcode, inst->imm, inst->opcode);
+    } else if (inst->type == ST) {
+        sprintf(buffer, " st %s, %d(%s)", inst->opcode, inst->imm, inst->opcode);
+    } else if (inst->type == LOOP) {
+        sprintf(buffer, " loop %d", inst->block);
+    }
+    return buffer;
+}
+
+/**
+ * @brief Function to write the VLIW bundles to a JSON file.
+ * @param bundles The VLIW bundles to write.
+ * @param filename The name of the file to write to.
+ */
+void writeVLIWToJson(VLIWBundles *bundles, const char *filename) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Failed to open file");
+        return;
+    }
+
+    fprintf(file, "[\n");
+    for (int i = 0; i < bundles->size; i++) {
+        fprintf(file, "  [");
+        fprintf(file, "\"%s\", \"%s\", \"%s\", \"%s\", \"%s\"",
+                instructionToString(bundles->vliw[i].alu1),
+                instructionToString(bundles->vliw[i].alu2),
+                instructionToString(bundles->vliw[i].mult),
+                instructionToString(bundles->vliw[i].mem),
+                instructionToString(bundles->vliw[i].br));
+        if (i < bundles->size - 1) {
+            fprintf(file, "],\n");
+        } else {
+            fprintf(file, "]\n");
+        }
+    }
+    fprintf(file, "]\n");
+    fclose(file);
+}
+
+
+
 /*************************************************************
  *
  *                    Display Methods

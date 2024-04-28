@@ -114,13 +114,13 @@ void whatType(int instr1, int instr2, dependencyTable *table)
                     {
                         pushId(&entry->invariant, table->dependencies[instr1].ID, instrs.instructions[instr1].dest);
                     }
-        }
-    }
-    else
-    {
+        }else
+    { //TODO:Waring very false
         // if there is no loop all dependencies are local
         pushId(&entry->local, table->dependencies[instr1].ID, instrs.instructions[instr1].dest);
     }
+    }
+    
 
     return;
 }
@@ -130,9 +130,8 @@ dependencyTable fillDepencies()
     dependencyTable table = dependencyTableInit();
     for (int i = 0; i < table.size; i++)
     {
-        
         int pot = instrs.instructions[i].dest;
-        for (int j = i; j < instrs.size; j++)
+        for (int j = i+1; j < instrs.size; j++)
         {
             // check for each instruction if pot is a dest or src
             if (instrs.instructions[j].dest == pot)
@@ -146,7 +145,7 @@ dependencyTable fillDepencies()
         if (instrs.instructions[i].block == 1 && instrs.loop_start != -1)
         {
 
-            for (int j = instrs.loop_start; j < i; j++)
+            for (int j = instrs.loop_start; j <= i; j++)
             {
                 whatType(i, j, &table);
             }

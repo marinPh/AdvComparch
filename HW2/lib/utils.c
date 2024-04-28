@@ -27,7 +27,6 @@ void parseString(char *instr_string, InstructionEntry *entry)
         
         if (token[0] == '(')
         {
-
             entry->imm = 0;
             token += 1;
         }
@@ -43,7 +42,6 @@ void parseString(char *instr_string, InstructionEntry *entry)
     }
     else if (strcmp(entry->opcode, "loop") == 0 || strcmp(entry->opcode, "loop.pip")==0)
     { // if opcode is loop
- 
         token = strtok(NULL, " ");
         entry->imm = atoi(token);
         entry->dest = -1;
@@ -58,7 +56,7 @@ void parseString(char *instr_string, InstructionEntry *entry)
         entry->dest = -1;
         entry->src1 = -1;
         entry->src2 = -1;
-        entry->imm = -1;
+        entry->imm = 0;
     }
     else if (strcmp(entry->opcode, "mov") == 0)
     {
@@ -66,11 +64,12 @@ void parseString(char *instr_string, InstructionEntry *entry)
         // if dest = "pX" then dest = -2 and imm = 0 if false and 1 if true
         if (token[0] == 'p')
         {
-            entry->dest = -2;
-            entry->imm = atoi(strtok(NULL, " "));
+            entry->dest = atoi(token + 1);
+            entry->predicate = atoi(strtok(NULL, " "));
         }
         else if (token[1] == "C")
         {
+            //NB: if dest = LC then dest = -3  or dest = EC then dest = -4
             // if dest = LC then dest = -3  or dest = EC then dest = -4
             if (token[0] == 'L')
             {
@@ -87,13 +86,12 @@ void parseString(char *instr_string, InstructionEntry *entry)
  
             entry->dest = atoi(token + 1);
             // need to check if there is an imm or a src
-
             token = strtok(NULL, " ");
             if (token[0] == 'x')
             {
                 entry->src1 = atoi(token + 1);
                 entry->src2 = -1;
-                entry->imm = -1;
+                entry->imm = 0;
             }
             else
             {
@@ -115,7 +113,7 @@ void parseString(char *instr_string, InstructionEntry *entry)
         if (token[0] == 'x')
         {
             entry->src2 = atoi(token + 2);
-            entry->imm = -1;
+            entry->imm = 0;
         }
         else
         {

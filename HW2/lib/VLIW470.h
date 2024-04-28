@@ -77,12 +77,13 @@ typedef struct {
     unsigned int  stage;   // Loop stage 
 } ProcessorState;
 
-void parseInstrunctions(char* progFile, char* inputFile);
+void parseInstrunctions(char* inputFile);
 
 void printInstructions(InstructionsSet instr);
 
 void showDepTable(DependencyTable table);
-DependencyTable fillDepencies();
+DependencyTable createFillDepencies();
+DependencyTable dependencyTableInit();
 
 void initProcessorState(ProcessorState *state);
 
@@ -110,6 +111,7 @@ typedef struct {
 
 void scheduleInstruction(ProcessorState *state, DependencyEntry *entry, SchedulerState *schedulerState);
 void scheduleInstructions(ProcessorState *state, DependencyTable *table);
+void scheduleInstructionsPiP(ProcessorState *state, DependencyTable *table);
 
 
 #endif /* MIPS_SIMULATOR_H */

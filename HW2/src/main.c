@@ -29,7 +29,10 @@ int main(int argc, char *argv[]) {
 //
     //registerAllocation(state, &table);
     printf("II: \n");
-    showProcessorState(*state);    
+    showProcessorState(*state);   
+
+    writeVLIWToJson(&state->bundles, "output.json"); 
+    printf("output.json created\n");
 
 
     // test LOOP_PIP

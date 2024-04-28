@@ -2053,7 +2053,8 @@ const char* instructionToString(InstructionEntry *inst) {
     } else if (inst->type == MOV) {
         sprintf(buffer, " mov %s, %d", inst->opcode, inst->imm);
     } else if (inst->type == ADDI) {
-        sprintf(buffer, " addi %s, %s, %d", inst->opcode, inst->opcode, inst->imm);
+        
+        sprintf(buffer, " addi %s, %s, %d", inst->opcode,, inst->imm);
     } else if (inst->type == MULU) {
         sprintf(buffer, " mulu %s, %s, %s", inst->opcode, inst->opcode, inst->opcode);
     } else if (inst->type == LD) {
@@ -2087,6 +2088,7 @@ void writeVLIWToJson(VLIWBundles *bundles, const char *filename) {
                 instructionToString(bundles->vliw[i].mult),
                 instructionToString(bundles->vliw[i].mem),
                 instructionToString(bundles->vliw[i].br));
+        
         if (i < bundles->size - 1) {
             fprintf(file, "],\n");
         } else {

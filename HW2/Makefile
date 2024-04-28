@@ -9,7 +9,7 @@ SRCS = main.c utils.c VLIW470.c
 OBJS = $(SRCS:.c=.o)
 
 # Executable name
-TARGET = myprogram
+TARGET = main
 
 # Default target
 all: $(TARGET)

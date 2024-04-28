@@ -25,7 +25,7 @@ set(HEADERS
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Add the executable target
-add_executable(MyExecutable ${SOURCES} ${HEADERS})
+add_executable(main ${SOURCES} ${HEADERS})
 
-# Link any libraries or dependencies
-target_link_libraries(MyExecutable ${LIBRARIES})
+# # Link any libraries or dependencies
+# target_link_libraries(main ${LIBRARIES})

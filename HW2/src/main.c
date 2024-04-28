@@ -25,11 +25,11 @@ int main(int argc, char *argv[]) {
     //showDepTable(table);
 
     // test LOOP (simple)
-    //scheduleInstructions(state, &table);
+    scheduleInstructions(state, &table);
 //
     //registerAllocation(state, &table);
     printf("II: \n");
-    //showProcessorState(*state);    
+    showProcessorState(*state);    
 
 
     // test LOOP_PIP

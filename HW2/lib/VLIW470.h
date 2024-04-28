@@ -18,11 +18,13 @@ typedef struct {
 typedef struct {
     char ID;
     unsigned int reg;
+    int src;
 } dependency;
 
 typedef struct {
     dependency *list;
     unsigned int size;
+    
 } idList;
 
 typedef struct {

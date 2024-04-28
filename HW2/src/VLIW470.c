@@ -71,11 +71,12 @@ DependencyTable dependencyTableInit()
  * @param id The ID of the instruction to add as a dependency.
  * @param reg The register that the instruction writes to.
  */
-void pushId(idList *list, char id, unsigned int reg)
+void pushId(idList *list, char id, unsigned int reg,int src)
 {
     list->list = realloc(list->list, (list->size + 1) * sizeof(dependency));
     list->list[list->size].ID = id;
     list->list[list->size].reg = reg;
+    list->list[list->size].src =src;
     list->size++;
 }
 
@@ -92,14 +93,13 @@ void whatType(int instr1, int instr2, DependencyTable *table)
     //  we check if the dest of instr1 is equal to src1 or src2 of instr2
     
 
-    if(instr2 == 6){
-        // src1 and src2 of instr2 and dest of instr1
-        printf(" src1 %d, scr2 %d, dest %d, PC %d\n", instrs.instructions[instr2].src1, instrs.instructions[instr2].src2, instrs.instructions[instr1].dest, instr1);        
-    }
-
+  
 
     if (instrs.instructions[instr1].dest == instrs.instructions[instr2].src1 || instrs.instructions[instr2].src2 == instrs.instructions[instr1].dest)
     {
+        //src is the name of the src that has the dependency
+        int src = instrs.instructions[instr1].dest == instrs.instructions[instr2].src1 ? 1 : 2;
+       
         if (instrs.loopStart != -1)
         { // check if in same block
         
@@ -110,11 +110,11 @@ void whatType(int instr1, int instr2, DependencyTable *table)
 
                 if (instr1 < instr2)
                 {
-                    pushId(&entry->local, table->dependencies[instr1].ID, instrs.instructions[instr1].dest);
+                    pushId(&entry->local, table->dependencies[instr1].ID, instrs.instructions[instr1].dest,src);
                 }
                 else
                 {
-                    pushId(&entry->loop, table->dependencies[instr1].ID, instrs.instructions[instr1].dest);
+                    pushId(&entry->loop, table->dependencies[instr1].ID, instrs.instructions[instr1].dest,src);
                 }
             }
             else
@@ -122,14 +122,14 @@ void whatType(int instr1, int instr2, DependencyTable *table)
                 // check if in post loop means instr1 is in block 1 and instr2 is in block 2
                 if (instrs.instructions[instr1].block == 1 && instrs.instructions[instr2].block == 2)
                 {
-                    pushId(&entry->postL, table->dependencies[instr1].ID, instrs.instructions[instr1].dest);
+                    pushId(&entry->postL, table->dependencies[instr1].ID, instrs.instructions[instr1].dest,src);
                 }
                 else
                 {
                     // check if in invariant
                     if (instrs.instructions[instr1].block == 0 && (instrs.instructions[instr2].block == 1 || instrs.instructions[instr2].block == 2))
                     {
-                        pushId(&entry->invariant, table->dependencies[instr1].ID, instrs.instructions[instr1].dest);
+                        pushId(&entry->invariant, table->dependencies[instr1].ID, instrs.instructions[instr1].dest,src);
                     }
                 }
             }
@@ -137,7 +137,7 @@ void whatType(int instr1, int instr2, DependencyTable *table)
         else
         {
             // if there is no loop all dependencies are local
-            pushId(&entry->local, table->dependencies[instr1].ID, instrs.instructions[instr1].dest);
+            pushId(&entry->local, table->dependencies[instr1].ID, instrs.instructions[instr1].dest,src);
         }
     }
     // printf("returning\n");
@@ -172,9 +172,7 @@ DependencyTable createFillDepencies()
         {
             // printf("i: %d, j: %d\n", i, j);
             //  check for each instruction if pot is a dest or src
-              if(i == 2){
-            printf("pot: %d ,\n", pot);
-        }
+           
             
             whatType(i, j, &table);
             if (instrs.instructions[j].dest == pot)
@@ -630,14 +628,15 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
         int reg2 = instrs.instructions[entry->ID - 65].src2; // source register 2
 
         LatestDependency latestDep = findLatestDependency(table, entry);
-        if(entry->ID-65 ==6){
-            //printf("-->latestDep.idx: %d\n", latestDep.idx);
+        if(entry->ID-65 == 6){
+            printf("-->latestDep.idx: %d\n", latestDep.idx);
+            printf("-->latestDep.dest: %d\n", latestDep.dest);
             printf("-->latestDep.idxOtherSrc: %d\n", latestDep.idxOtherSrc);
+            printf("-->latestDep.destOtherSrc: %d\n", latestDep.destOtherSrc);
             
         }
 
         
-
         // interloopDeps
         // only check for interloop dependencies if the latest found dependency producer is NOT in BB0
         // (case where there exist 2 producers, one in BB0 and one in BB1, and the consumer is in BB1 or BB2)    TODO consumer in BB2 ?
@@ -708,11 +707,23 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
         // change the source registers to the allocated destination registers of the instructions they depend on
         if (latestDep.idx != -1)
         {
-            instrs.instructions[entry->ID - 65].src1 = instrs.instructions[latestDep.idx].dest;
+            if (table->dependencies[latestDep.idx].dest == reg1)
+            {
+                instrs.instructions[entry->ID - 65].src1 = instrs.instructions[latestDep.idx].dest;
+            } else if (table->dependencies[latestDep.idx].dest == reg2)
+            {
+                instrs.instructions[entry->ID - 65].src2 = instrs.instructions[latestDep.idx].dest;
+            }
         }
         if (latestDep.idxOtherSrc != -1)
         {
-            instrs.instructions[entry->ID - 65].src2 = instrs.instructions[latestDep.idxOtherSrc].dest;
+            if (table->dependencies[latestDep.idxOtherSrc].dest == reg2)
+            {
+                instrs.instructions[entry->ID - 65].src2 = instrs.instructions[latestDep.idxOtherSrc].dest;
+            } else if (table->dependencies[latestDep.idxOtherSrc].dest == reg1)
+            {
+                instrs.instructions[entry->ID - 65].src1 = instrs.instructions[latestDep.idxOtherSrc].dest;
+            }
         }
     }
 
@@ -727,29 +738,41 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
         {
             if (entry->loop.list[k].ID == entry->ID)
             {
-
+                int reg = entry->loop.list[k].src ==1 ? instrs.instructions[entry->ID - 65].src1 : instrs.instructions[entry->ID - 65].src2;
                 // find the last time that the same register was used as a source register
                 int lastUsedTime = -1;
                 int idxLastUsed = -1;
                 int regDep = -1;
+                InstructionType type = NOP;
                 for (int l = instrs.loopStart; l < instrs.loopEnd + 1; l++)
                 {
-                    if (instrs.instructions[l].src1 == table->dependencies[entry->ID - 65].dest || instrs.instructions[l].src2 == table->dependencies[entry->ID - 65].dest)
+                    if (instrs.instructions[l].src1 == reg || instrs.instructions[l].src2 == reg)
                     {
                         if (table->dependencies[l].scheduledTime > lastUsedTime)
                         {
+                            type = instrs.instructions[l].src1 == reg ? instrs.instructions[l].type : instrs.instructions[l].type;
                             lastUsedTime = table->dependencies[l].scheduledTime;
                             idxLastUsed = l;
-                            regDep = instrs.instructions[l].src1 == table->dependencies[entry->ID - 65].dest ? instrs.instructions[l].src1 : instrs.instructions[l].src2;
+                            regDep = instrs.instructions[l].src1 == reg ? instrs.instructions[l].src1 : instrs.instructions[l].src2;
+                            printf("regDep: %d\n", regDep);
                         }
                     }
+                }
+                printf("type of last used: %d\n", type);
+
+                if (type == MULU)
+                {
+                    lastUsedTime += 3;
                 }
 
                 // schedule a MOV instruction to copy the value of the source register to the destination register
                 // in the VLIW bundle with the latest scheduled instruction if one of the two ALUs is free
                 VLIW *vliw = &(state->bundles.vliw[lastUsedTime]);
+                
 
-                //printf("lastUsedTime: %d\n", lastUsedTime);
+                printf("lastUsedTime: %d\n", lastUsedTime);
+
+                
 
                 if (vliw->alu1->type == NOP)
                 {
@@ -758,9 +781,7 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
                 }
                 else if (vliw->alu2->type == NOP)
                 {
-                  vliw->alu2 = createNewInstruction("mov", regDep, instrs.instructions[entry->ID - 65].dest,-1, 0, 0, MOV, 0, false);
-
-                    
+                    vliw->alu2 = createNewInstruction("mov", regDep, instrs.instructions[entry->ID - 65].dest,-1, 0, 0, MOV, 0, false);
                 }
                 else
                 {
@@ -808,6 +829,8 @@ void registerAllocation(ProcessorState *state, DependencyTable *table)
             }
         }
     }
+
+    state->bundles.vliw[table->dependencies[instrs.loopEnd].scheduledTime].br->imm = table->dependencies[instrs.loopStart].scheduledTime;
 }
 
 /**
@@ -2067,12 +2090,12 @@ void showDepTable(DependencyTable table)
         printf("Local\n");
         for (int j = 0; j < table.dependencies[i].local.size; j++)
         {
-            printf("ID: %c, Reg: %d\n", table.dependencies[i].local.list[j].ID, table.dependencies[i].local.list[j].reg);
+            printf("ID: %c, Reg: %d, \n", table.dependencies[i].local.list[j].ID, table.dependencies[i].local.list[j].reg);
         }
         printf("Loop\n");
         for (int j = 0; j < table.dependencies[i].loop.size; j++)
         {
-            printf("ID: %c, Reg: %d\n", table.dependencies[i].loop.list[j].ID, table.dependencies[i].loop.list[j].reg);
+            printf("ID: %c, Reg: %d src %d\n", table.dependencies[i].loop.list[j].ID, table.dependencies[i].loop.list[j].reg, table.dependencies[i].loop.list[j].src);
         }
         printf("Invariant\n");
         for (int j = 0; j < table.dependencies[i].invariant.size; j++)

@@ -82,10 +82,13 @@ void pushId(idList *list, char id, unsigned int reg)
  */
 void whatType(int instr1, int instr2, DependencyTable *table) {
     DependencyEntry *entry = &(table->dependencies[instr2]);
+    //printf("instr1: %d, instr2: %d\n", instr1, instr2);
     // we check if the dest of instr1 is equal to src1 or src2 of instr2
+    
     if (instrs.instructions[instr1].dest == instrs.instructions[instr2].src1 || instrs.instructions[instr2].src2 == instrs.instructions[instr1].dest) {
         if (instrs.loopStart != -1)
         { // check if in same block
+        
             if (instrs.instructions[instr1].block == instrs.instructions[instr2].block) {
                 // check if instr1 > instr2
                 if (instr1 > instr2) {
@@ -105,11 +108,13 @@ void whatType(int instr1, int instr2, DependencyTable *table) {
                 }
             }
 
-        } else { // TODO:Waring very false
+        } else { 
             // if there is no loop all dependencies are local
             pushId(&entry->local, table->dependencies[instr1].ID, instrs.instructions[instr1].dest);
         }
     }
+    //printf("returning\n");
+    //printf("instr1: %d, instr2: %d\n", instr1, instr2);
     return;
 }
 
@@ -121,20 +126,44 @@ void whatType(int instr1, int instr2, DependencyTable *table) {
 DependencyTable createFillDepencies() {
     DependencyTable table = dependencyTableInit();
     for (int i = 0; i < table.size; i++) {
+        //printf("i: %d\n", i);
+
+        if(i+1 >= instrs.size) {
+            //printf("breaking\n");
+            break;
+        }
+        //printf("i: %d\n", i);
+    
         int pot = instrs.instructions[i].dest;
+        //printf("pot: %d\n", pot);
+        
+        if (pot == -1) continue;
+        
+        if (i+1 >= instrs.size) {
+            break;
+        }
         for (int j = i+1; j < instrs.size; j++) {
+            //printf("i: %d, j: %d\n", i, j);
             // check for each instruction if pot is a dest or src
             if (instrs.instructions[j].dest == pot) break; 
             whatType(i, j, &table);
         }
+        
         // if instruction is in block 1 we check for the instructions before in block 1
         // from start of loop to i
+        //printf("instr: %s\n", instrs.instructions[i].opcode);
+        
         if (instrs.instructions[i].block == 1 && instrs.loopStart != -1) {
+            
+            
             for (int j = instrs.loopStart; j <= i; j++) {
                 whatType(i, j, &table);
             }
         }
+        //printf("instr: %s\n", instrs.instructions[i].opcode);
     }
+    //printf("returning\n");
+    //showDepTable(table);
     return table;
 }
 
@@ -1383,6 +1412,8 @@ void parseInstrunctions( char *inputFile) {
     // prog1 is an array of strings
 
     printf("root2\n");
+    instrs.loopEnd =-1;
+    instrs.loopStart =-1;
     for (int i = 0; i < cJSON_GetArraySize(root2); i++)
     {
         cJSON *instr = cJSON_GetArrayItem(root2, i);

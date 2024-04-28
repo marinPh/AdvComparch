@@ -13,12 +13,14 @@ int main(int argc, char *argv[]) {
     }
 
     parseInstrunctions(argv[1]);
-    showInstructionSet();
+
     
-    /*
+    
     ProcessorState *state = (ProcessorState *)malloc(sizeof(ProcessorState));
     initProcessorState(state);
-
+    //showProcessorState(*state);
+    
+    printf("filling dep\n");
     DependencyTable table = createFillDepencies();
     showDepTable(table);
 
@@ -44,6 +46,6 @@ int main(int argc, char *argv[]) {
     free(state);
     // free(state_pip->bundles.vliw);
     // free(state_pip);
-*/
+
     return 0;
 }

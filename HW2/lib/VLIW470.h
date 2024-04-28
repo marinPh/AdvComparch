@@ -92,6 +92,7 @@ bool readPredicateRegister(ProcessorState *state, int index);
 
 int calculateIIRes(InstructionsSet *set, ProcessorState *state);
 void showInstructionSet();
+void showProcessorState(ProcessorState state);
 
 int checkInterloopDependencies(DependencyTable *table, ProcessorState *state);
 int checkAndAdjustIIForInstruction(DependencyTable *table, int i, ProcessorState *state);

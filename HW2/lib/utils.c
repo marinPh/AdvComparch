@@ -27,7 +27,7 @@ void parseString(char *instr_string, InstructionEntry *entry)
     {
         entry->type = MULU;
     }
-    else if (strcmp(entry->opcode, "ld") == 0)
+    else if (strncmp(entry->opcode, "ld",2) == 0)
     {
         entry->type = LD;
     }
@@ -65,7 +65,19 @@ void parseString(char *instr_string, InstructionEntry *entry)
     if (entry->type == LD || entry->type == ST)
     {
         token = strtok(NULL, " ");
-        entry->dest = atoi(token + 1);
+         printf("token for LD/ST: %s\n", token);
+
+        if (entry->type == LD)
+        {
+            entry->dest = atoi(token + 1);
+            entry->src2 = -1;
+        }
+        else
+        {
+            entry->src2 = atoi(token + 1);
+            entry->dest = -1;
+        }
+
 
         //"ld x3, imm(x0)"
         // if there isn't an imm , imm =0
@@ -92,7 +104,7 @@ void parseString(char *instr_string, InstructionEntry *entry)
         }
 
         entry->src1 = atoi(token + 1);
-        entry->src2 = -1;
+
     }
     else if (entry->type == LOOP || entry->type == LOOP_PIP)
     { // if opcode is loop
@@ -174,14 +186,17 @@ void parseString(char *instr_string, InstructionEntry *entry)
         }
     } else {  // if opcode is add, addi, sub, mulu
         token = strtok(NULL, ",");
-        entry->dest = atoi(token + 2); // TODO if x35 works, possible error 
+
+        entry->dest = atoi(token + 1); // TODO if x35 works, possible error
         token = strtok(NULL, ",");
         entry->src1 = atoi(token + 2);
-        token = strtok(NULL, ",");
+        token = strtok(NULL, " ");
         // need to check if last element is imm or  xX
+        printf("token for add, addi, sub, mulu: %s\n", token);
+
         if (token[0] == 'x')
         {
-            entry->src2 = atoi(token + 2);
+            entry->src2 = atoi(token + 1);
             entry->imm = 0;
         }
         else

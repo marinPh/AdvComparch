@@ -90,7 +90,7 @@ int getRotatedRegisterIndex(int baseIndex, int rrb);
 int readGeneralRegister(ProcessorState *state, int index);
 bool readPredicateRegister(ProcessorState *state, int index);
 
-int calculateIIRes(InstructionsSet *set, ProcessorState *state);
+int calculateIIRes(ProcessorState *state);
 void showInstructionSet();
 void showProcessorState(ProcessorState state);
 

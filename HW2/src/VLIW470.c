@@ -217,13 +217,13 @@ bool readPredicateRegister(ProcessorState *state, int index) {
  * @param state Pointer to the processor state containing the FUs available in the processor.
  * @return The lower bound of the II.
  */
-int calculateIIRes(InstructionsSet *set, ProcessorState *state) {
+int calculateIIRes(ProcessorState *state) {
     int counts[10] = {0};  // Array to count instruction types
 
     // Counting instructions by type
-    for (int i = 0; i < set->size; i++) {
-        if (set->instructions[i].type != NOP) { // Ignore NOPs
-            counts[set->instructions[i].type]++;
+    for (int i = instrs.loopStart; i < instrs.loopEnd+1; i++) {
+        if (instrs.instructions[i].type != NOP) { // Ignore NOPs     
+            counts[instrs.instructions[i].type]++;
         }
     }
 
@@ -623,8 +623,10 @@ void registerAllocation(ProcessorState *state, DependencyTable *table) {
         DependencyEntry *entry = &table->dependencies[j];
         if (entry->local.size == 0 && entry->loop.size == 0 && entry->invariant.size == 0 && entry->postL.size == 0) {
             // allocate a register to the source register
-            instrs.instructions[entry->ID-65].src1 = reg;
-            reg++;
+            if (instrs.instructions[entry->ID-65].src1 != -1) {
+                instrs.instructions[entry->ID-65].src1 = reg;
+                reg++;
+            }
 
             if (instrs.instructions[entry->ID-65].src2 != -1) {
                 instrs.instructions[entry->ID-65].src2 = reg;
@@ -970,8 +972,10 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table) {
         DependencyEntry *entry = &table->dependencies[j];
         if (entry->local.size == 0 && entry->loop.size == 0 && entry->invariant.size == 0 && entry->postL.size == 0) {
             // allocate a register to the source register
-            instrs.instructions[entry->ID-65].src1 = reg;
-            reg++;
+            if (instrs.instructions[entry->ID-65].src1 != -1) {
+                instrs.instructions[entry->ID-65].src1 = reg;
+                reg++;
+            }
 
             if (instrs.instructions[entry->ID-65].src2 != -1) {
                 instrs.instructions[entry->ID-65].src2 = reg;
@@ -1295,10 +1299,156 @@ void scheduleInstructions(ProcessorState *state, DependencyTable *table) {
             }
         }
 
+        // if there is a loop
+        if (instrs.loopStart != -1) {
+
+//-->       // Interloop dependencies
+            // handled right after all of BB1 is scheduled
+            if (table->dependencies[instrs.loopEnd].scheduledTime != -1 && table->dependencies[instrs.loopEnd+1].scheduledTime == -1) {
+                for (int i = instrs.loopStart; i < instrs.loopEnd+1; i++) {
+                    DependencyEntry *entry = &table->dependencies[i];
+
+                    if (entry->loop.size != 0) {
+                        int latestScheduledTime = -1;
+                        int IDdependsOn = -1;
+                        // look for the latest scheduled time of the instruction(s) it depends on ONLY in the loop (i.e. block == 1)
+                        for (int j = 0; j < entry->loop.size; j++) {
+                            if (table->dependencies[entry->loop.list[j].ID-65].type == MULU) {
+                                if ((table->dependencies[entry->loop.list[j].ID-65].scheduledTime + 2) > latestScheduledTime) {
+                                    latestScheduledTime = table->dependencies[entry->loop.list[j].ID-65].scheduledTime + 2;
+                                    IDdependsOn = entry->loop.list[j].ID-65;
+                                }
+                            } else if (table->dependencies[entry->loop.list[j].ID-65].scheduledTime > latestScheduledTime) {
+                                latestScheduledTime = table->dependencies[entry->loop.list[j].ID-65].scheduledTime;
+                                IDdependsOn = entry->loop.list[j].ID-65;
+                            }
+                        }
+
+                        // only case that needs to be handled: depends on a MULU
+                        if (table->dependencies[IDdependsOn].type == MULU) {
+                            // check that the distance between this instruction and the entry is at least 3 cycles
+                            
+                            // distance between the beginning of the loop and the instruction scheduled time
+                            int x = entry->scheduledTime - instrs.loopStart;
+                            // distance between the end of the loop scheduled time and the instruction it depends on
+                            int y = table->dependencies[instrs.loopEnd].scheduledTime - table->dependencies[IDdependsOn].scheduledTime;
+
+                            // if the distance is less than 3, need to add NOP cycles
+                            for (int j = 0; j < (3 - (x + y + 1)); j++) {
+                                VLIW v = newVLIW(state);
+                                vliw = &v;
+                            }
+                            // postpone the LOOP or LOOP_PIP instruction to the end of the loop
+                            vliw     = &state->bundles.vliw[table->dependencies[instrs.loopEnd].scheduledTime];
+                            vliw->br = &NOPinstr; 
+
+                            vliw     = &state->bundles.vliw[state->bundles.size-1];
+                            vliw->br = &instrs.instructions[instrs.loopEnd];
+
+                            schedulerState.latestBr = state->bundles.size-1;
+                            table->dependencies[instrs.loopEnd].scheduledTime = schedulerState.latestBr;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * @brief Schedule instructions in the VLIW bundles based on the DependencyTable using LOOP_PIP.
+ * @param state Pointer to the processor state.
+ * @param table Pointer to the DependencyTable.
+ */
+void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table) {
+    // Schedule instructions in the VLIW bundle based on the DependencyTable
+
+    // compute IIRes
+    state->II = calculateIIRes(state); 
+
+    SchedulerState schedulerState;
+    schedulerState.latestALU1 = 0;
+    schedulerState.latestALU2 = 0;
+    schedulerState.latestMult = 0;
+    schedulerState.latestMem = 0;
+    schedulerState.latestBr = 0;
+
+    // create a new VLIW bundle
+    VLIW v = newVLIW(state);
+    VLIW *vliw = &v;
+
+    for (int i = 0; i < table->size; i++) {
+        DependencyEntry *entry = &table->dependencies[i];
+
+        // When enter BB1 or BB2, stop using the previous VLIW bundles and start a new one
+        // and set the latest counters to the size of the bundles-1
+        if ((instrs.instructions[i].block == 1 && instrs.instructions[i-1].block == 0) ||    // first instruction in BB1
+            (instrs.instructions[i].block == 2 && instrs.instructions[i-1].block == 1)) {    // first instruction in BB2
+            VLIW v = newVLIW(state);
+            vliw = &v;
+            schedulerState.latestALU1 = state->bundles.size - 1;
+            schedulerState.latestALU2 = state->bundles.size - 1;
+            schedulerState.latestMult = state->bundles.size - 1;
+            schedulerState.latestMem  = state->bundles.size - 1;
+            schedulerState.latestBr   = state->bundles.size - 1;
+        }
+
+        // If there are no local, invariant or post loop dependencies (CAN have interloop dependencies !)
+        if (entry->local.size == 0 && entry->invariant.size == 0 && entry->postL.size == 0) {
+            // Schedule the instruction in the VLIW bundle
+
+            // updated list of latest used ALU1, ALU2, MULT, MEM, BR, and loop instruction indices
+            scheduleInstruction(state, entry, &schedulerState);
+        }
+
+//-->   // Local, invariant or post loop dependencies (at least 1)
+        else {
+            // check the LATEST schedule time of the instruction(s) it depends on
+            LatestDependency latestDep = findLatestDependency(table, entry);
+
+            int latestScheduledTime = latestDep.scheduledTime;
+            int IDdependsOn = latestDep.idx;
+            
+            // scheduling cases for different instruction types
+
+            // schedule the instruction in the first VLIW bundle with the available correct unit and the latest schedule time
+            if (table->dependencies[IDdependsOn].type == MULU) {
+                int oldLatest = schedulerState.latestMult; // save copy of old latest
+                // new entry must be scheduled AFTER its dependency is resolved (latestScheduledTime + latency) or later 
+                // only need to do +1 because +2 was already done when computing latestScheduledTime
+                schedulerState.latestMult = (schedulerState.latestMult < latestScheduledTime + 1) ? latestScheduledTime + 1 : schedulerState.latestMult; // compute latestMult making sure the new entry is scheduled AT LEAST 3 cycles AFTER its dependency
+                // create as many new VLIW bundles as the difference between the old latest and the new latest
+                for (int j = oldLatest; j < schedulerState.latestMult; j++) {
+                    VLIW v = newVLIW(state);
+                    vliw = &v;
+                }
+                // schedule the instruction in the VLIW bundle with the latest scheduled time
+                vliw->mult = &instrs.instructions[entry->ID-65];
+                entry->scheduledTime = schedulerState.latestMult;
+                scheduleInstruction(state, entry, &schedulerState);
+                schedulerState.latestMult = oldLatest; // restore old latest
+            }
+            else if (table->dependencies[IDdependsOn].type == LD || table->dependencies[IDdependsOn].type == ST) {
+                int oldLatest = schedulerState.latestMem;
+                schedulerState.latestMem =max(schedulerState.latestMem, latestScheduledTime + 1); 
+                scheduleInstruction(state, entry, &schedulerState);
+                schedulerState.latestMem = oldLatest;
+            }
+            else {
+                int oldLatest1 = schedulerState.latestALU1;
+                int oldLatest2 = schedulerState.latestALU2;
+                schedulerState.latestALU1 = max(schedulerState.latestALU1, latestScheduledTime + 1);
+                schedulerState.latestALU2 = max(schedulerState.latestALU2, latestScheduledTime + 1);
+                scheduleInstruction(state, entry, &schedulerState);
+                schedulerState.latestALU1 = oldLatest1;
+                schedulerState.latestALU2 = oldLatest2;
+            }
+        }
+
 //-->   // Interloop dependencies
         // handled right after all of BB1 is scheduled
         if (table->dependencies[instrs.loopEnd].scheduledTime != -1 && table->dependencies[instrs.loopEnd+1].scheduledTime == -1) {
-            for (int i = instrs.loopStart; i < instrs.loopEnd+1; i++) {
+            for (int i = instrs.loopStart; i < instrs.loopEnd+1; i++) { 
                 DependencyEntry *entry = &table->dependencies[i];
 
                 if (entry->loop.size != 0) {
@@ -1345,6 +1495,18 @@ void scheduleInstructions(ProcessorState *state, DependencyTable *table) {
 
             }
         }
+
+        // Once the loop is scheduled, comute the number of loop stages
+        state->stage = floor((table->dependencies[instrs.loopEnd].scheduledTime + 1 - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
+
+        // check if the II needs to be updated
+        int changed = checkInterloopDependencies(table, state);
+
+        if (changed) {
+            // reschedule the instructions
+            scheduleInstructionsPip(state, table);
+        }
+
     }
 }
 

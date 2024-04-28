@@ -73,7 +73,8 @@ typedef struct {
     unsigned long PredRegFile[REGS]; // Predicate Register File
     unsigned int  FUCount[FU]; // Number of each type of FU: [ALU, MULT, MEM, BR]
     VLIWBundles   bundles; // VLIW instruction bundles
-    unsigned int  II; // Initiation Interval
+    unsigned int  II;      // Initiation Interval
+    unsigned int  stage;   // Loop stage 
 } ProcessorState;
 
 void parseInstrunctions(char* progFile, char* inputFile);

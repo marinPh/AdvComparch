@@ -33,6 +33,7 @@ void initProcessorState() {
     state.FUCount[3] = 1;
     state.bundles.vliw = NULL;
     state.II = 1;
+    state.stage = 0;
 }
 
 /**
@@ -438,11 +439,11 @@ void registerAllocation(ProcessorState *state, DependencyTable *table) {
             vliw->mult.dest = reg;  
             reg++;
         }
-        // // MEM      TODO no dest ? 
-        // if (vliw->mem.type != NOP) {
-        //     vliw->mem.dest = reg; 
-        //     reg++;
-        // }
+        // MEM       
+        if (vliw->mem.type == LD) {  // only rename LDs (STs are not renamed)
+            vliw->mem.dest = reg; 
+            reg++;
+        }
         // BR
         // if (vliw->br.type != NOP) {
         //     // TODO 
@@ -589,6 +590,358 @@ void registerAllocation(ProcessorState *state, DependencyTable *table) {
             // allocate a register to the source register
             entry->src1 = reg;
             reg++;
+
+            if (entry->src2 != -1) {  // TODO Marin 
+                entry->src2 = reg;
+                reg++;
+            }
+        }
+    }
+
+}
+
+/**
+ * @brief Rename the scheduled instructions to eliminate WARs and WAWs when LOOP_PIP.
+ * @param state The pointer to the processor state.
+ * @param table The pointer to the dependency table.
+ */
+void registerAllocationPip(ProcessorState *state, DependencyTable *table) {  
+    // Allocate registers to instructions in the VLIW bundle based on the DependencyTable
+
+    int offset = 1; // offset for rotating registers
+    int reg    = 1; // for non-rotating registers
+
+    // TODO separate state in 1 VLIW bundles for BB0, 1 for BB1 and 1 for BB2 ? 
+
+    // Step 1. allocate ROTATING registers to the destination registers of all instructions in the VLIW bundles
+    for (int i = table->dependencies[instrs.loopStart].scheduledTime; i < table->dependencies[instrs.loopEnd].scheduledTime+1; i++) {
+        VLIW *vliw = &state->bundles.vliw[i];
+        // ALU1
+        if (vliw->alu1.type != NOP) {
+            // Allocate registers
+            vliw->alu1.dest = offset + ROTATION_START_INDEX + state->RRB;    // TODO keep track somewhere ? of the used regs 
+            offset++;
+            offset += state->stage; 
+        }
+        // ALU2
+        if (vliw->alu2.type != NOP) {
+            vliw->alu2.dest = offset + ROTATION_START_INDEX + state->RRB;  
+            offset++;
+            offset += state->stage; 
+        }
+        // MULT
+        if (vliw->mult.type != NOP) {
+            vliw->mult.dest = offset + ROTATION_START_INDEX + state->RRB;  
+            offset++;
+            offset += state->stage; 
+        }
+        // MEM
+        if (vliw->mem.type == LD) {  // only rename LDs (STs are not renamed)
+            vliw->mem.dest = offset + ROTATION_START_INDEX + state->RRB; 
+            offset++;
+            offset += state->stage; 
+        }
+    }
+
+    // Step 3. for local and interloop dependencies, adjust the src registers by adding the difference 
+    // of the stage of the consumer and the stage of the producer (+1 for interloop)
+    // (a new stage every II cycles, a new loop => new stage too)
+
+    for (int j = instrs.loopStart; j < instrs.loopEnd+1; j++) {
+        DependencyEntry *entry = table->dependencies[j];
+
+        // find the latest dependency for src1 and src2
+        int reg1 = instrs.instructions[entry->ID-65].src1; // source register 1
+        int reg2 = instrs.instructions[entry->ID-65].src2; // source register 2
+
+        int latestDep1 = -1;
+        int latestDep2 = -1;
+
+        int stageDiff1 = math.floor(table->dependencies[entry->ID-65].scheduledTime / state->II);
+        int stageDiff2 = math.floor(table->dependencies[entry->ID-65].scheduledTime / state->II);
+
+        for (int k = 0; k < entry->local.size; k++) {
+            // MUST use instrs.instructions[entry->local.list[j].ID-65].dest 
+            // bc table->dependencies[entry->local.list[j].ID-65].dest NOT renamed
+            if (entry->local.list[j].reg == reg1 && table->dependencies[entry->local.list[j].ID-65].scheduledTime > latestDep1) {
+                int stageDiff = math.floor(table->dependencies[entry->local.list[j].ID-65].scheduledTime / state->II);
+
+                instrs.instructions[entry->ID-65].src1 = instrs.instructions[entry->local.list[j].ID-65].dest + (stageDiff1 - stageDiff);
+                latestDep1 = table->dependencies[entry->local.list[j].ID-65].scheduledTime;
+            }
+            if (entry->local.list[j].reg == reg2 && table->dependencies[entry->local.list[j].ID-65].scheduledTime > latestDep2) {
+                int stageDiff = math.floor(table->dependencies[entry->local.list[j].ID-65].scheduledTime / state->II);
+
+                instrs.instructions[entry->ID-65].src2 = instrs.instructions[entry->local.list[j].ID-65].dest + (stageDiff2 - stageDiff);
+                latestDep2 = table->dependencies[entry->local.list[j].ID-65].scheduledTime;
+            }
+        }
+
+        // reset
+        int latestDep1 = -1;
+        int latestDep2 = -1;
+
+        for (int k = 0; k < entry->loop.size; k++) {
+            if (entry->loop.list[j].reg == reg1 && table->dependencies[entry->loop.list[j].ID-65].scheduledTime > latestDep1) {
+                int stageDiff = math.floor(table->dependencies[entry->loop.list[j].ID-65].scheduledTime / state->II);
+
+                instrs.instructions[entry->ID-65].src1 = instrs.instructions[entry->loop.list[j].ID-65].dest + (stageDiff1 - stageDiff) + 1;
+                latestDep1 = table->dependencies[entry->loop.list[j].ID-65].scheduledTime;
+            }
+            if (entry->loop.list[j].reg == reg2 && table->dependencies[entry->loop.list[j].ID-65].scheduledTime > latestDep2) {
+                int stageDiff = math.floor(table->dependencies[entry->loop.list[j].ID-65].scheduledTime / state->II);
+
+                instrs.instructions[entry->ID-65].src2 = instrs.instructions[entry->loop.list[j].ID-65].dest + (stageDiff2 - stageDiff) + 1;
+                latestDep2 = table->dependencies[entry->loop.list[j].ID-65].scheduledTime;
+            }
+        }
+
+        // TODO what if both local and interloop ?
+    }
+
+    // Step 0. destination register renaming and local dependency renaming for BB0 and BB2
+    // rename the destination registers in BB0
+    for (int i = 0; i < table->dependencies[instrs.loopStart].scheduledTime; i++) {
+        VLIW *vliw = &state->bundles.vliw[i];
+        // ALU1
+        if (vliw->alu1.type != NOP) {
+            // Allocate registers
+            bool dependance = false; 
+            for (int j = instrs.loopStart; j < instrs.loopEnd+1; j++) {
+                DependencyEntry *entry = table->dependencies[j];
+                for (int k = 0; k < entry->loop.size; k++) {
+                    if (entry->local.list[j].reg == vliw->alu1.dest) {
+                        int stageDiff = math.floor(table->dependencies[entry->loop.list[j].ID-65].scheduledTime / state->II);
+                        vliw->alu1.dest = instrs.instructions[entry->loop.list[j].ID-65].dest - stageDiff + 1;  // -S(P), iteration = 1
+                        dependance = true;
+                    }
+                }
+            }
+            if (!dependance) {
+                vliw->alu1.dest = reg;  
+                reg++;
+            }
+        }
+        // ALU2
+        if (vliw->alu2.type != NOP) {
+            bool dependance = false;
+            for (int j = instrs.loopStart; j < instrs.loopEnd+1; j++) {
+                DependencyEntry *entry = table->dependencies[j];
+                for (int k = 0; k < entry->loop.size; k++) {
+                    if (entry->local.list[j].reg == vliw->alu2.dest) {
+                        int stageDiff = math.floor(table->dependencies[entry->loop.list[j].ID-65].scheduledTime / state->II);
+                        vliw->alu2.dest = instrs.instructions[entry->loop.list[j].ID-65].dest - stageDiff + 1;  // -S(P), iteration = 1
+                        dependance = true;
+                    }
+                }
+            }
+            if (!dependance) {
+                vliw->alu2.dest = reg;  
+                reg++;
+            }
+        }
+        // MULT
+        if (vliw->mult.type != NOP) {
+            bool dependance = false;
+            for (int j = instrs.loopStart; j < instrs.loopEnd+1; j++) {
+                DependencyEntry *entry = table->dependencies[j];
+                for (int k = 0; k < entry->loop.size; k++) {
+                    if (entry->local.list[j].reg == vliw->mult.dest) {
+                        int stageDiff = math.floor(table->dependencies[entry->loop.list[j].ID-65].scheduledTime / state->II);
+                        vliw->mult.dest = instrs.instructions[entry->loop.list[j].ID-65].dest - stageDiff + 1;  // -S(P), iteration = 1
+                        dependance = true;
+                    }
+                }
+            }
+            if (!dependance) {
+                vliw->mult.dest = reg;  
+                reg++;
+            }
+        }
+        // MEM       
+        if (vliw->mem.type == LD) {  // only rename LDs (STs are not renamed)
+            bool dependance = false;
+            for (int j = instrs.loopStart; j < instrs.loopEnd+1; j++) {
+                DependencyEntry *entry = table->dependencies[j];
+                for (int k = 0; k < entry->loop.size; k++) {
+                    if (entry->local.list[j].reg == vliw->mem.dest) {
+                        int stageDiff = math.floor(table->dependencies[entry->loop.list[j].ID-65].scheduledTime / state->II);
+                        vliw->mem.dest = instrs.instructions[entry->loop.list[j].ID-65].dest - stageDiff + 1;  // -S(P), iteration = 1
+                        dependance = true;
+                    }
+                }
+            }
+            if (!dependance) {
+                vliw->mem.dest = reg; 
+                reg++;
+            }
+        }
+    }
+
+    // BB2
+    for (int i = table->dependencies[instrs.loopEnd].scheduledTime+1; i < state->bundles.size; i++) {
+        VLIW *vliw = &state->bundles.vliw[i];
+        // ALU1
+        if (vliw->alu1.type != NOP) {
+            // Allocate registers
+            vliw->alu1.dest = reg;  
+            reg++;
+        }
+        // ALU2
+        if (vliw->alu2.type != NOP) {
+            vliw->alu2.dest = reg;  
+            reg++;
+        }
+        // MULT
+        if (vliw->mult.type != NOP) {
+            vliw->mult.dest = reg;  
+            reg++;
+        }
+        // MEM       
+        if (vliw->mem.type == LD) {  // only rename LDs (STs are not renamed)
+            vliw->mem.dest = reg; 
+            reg++;
+        }
+    }
+
+    // rename the source registers for local dependencies in BB0
+    for (int i = 0; i < instrs.loopStart; i++) {
+        DependencyEntry *entry = table->dependencies[i];
+        if (entry->local.size != 0) {
+            // find the latest dependency for src1 and src2
+            int reg1 = instrs.instructions[entry->ID-65].src1; // source register 1
+            int reg2 = instrs.instructions[entry->ID-65].src2; // source register 2
+
+            int latestDep1 = -1;
+            int latestDep2 = -1;
+
+            for (int j = 0; j < entry->local.size; j++) {
+                if (entry->local.list[j].reg == reg1 && table->dependencies[entry->local.list[j].ID-65].scheduledTime > latestDep1) {
+                    instrs.instructions[entry->ID-65].src1 = table->dependencies[entry->local.list[j].ID-65].dest;
+                    latestDep1 = table->dependencies[entry->local.list[j].ID-65].scheduledTime;
+                }
+                if (entry->local.list[j].reg == reg2 && table->dependencies[entry->local.list[j].ID-65].scheduledTime > latestDep2) {
+                    instrs.instructions[entry->ID-65].src2 = table->dependencies[entry->local.list[j].ID-65].dest;
+                    latestDep2 = table->dependencies[entry->local.list[j].ID-65].scheduledTime;
+                }
+            }
+        }
+    }
+    
+    // rename the source registers for local dependencies in BB2
+    for (int i = instrs.loopEnd+1; i < table->size; i++) {
+        DependencyEntry *entry = table->dependencies[i];
+        if (entry->local.size != 0) {
+            // find the latest dependency for src1 and src2
+            int reg1 = instrs.instructions[entry->ID-65].src1; // source register 1
+            int reg2 = instrs.instructions[entry->ID-65].src2; // source register 2
+
+            int latestDep1 = -1;
+            int latestDep2 = -1;
+
+            for (int j = 0; j < entry->local.size; j++) {
+                if (entry->local.list[j].reg == reg1 && table->dependencies[entry->local.list[j].ID-65].scheduledTime > latestDep1) {
+                    instrs.instructions[entry->ID-65].src1 = table->dependencies[entry->local.list[j].ID-65].dest;
+                    latestDep1 = table->dependencies[entry->local.list[j].ID-65].scheduledTime;
+                }
+                if (entry->local.list[j].reg == reg2 && table->dependencies[entry->local.list[j].ID-65].scheduledTime > latestDep2) {
+                    instrs.instructions[entry->ID-65].src2 = table->dependencies[entry->local.list[j].ID-65].dest;
+                    latestDep2 = table->dependencies[entry->local.list[j].ID-65].scheduledTime;
+                }
+            }
+        }
+    }
+
+    // Step 2. allocate non-rotating register to the invariant dependencies
+    for (int j = instrs.loopStart; j < instrs.loopEnd+1; j++) {
+        DependencyEntry *entry = table->dependencies[j];
+        if (entry->invariant.size != 0) {
+            // find the latest dependency for src1 and src2
+            int reg1 = instrs.instructions[entry->ID-65].src1; // source register 1
+            int reg2 = instrs.instructions[entry->ID-65].src2; // source register 2
+
+            int latestDep1 = -1;
+            int latestDep2 = -1;
+
+            for (int k = 0; k < entry->invariant.size; k++) {
+                if (entry->invariant.list[j].reg == reg1 && table->dependencies[entry->invariant.list[j].ID-65].scheduledTime > latestDep1) {
+                    instrs.instructions[entry->ID-65].src1 = table->dependencies[entry->invariant.list[j].ID-65].dest;
+                    latestDep1 = table->dependencies[entry->invariant.list[j].ID-65].scheduledTime;
+                }
+                if (entry->invariant.list[j].reg == reg2 && table->dependencies[entry->invariant.list[j].ID-65].scheduledTime > latestDep2) {
+                    instrs.instructions[entry->ID-65].src2 = table->dependencies[entry->invariant.list[j].ID-65].dest;
+                    latestDep2 = table->dependencies[entry->invariant.list[j].ID-65].scheduledTime;
+                }
+            }
+        }
+    }
+
+    // Step 4. for postloop dependencies, adjust the src registers by adding the difference
+    // considering the BB2 stage as being the last stage of the loop
+
+    // TODO (!) check the -1  used to assign last stage to the post loop dependencies
+    // same for all postloop
+    int stageDiffPost = math.floor((table->dependencies[instrs.loopEnd+1].scheduledTime-1) / state->II);
+
+    for (int j = instrs.loopEnd+1; j < table->size; j++) {
+        DependencyEntry *entry = table->dependencies[j];
+
+        // find the latest dependency for src1 and src2
+        int reg1 = instrs.instructions[entry->ID-65].src1; // source register 1
+        int reg2 = instrs.instructions[entry->ID-65].src2; // source register 2
+
+        int latestDep1 = -1;
+        int latestDep2 = -1;
+
+        for (int k = 0; k < entry->postL.size; k++) {
+            // MUST use instrs.instructions[entry->postL.list[j].ID-65].dest 
+            // bc table->dependencies[entry->postL.list[j].ID-65].dest NOT renamed
+            if (entry->postL.list[j].reg == reg1 && table->dependencies[entry->postL.list[j].ID-65].scheduledTime > latestDep1) {
+                int stageDiff = math.floor(table->dependencies[entry->postL.list[j].ID-65].scheduledTime / state->II);
+
+                instrs.instructions[entry->ID-65].src1 = instrs.instructions[entry->postL.list[j].ID-65].dest + (stageDiffPost - stageDiff);
+                latestDep1 = table->dependencies[entry->postL.list[j].ID-65].scheduledTime;
+            }
+            if (entry->postL.list[j].reg == reg2 && table->dependencies[entry->postL.list[j].ID-65].scheduledTime > latestDep2) {
+                int stageDiff = math.floor(table->dependencies[entry->postL.list[j].ID-65].scheduledTime / state->II);
+
+                instrs.instructions[entry->ID-65].src2 = instrs.instructions[entry->postL.list[j].ID-65].dest + (stageDiffPost - stageDiff);
+                latestDep2 = table->dependencies[entry->postL.list[j].ID-65].scheduledTime;
+            }
+        }
+
+        // loop invariant dependencies BB2->BB0
+
+        // reset
+        int latestDep1 = -1;
+        int latestDep2 = -1;
+
+        for (int k = 0; k < entry->invariant.size; k++) {
+            if (entry->invariant.list[j].reg == reg1 && table->dependencies[entry->invariant.list[j].ID-65].scheduledTime > latestDep1) {
+                instrs.instructions[entry->ID-65].src1 = instrs.instructions[entry->invariant.list[j].ID-65].dest;
+                latestDep1 = table->dependencies[entry->invariant.list[j].ID-65].scheduledTime;
+            }
+            if (entry->invariant.list[j].reg == reg2 && table->dependencies[entry->invariant.list[j].ID-65].scheduledTime > latestDep2) {
+                instrs.instructions[entry->ID-65].src2 = instrs.instructions[entry->invariant.list[j].ID-65].dest;
+                latestDep2 = table->dependencies[entry->invariant.list[j].ID-65].scheduledTime;
+            }
+        }
+    }
+
+    // Step 5. allocate unused register for all source registers that have no RAW dependency
+    // for every instruction in DependencyTable, check if it has a dependency on another instruction
+    // if not, allocate a register to the source register
+    for (int j = 0; j < table->size; j++) {
+        DependencyEntry *entry = table->dependencies[j];
+        if (entry->local.size == 0 && entry->interloop.size == 0 && entry->invariant.size == 0 && entry->postL.size == 0) {
+            // allocate a register to the source register
+            entry->src1 = reg;
+            reg++;
+
+            if (entry->src2 != -1) {  // TODO Marin 
+                entry->src2 = reg;
+                reg++;
+            }
         }
     }
 
@@ -963,225 +1316,6 @@ void scheduleInstructions(ProcessorState *state, DependencyTable *table) {
         }
     }
 }
-
-            // // only case that needs to be handled: depends on a MULU
-            // if (table->dependencies[IDdependsOn].type == MULU) {
-            //     // check that the distance between this instruction and the entry is at least 3 cycles
-                
-            //     // distance between the beginning of the loop and the instruction scheduled time
-            //     int x = entry->scheduledTime - instrs.loopStart;
-            //     // distance between the end of the loop scheduled time and the instruction it depends on
-            //     int y = table->dependencies[instrs.loopEnd].scheduledTime - table->dependencies[IDdependsOn].scheduledTime;
-
-            //     // if the distance is less than 3, need to add NOP cycles
-            //     if ((x + y + 1) < 3) {  // TODO +1 ? 
-            //         // push down all VLIW bundles of the BB2 and insert NOPs at the end of BB1
-            //         int pushDown = 3 - (x + y + 1);
-            //         int j = table->dependencies[instrs.loopEnd].scheduledTime + 1;
-                    
-            //         // save the j+pushdown-1 VLIW bundles of BB2
-            //         VLIW *temp = (VLIW*)malloc(pushDown * sizeof(VLIW));
-            //         for (int k = 0; k < pushDown; k++) {
-            //             temp[k] = state->bundles.vliw[j+k]; 
-            //         }
-            //         // insert NOPs at the end of BB1
-            //         for (int k = 0; k < pushDown; k++) {
-            //             state->bundles.vliw[j+k] = {NOP, NOP, NOP, NOP, NOP};
-            //         }
-            //         // move the VLIW bundles of BB2 down
-            //         // save the last three VLIW bundles
-            //          VLIW *last = (VLIW*)malloc(pushDown * sizeof(VLIW));
-            //         for (int k = 0; k < pushDown; k++) {
-            //             last[k] = state->bundles.vliw[state->bundles.size-1-k];
-            //         }
-
-            //         for (int k = state->bundles.size-1-pushDown; k >= j+pushDown; k--) {
-            //             state->bundles.vliw[k] = state->bundles.vliw[k-pushDown];
-            //         }
-            //         // restore the last three VLIW bundles
-            //         for (int k = 0; k < pushDown; k++) {
-
-
-
-
-
-
-
-
-//*************************************************************
-//
-//                     Pipeline Stages
-//
-//*************************************************************
-
-
-//     // Check and adjust the Initiation Interval (II) for the instruction
-//     // based on interloop dependencies
-//     // checkInterloopDependencies(table, state);  // TODO no loops yet
-
-//     // Perform register allocation
-//     ...
-// }
-
-// /**
-//  * Execute stage of the pipeline.
-//  * @param state Pointer to the processor state.
-//  */
-// void Execute(ProcessorState *state) {
-//     // for the instruction in the VLIW bundle with scheduled time = PC, execute it
-//     // if done update the register file
-
-//     // ALU1
-//     state->bundles.vliw[state->PC].alu1.cycle = 1;
-//     state->bundles.vliw[state->PC].alu1.done  = true;  // even if NOP 
-//     switch (state->bundles.vliw[state->PC].alu1.type) {
-//         case ADD:
-//             state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src1] + state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src2];
-//             break;
-//         case ADDI:
-//             state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src1] + state->bundles.vliw[state->PC].alu1.imm;
-//             break;
-//         case SUB:
-//             state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src1] - state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src2];
-//             break;
-//         case MOV:
-//             if (strcmp(state->bundles.vliw[state->PC].alu1.dest, "LC") == 0) {  // case of mov LC
-//                 state->LC = state->bundles.vliw[state->PC].alu1.src1;
-//                 // state->EC = #loop stages i.e. #loop iterations
-//                 state->Ec = state->bundles.vliw[state->PC].alu2.src1; // TODO check if it's the right way to do it
-//             } else if (state->bundles.vliw[state->PC].alu1.imm != -1) {  // case of mov with immediate
-//                 state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->bundles.vliw[state->PC].alu1.imm;
-//             } else {  // case of mov with register
-//                 state->PhysRegFile[state->bundles.vliw[state->PC].alu1.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu1.src1];
-//             }
-//             break;
-//         default:
-//             break;
-//     }
-
-
-//     // ALU2
-//     state->bundles.vliw[state->PC].alu2.cycle = 1;
-//     state->bundles.vliw[state->PC].alu2.done  = true; 
-//     switch (state->bundles.vliw[state->PC].alu2.type) {
-//         case ADD:
-//             state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src1] + state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src2];
-//             break;
-//         case ADDI:
-//             state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src1] + state->bundles.vliw[state->PC].alu2.imm;
-//             break;
-//         case SUB:
-//             state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src1] - state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src2];
-//             break;
-//         case MOV:
-//             if (strcmp(state->bundles.vliw[state->PC].alu2.dest, "LC") == 0) {  // case of mov LC
-//                 state->LC = state->bundles.vliw[state->PC].alu2.src1;
-//                 // state->EC = #loop stages i.e. #loop iterations
-//                 state->Ec = state->bundles.vliw[state->PC].alu2.src1; // TODO check if it's the right way to do it 
-//             } else if (state->bundles.vliw[state->PC].alu2.imm != -1) {  // case of mov with immediate
-//                 state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->bundles.vliw[state->PC].alu2.imm;
-//             } else {  // case of mov with register
-//                 state->PhysRegFile[state->bundles.vliw[state->PC].alu2.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].alu2.src1];
-//             }
-//             break;
-//         default:
-//             break;
-//     }
-
-//     // MULT
-//     if (state->bundles.vliw[state->PC - 1].mult.done == false && state->bundles.vliw[state->PC - 1].mult.type == MULU) {
-//         // if NOP and previous instruction was an UNFINISHED MULU, copy the mult instruction from the previous cycle
-//         state->bundles.vliw[state->PC].mult = state->bundles.vliw[state->PC - 1].mult;   // TODO by refernece .... but it's what we want 
-//     }
-//     if (state->bundles.vliw[state->PC].mult.type == MULU) {  // if MULU, start/keep executing it 
-//         state->bundles.vliw[state->PC].mult.cycle += 1;
-//         if (state->bundles.vliw[state->PC].mult.cycle == 3) {
-//             state->bundles.vliw[state->PC].mult.done = true;
-//             state->PhysRegFile[state->bundles.vliw[state->PC].mult.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].mult.src1] * state->PhysRegFile[state->bundles.vliw[state->PC].mult.src2];
-//         }
-//     } else { // if NOP, set done to true 
-//         // (this is the case where NO MULU instructions are present in the VLIW bundle
-//         // or the previous MULU instruction is done)
-//         state->bundles.vliw[state->PC].mult.done = true;
-//     }
-
-//     //********************        //********************
-//     //       MULU                 //    MULU cycle 1
-//     //       NOP             =>   //    MULU cycle 2
-//     //       NOP                  //    MULU cycle 3, done
-//     //       NOP                  //    NOP  done 
-//     //********************        //********************
-
-//     //********************        //********************
-//     //       NOP                  //    NOP  done
-//     //       NOP                  //    NOP  done
-//     //       MULU                 //    MULU cycle 1
-//     //       NOP             =>   //    MULU cycle 2
-//     //       NOP                  //    MULU cycle 3, done
-//     //       NOP                  //    NOP  done 
-//     //********************        //********************
-
-//     // LD 
-//     state->bundles.vliw[state->PC].mem.cycle = 1;
-//     state->bundles.vliw[state->PC].mem.done  = true;
-//     if (state->bundles.vliw[state->PC].mem.type == LD) {
-//         state->PhysRegFile[state->bundles.vliw[state->PC].mem.dest] = state->PhysRegFile[state->bundles.vliw[state->PC].mem.src1] + state->bundles.vliw[state->PC].mem.imm;
-//     }  // TODO store operations are not considered ?? 
-
-//     // BR (LOOP, LOOP_PIP)
-//     state->bundles.vliw[state->PC].br.cycle = 1;
-//     state->bundles.vliw[state->PC].br.done  = true;
-//     if (state->bundles.vliw[state->PC].br.type == LOOP) {  // unconditional branch
-//         state->PC = state->bundles.vliw[state->PC].br.loopStart;   
-//     } else if (state->bundles.vliw[state->PC].br.type == LOOP_PIP) {  // conditional branch
-//         if (state->LC > 0) {
-//             state->LC -= 1;
-//             // state->EC unchanged
-//             state->RRB += 1;
-//             // enable stage predicate register  TODO ????? always p32 ? 
-//             state->PredRegFile[31] = true;
-//             state->PC = state->bundles.vliw[state->PC].br.loopStart;
-//         } else {
-//             if (state->EC > 0) {
-//                 // state->LC unchanged
-//                 state->EC -= 1;
-//                 state->RRB += 1;
-//                 // disable stage predicate register  TODO ????? 
-//                 state->PredRegFile[31] = false;
-//                 state->PC = state->bundles.vliw[state->PC].br.loopStart;
-//             } else {
-//                 //state->PC += 1;  // TODO nothing ? bc was already incremented by FetchAndDecode ? 
-//             }
-//         }
-//     }
-// }
-
-// /**
-//  * Commit stage of the pipeline.
-//  * @param state Pointer to the processor state.
-//  */
-// void Commit(ProcessorState *state, DependencyTable *table) {
-//     // Commit the instructions in the VLIW bundle
-//     // if done update the register file
-//     // TODO how to update DepTable? 
-//     // TODO
-//     if (state->bundles.vliw[state->PC].alu1.done) {
-//         state->bundles.vliw[state->PC].alu1.done = false;
-//     }
-//     if (state->bundles.vliw[state->PC].alu2.done) {
-//         state->bundles.vliw[state->PC].alu2.done = false;
-//     }
-//     if (state->bundles.vliw[state->PC].mult.done) {
-//         state->bundles.vliw[state->PC].mult.done = false;
-//     }
-//     if (state->bundles.vliw[state->PC].mem.done) {
-//         state->bundles.vliw[state->PC].mem.done = false;
-//     }
-//     if (state->bundles.vliw[state->PC].br.done) {
-//         state->bundles.vliw[state->PC].br.done = false;
-//     }
-// }
-
 
 
 /*************************************************************

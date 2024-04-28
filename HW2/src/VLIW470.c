@@ -1491,6 +1491,7 @@ void scheduleInstruction(ProcessorState *state, DependencyEntry *entry, Schedule
     if (instrs.instructions[entry->ID - 65].block == 1 && entry->type != LOOP && entry->type != LOOP_PIP)
     {
         schedulerState->latestBr = max(schedulerState->latestBr, entry->scheduledTime);
+        printf("latestBr = %d\n", schedulerState->latestBr);
     }
 
     // BR instruction must always be scheduled in LAST bundle of BB1
@@ -1748,8 +1749,8 @@ void scheduleInstructions(ProcessorState *state, DependencyTable *table)
                             // if the distance is less than 3, need to add NOP cycles
                             for (int j = 0; j < (3 - (x + y + 1)); j++)
                             {
-                                VLIW v = newVLIW(state);
-                                vliw = &v;
+                                newVLIW(state);
+                                VLIW *vliw = &state->bundles.vliw[state->bundles.size - 1];
                             }
                             // postpone the LOOP or LOOP_PIP instruction to the end of the loop
                             vliw = &state->bundles.vliw[table->dependencies[instrs.loopEnd].scheduledTime];
@@ -1788,8 +1789,8 @@ void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table)
     schedulerState.latestBr = 0;
 
     // create a new VLIW bundle
-    VLIW v = newVLIW(state);
-    VLIW *vliw = &v;
+    newVLIW(state);
+    VLIW *vliw = &state->bundles.vliw[state->bundles.size - 1];
 
     for (int i = 0; i < table->size; i++)
     {
@@ -1800,8 +1801,8 @@ void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table)
         if ((instrs.instructions[i].block == 1 && instrs.instructions[i - 1].block == 0) || // first instruction in BB1
             (instrs.instructions[i].block == 2 && instrs.instructions[i - 1].block == 1))
         { // first instruction in BB2
-            VLIW v = newVLIW(state);
-            vliw = &v;
+            newVLIW(state);
+            VLIW *vliw = &state->bundles.vliw[state->bundles.size - 1];
             schedulerState.latestALU1 = state->bundles.size - 1;
             schedulerState.latestALU2 = state->bundles.size - 1;
             schedulerState.latestMult = state->bundles.size - 1;
@@ -1839,8 +1840,8 @@ void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table)
                 // create as many new VLIW bundles as the difference between the old latest and the new latest
                 for (int j = oldLatest; j < schedulerState.latestMult; j++)
                 {
-                    VLIW v = newVLIW(state);
-                    vliw = &v;
+                    newVLIW(state);
+                    VLIW *vliw = &state->bundles.vliw[state->bundles.size - 1];
                 }
                 // schedule the instruction in the VLIW bundle with the latest scheduled time
                 vliw->mult = &instrs.instructions[entry->ID - 65];
@@ -1910,8 +1911,8 @@ void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table)
                         // if the distance is less than 3, need to add NOP cycles
                         for (int j = 0; j < (3 - (x + y + 1)); j++)
                         {
-                            VLIW v = newVLIW(state);
-                            vliw = &v;
+                            newVLIW(state);
+                            VLIW *vliw = &state->bundles.vliw[state->bundles.size - 1];
                         }
                         // postpone the LOOP or LOOP_PIP instruction to the end of the loop
                         vliw = &state->bundles.vliw[table->dependencies[instrs.loopEnd].scheduledTime];

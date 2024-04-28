@@ -3,13 +3,14 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
-#include "lib/cJSON.h"
-#include "lib/cJSON_Utils.h"
-#include "lib/VLIW470.h"
-#include "lib/utils.h"
+#include "../lib/cJSON.h"
+#include "../lib/cJSON_Utils.h"
+#include "../lib/VLIW470.h"
+#include "../lib/utils.h"
 
 #define ROTATION_START_INDEX 32 // Start index of rotating registers
 #define LOOP_AROUND 64 // Number of registers in the rotating register file
+#define max(a, b) ((a) > (b) ? (a) : (b))
 
 InstructionsSet instrs   = {NULL, 0};
 DependencyTable depTable = {NULL, 0};
@@ -59,30 +60,18 @@ DependencyTable dependencyTableInit() {
     }
     return table;
 }
-
 /**
- * @brief Fill the dependency table with dependencies between instructions.
- * 
- * @return DependencyTable 
+ * @brief Add a dependency to the list of dependencies.
+ * @param list The pointer to the list of dependencies.
+ * @param id The ID of the instruction to add as a dependency.
+ * @param reg The register that the instruction writes to.
  */
-DependencyTable createFillDepencies() {
-    DependencyTable table = dependencyTableInit();
-    for (int i = 0; i < table.size; i++) {
-        int pot = instrs.instructions[i].dest;
-        for (int j = i+1; j < instrs.size; j++) {
-            // check for each instruction if pot is a dest or src
-            if (instrs.instructions[j].dest == pot) break; 
-            whatType(i, j, &table);
-        }
-        // if instruction is in block 1 we check for the instructions before in block 1
-        // from start of loop to i
-        if (instrs.instructions[i].block == 1 && instrs.loopStart != -1) {
-            for (int j = instrs.loopStart; j <= i; j++) {
-                whatType(i, j, &table);
-            }
-        }
-    }
-    return table;
+void pushId(idList *list, char id, unsigned int reg)
+{
+    list->list = realloc(list->list, (list->size + 1) * sizeof(dependency));
+    list->list[list->size].ID = id;
+    list->list[list->size].reg = reg;
+    list->size++;
 }
 
 /**
@@ -123,6 +112,33 @@ void whatType(int instr1, int instr2, DependencyTable *table) {
     }
     return;
 }
+
+/**
+ * @brief Fill the dependency table with dependencies between instructions.
+ * 
+ * @return DependencyTable 
+ */
+DependencyTable createFillDepencies() {
+    DependencyTable table = dependencyTableInit();
+    for (int i = 0; i < table.size; i++) {
+        int pot = instrs.instructions[i].dest;
+        for (int j = i+1; j < instrs.size; j++) {
+            // check for each instruction if pot is a dest or src
+            if (instrs.instructions[j].dest == pot) break; 
+            whatType(i, j, &table);
+        }
+        // if instruction is in block 1 we check for the instructions before in block 1
+        // from start of loop to i
+        if (instrs.instructions[i].block == 1 && instrs.loopStart != -1) {
+            for (int j = instrs.loopStart; j <= i; j++) {
+                whatType(i, j, &table);
+            }
+        }
+    }
+    return table;
+}
+
+
 
 /**
  * Calculate the rotated register index for general-purpose or predicate registers.
@@ -222,10 +238,13 @@ int checkAndAdjustIIForInstruction(DependencyTable *table, int i, ProcessorState
     DependencyEntry *current = &table->dependencies[i];
 
     // If the instruction has an interloop dependency
+    int latencies[10] = {1, 1, 1, 3, 1, 1, 1, 1, 1, 1};
+
+    int latency =0;
     for (int i = 0; i < current->loop.size; i++) {   
         DependencyEntry *dependency = &current->loop.list[i];
         // Check the interloop dependency condition
-        int latency = latencies[dependency->type];
+        latency = latencies[dependency->type];
         if (dependency->scheduledTime + latency > current->scheduledTime + state->II) {   
             // Adjust the II to satisfy the interloop dependency
             state->II = dependency->scheduledTime + latency - current->scheduledTime;
@@ -665,8 +684,8 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table) {
         }
 
         // reset
-        int latestDep1 = -1;
-        int latestDep2 = -1;
+         latestDep1 = -1;
+         latestDep2 = -1;
 
         for (int k = 0; k < entry->loop.size; k++) {
             if (entry->loop.list[j].reg == reg1 && table->dependencies[entry->loop.list[j].ID-65].scheduledTime > latestDep1) {
@@ -799,8 +818,8 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table) {
             int reg1 = instrs.instructions[entry->ID-65].src1; // source register 1
             int reg2 = instrs.instructions[entry->ID-65].src2; // source register 2
 
-            int latestDep1 = -1;
-            int latestDep2 = -1;
+             int latestDep1 = -1;
+             int latestDep2 = -1;
 
             for (int j = 0; j < entry->local.size; j++) {
                 if (entry->local.list[j].reg == reg1 && table->dependencies[entry->local.list[j].ID-65].scheduledTime > latestDep1) {
@@ -900,8 +919,8 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table) {
         // loop invariant dependencies BB2->BB0
 
         // reset
-        int latestDep1 = -1;
-        int latestDep2 = -1;
+        latestDep1 = -1;
+        latestDep2 = -1;
 
         for (int k = 0; k < entry->invariant.size; k++) {
             if (entry->invariant.list[j].reg == reg1 && table->dependencies[entry->invariant.list[j].ID-65].scheduledTime > latestDep1) {
@@ -1421,10 +1440,12 @@ void showInstruction(InstructionEntry instr) {
     printf("Type: %d\n", instr.type);
 }
 
+
+
 /**
  * @brief Function to display the instruction set.
  */
-void showInstructions() {
+void showInstructionSet() {
     printf("Instructions\n");
     printf("Size: %d\n", instrs.size);
     printf("Loop Start: %d\n", instrs.loopStart);

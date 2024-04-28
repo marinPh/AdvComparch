@@ -62,7 +62,6 @@ typedef struct {
 } VLIWBundles;
 
 // Dictionary {instruction type: latency}
-int latencies[10] = {1, 1, 1, 3, 1, 1, 1, 1, 1, 1};
 
 typedef struct {
     unsigned int  PC; // Program Counter
@@ -92,6 +91,7 @@ int readGeneralRegister(ProcessorState *state, int index);
 bool readPredicateRegister(ProcessorState *state, int index);
 
 int calculateIIRes(InstructionsSet *set, ProcessorState *state);
+void showInstructionSet();
 
 int checkInterloopDependencies(DependencyTable *table, ProcessorState *state);
 int checkAndAdjustIIForInstruction(DependencyTable *table, int i, ProcessorState *state);

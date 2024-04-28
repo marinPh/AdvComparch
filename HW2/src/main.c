@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "lib/cJSON.h"
-#include "lib/cJSON_Utils.h"
-#include "lib/VLIW470.h"
+#include "../lib/cJSON.h"
+#include "../lib/cJSON_Utils.h"
+#include "../lib/VLIW470.h"
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -12,23 +12,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // Open the JSON file
-    FILE *file = fopen(argv[1], "r");
-    if (file == NULL) {
-        printf("Failed to open file.\n");
-        return 1;
-    }
-
-    parseInstrunctions(file);
-
-    fclose(file);
-
+    parseInstrunctions(argv[1]);
+    showInstructionSet();
+    
+    /*
     ProcessorState *state = (ProcessorState *)malloc(sizeof(ProcessorState));
-    if (state == NULL) {
-        printf("Memory allocation failed.\n");
-        fclose(file);
-        return 1;
-    }
     initProcessorState(state);
 
     DependencyTable table = createFillDepencies();
@@ -56,6 +44,6 @@ int main(int argc, char *argv[]) {
     free(state);
     // free(state_pip->bundles.vliw);
     // free(state_pip);
-
+*/
     return 0;
 }

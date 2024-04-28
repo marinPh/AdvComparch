@@ -22,11 +22,14 @@ int main(int argc, char *argv[]) {
     
     printf("filling dep\n");
     DependencyTable table = createFillDepencies();
-    showDepTable(table);
+    //showDepTable(table);
 
     // test LOOP (simple)
-    scheduleInstructions(state, &table);
-    registerAllocation(state, &table);
+    //scheduleInstructions(state, &table);
+//
+    //registerAllocation(state, &table);
+    printf("II: \n");
+    //showProcessorState(*state);    
 
 
     // test LOOP_PIP

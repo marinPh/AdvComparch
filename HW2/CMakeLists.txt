@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(HW2)
+set(CMAKE_BUILD_TYPE Debug)
+# Set compiler flags for debugging
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+
 
 # Add your source files here
 set(SOURCES

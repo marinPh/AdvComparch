@@ -11,7 +11,7 @@
 #define OPCODE 5
 
 typedef enum {
-    ADD, ADDI, SUB, MULU, LD, ST, NOP, MOV, LOOP, LOOP_PIP  
+    ADD, ADDI, SUB, MOV, MULU, LD, ST, LOOP, LOOP_PIP, NOP  
 } InstructionType;
 
 // Instructions

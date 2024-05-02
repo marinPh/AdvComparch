@@ -65,7 +65,7 @@ void parseString(char *instr_string, InstructionEntry *entry)
     if (entry->type == LD || entry->type == ST)
     {
         token = strtok(NULL, " ");
-         printf("token for LD/ST: %s\n", token);
+        // printf("token for LD/ST: %s\n", token);
 
         if (entry->type == LD)
         {
@@ -94,15 +94,21 @@ void parseString(char *instr_string, InstructionEntry *entry)
             if (token[0] == '0' && token[1] == 'x')
             {
                 entry->imm = (int)strtol(token, NULL, 16);
+                printf("imm: %d\n", entry->imm);
             }
             else
             {
                 entry->imm = atoi(token);
             }
 
-            token += 2;
+            token += 2; 
         }
 
+        // until token[0] == 'x' increment token
+        while (token[0] != 'x')
+        {
+            token++;
+        }
         entry->src1 = atoi(token + 1);
 
     }
@@ -120,7 +126,7 @@ void parseString(char *instr_string, InstructionEntry *entry)
         entry->dest = -1;
         entry->src1 = -1;
         entry->src2 = -1;
-        entry->imm = 0;
+        entry->imm = -1;
     }
     else if (entry->type == MOV)
     {
@@ -162,12 +168,12 @@ void parseString(char *instr_string, InstructionEntry *entry)
             entry->dest = atoi(token + 1);
             // need to check if there is an imm or a src
             token = strtok(NULL, " ");
-            printf("token for 2C: %s\n", token);
+            //printf("token for 2C: %s\n", token);
             if (token[0] == 'x')
             {
                 entry->src1 = atoi(token + 1);
                 entry->src2 = -1;
-                entry->imm = 0;
+                entry->imm = -1;
             }
             else
             {
@@ -192,12 +198,12 @@ void parseString(char *instr_string, InstructionEntry *entry)
         entry->src1 = atoi(token + 2);
         token = strtok(NULL, " ");
         // need to check if last element is imm or  xX
-        printf("token for add, addi, sub, mulu: %s\n", token);
+        //printf("token for add, addi, sub, mulu: %s\n", token);
 
         if (token[0] == 'x')
         {
             entry->src2 = atoi(token + 1);
-            entry->imm = 0;
+            entry->imm = -1;
         }
         else
         {

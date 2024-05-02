@@ -20,20 +20,18 @@ int main(int argc, char *argv[]) {
     initProcessorState(state);
     //showProcessorState(*state);
     
-    printf("filling dep\n");
     DependencyTable table = createFillDepencies();
-    //showDepTable(table);
+    showDepTable(table);
 
     // test LOOP (simple)
     scheduleInstructions(state, &table);
 //
     registerAllocation(state, &table);
-    printf("II: \n");
     //showProcessorState(*state);   
 
     writeVLIWToJson(&state->bundles, argv[2]); 
     writeVLIWToJson(&state->bundles, argv[3]);
-    printf("output.json created\n");
+    //printf("output.json created\n");
 
 
     // test LOOP_PIP

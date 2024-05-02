@@ -69,3 +69,9 @@ cd /home/root/cs470
 
 If you have any questions when installing / running docker, please talk to a TA, we would be happy
 to help.
+
+
+
+## Authors 
+- Marin Philippe (326343)
+- Emma Gaia Poggiolini (330757)

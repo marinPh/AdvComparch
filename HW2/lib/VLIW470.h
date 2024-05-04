@@ -73,12 +73,13 @@ typedef struct {
     unsigned long PhysRegFile[REGS]; // Physical Register File (96 registers, 64 bits each)
     unsigned long PredRegFile[REGS]; // Predicate Register File
     unsigned int  FUCount[FU]; // Number of each type of FU: [ALU, MULT, MEM, BR]
-    VLIWBundles   bundles; // VLIW instruction bundles
-    unsigned int  II;      // Initiation Interval
-    unsigned int  stage;   // Loop stage 
+    VLIWBundles   bundles;   // VLIW instruction bundles
+    unsigned int  II;        // Initiation Interval
+    unsigned int  stage;     // Loop stage 
 } ProcessorState;
 
 void parseInstrunctions(char* inputFile);
+void emptyInstructions();
 
 void printInstructions(InstructionsSet instr);
 
@@ -110,11 +111,15 @@ typedef struct {
     int latestMult;
     int latestMem;
     int latestBr;
+    int EC;
+    // int P32;
 } SchedulerState;
 
 void scheduleInstruction(ProcessorState *state, DependencyEntry *entry, SchedulerState *schedulerState);
 void scheduleInstructions(ProcessorState *state, DependencyTable *table);
-void scheduleInstructionsPiP(ProcessorState *state, DependencyTable *table);
+void scheduler(ProcessorState *state, DependencyTable *table); 
+
+void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table);
 
 void writeVLIWToJson(VLIWBundles *bundles, const char *filename); 
 

@@ -14,43 +14,53 @@ int main(int argc, char *argv[]) {
 
     parseInstrunctions(argv[1]);
 
-    
-    
     ProcessorState *state = (ProcessorState *)malloc(sizeof(ProcessorState));
     initProcessorState(state);
     //showProcessorState(*state);
     
     DependencyTable table = createFillDepencies();
-    showDepTable(table);
+    //showDepTable(table);
 
     // test LOOP (simple)
     scheduleInstructions(state, &table);
-//
+
     registerAllocation(state, &table);
     //showProcessorState(*state);   
 
     writeVLIWToJson(&state->bundles, argv[2]); 
-    writeVLIWToJson(&state->bundles, argv[3]);
     //printf("output.json created\n");
-
-
-    // test LOOP_PIP
-    // ProcessorState *state_pip = (ProcessorState *)malloc(sizeof(ProcessorState));
-    // if (state_pip == NULL) {
-    //     printf("Memory allocation failed.\n");
-    //     fclose(file);
-    //     return 1;
-    // }
-    // initProcessorState(state_pip);
-
-    // scheduleInstructionsPiP(state_pip, &table);
-    // registerAllocationPip(state_pip, &table);
 
     // free memory
     free(state->bundles.vliw);
     free(state);
-    // free(state_pip->bundles.vliw);
-    // free(state_pip);
+
+    emptyInstructions(); 
+
+    //--------------------------------------------------------------------------------
+
+    parseInstrunctions(argv[1]);
+
+    // test LOOP_PIP
+    ProcessorState *state_pip = (ProcessorState *)malloc(sizeof(ProcessorState));
+    if (state_pip == NULL) {
+        printf("Memory allocation failed.\n");
+        return 1;
+    }
+    initProcessorState(state_pip);
+    //showProcessorState(*state);
+
+    DependencyTable table_pip = createFillDepencies();
+    //showDepTable(table_pip);
+
+    scheduler(state_pip, &table_pip);
+    // registerAllocationPip(state_pip, &table_pip);
+
+    writeVLIWToJson(&state_pip->bundles, argv[3]); 
+    //printf("output.json created\n");
+
+    // free memory
+    free(state_pip->bundles.vliw);
+    free(state_pip);
 
     return 0;
 }

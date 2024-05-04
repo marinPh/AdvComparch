@@ -58,8 +58,8 @@ void parseString(char *instr_string, InstructionEntry *entry)
     }
 
     entry->predicate = -1; // default value, will be updated only for BR ops if needed
-    entry->cycle = 0;
-    entry->done = false;
+    entry->cycle = -1;
+    entry->done  = false;
    
     // if opcode is ld or st this is the format -> "ld x3, imm(x0)"
     if (entry->type == LD || entry->type == ST)

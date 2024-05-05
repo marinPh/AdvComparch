@@ -272,11 +272,12 @@ int calculateIIRes(ProcessorState *state)
 
     // Calculation of II based on FU resources
     int II_res = 0;
+    //TODO: check unexpected behavior
     II_res = (counts[ADD] + counts[ADDI] + counts[SUB] + counts[MOV] + state->FUCount[0] - 1) / state->FUCount[0];
     II_res = fmax(II_res, (counts[MULU] + state->FUCount[1] - 1) / state->FUCount[1]);
     II_res = fmax(II_res, (counts[LD] + state->FUCount[2] - 1) / state->FUCount[2]);
     II_res = fmax(II_res, (counts[LOOP] + counts[LOOP_PIP] + state->FUCount[3] - 1) / state->FUCount[3]);
-
+    printf("II_res: %d\n", II_res);
     return II_res; // Want to minimize it to have more pipeline parallelism
 }
 
@@ -318,13 +319,17 @@ int checkAndAdjustIIForInstruction(DependencyTable *table, int i, ProcessorState
     int latency = 0;
     for (int i = 0; i < current->loop.size; i++)
     {
-        DependencyEntry *dependency = &current->loop.list[i];
+        //TODO: wrong typ casting
+        dependency *dependency = &current->loop.list[i];
+        printf("%d\n",i);
         // Check the interloop dependency condition
-        latency = latencies[dependency->type];
-        if (dependency->scheduledTime + latency > current->scheduledTime + state->II)
+        latency = latencies[current->type];
+        printf("dep: %d, %d\n",dependency->ID,current->scheduledTime);
+        if (current->scheduledTime + latency > current->scheduledTime + state->II)
         {
             // Adjust the II to satisfy the interloop dependency
-            state->II = dependency->scheduledTime + latency - current->scheduledTime;
+            state->II = current->scheduledTime + latency - current->scheduledTime;
+            printf("II adjusted to %d\n", state->II);
             changed = 1;
         }
     }
@@ -2156,6 +2161,7 @@ void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table)
         {
             // insert MOV EC (#stages-1)
             VLIW *vliw = &(state->bundles.vliw[state->bundles.size - 1]);
+			printf("stages: %d\n", state->stage);
 
             if (vliw->alu1->type == NOP)
             {
@@ -2448,6 +2454,7 @@ void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table)
 
             // if the number of stages has changed, update the EC value
             VLIW *vliw = &state->bundles.vliw[schedulerState.EC];
+        
             if (vliw->alu1->dest == -4)
             {
                 vliw->alu1->imm = state->stage -1;
@@ -2507,7 +2514,6 @@ void pushInstruction(InstructionEntry entry)
  */
 void parseInstrunctions(char *inputFile)
 {
-
     FILE *file2 = fopen(inputFile, "r");
 
     if (file2 == NULL)

@@ -366,7 +366,7 @@ typedef struct
  */
 LatestDependency findLatestDependency(DependencyTable *table, DependencyEntry *entry)
 {
-    int latency = instrs.instructions[instrs.loopEnd].type == LOOP ? 2 : 0;
+    int latency = (instrs.loopEnd == -1) ? 2 : instrs.instructions[instrs.loopEnd].type == LOOP ? 2 : 0;
 
     LatestDependency latestDep = {-1, -1, -1, -1, -1, -1, LOCAL, LOCAL, -1, -1};
 
@@ -1032,7 +1032,7 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
     int offset = 0; // offset for rotating registers
     int reg = 1;    // for non-rotating registers
 
-        // Step 0. destination register renaming and local dependency renaming for BB0 and BB2
+    // Step 0. destination register renaming and local dependency renaming for BB0 and BB2
     // rename the destination registers in BB0
     for (int i = 0; i < table->dependencies[instrs.loopStart].scheduledTime; i++)
     {
@@ -1086,7 +1086,7 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
 
     printf("BB2 renaming done\n");
 
-        // rename the source registers for local dependencies in BB0
+    // rename the source registers for local dependencies in BB0
     for (int i = 0; i < instrs.loopStart; i++)
     {
         DependencyEntry *entry = &table->dependencies[i];
@@ -1178,7 +1178,6 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
             offset += state->stage;
         }
         // MEM
-        printf("RRB: %d\n", state->RRB);
         if (vliw->mem->type == LD && vliw->mem->dest > 0)
         { // only rename LDs (STs are not renamed)
             vliw->mem->dest = offset + ROTATION_START_INDEX + state->RRB;
@@ -1197,6 +1196,29 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
         DependencyEntry *entry = &table->dependencies[i];
 
         if (instrs.instructions[i].dest < 0) {  // skip LC, EC, no dst
+            continue;
+        }
+
+        // skip the instruction if there is another one in BB0 that depends on it
+        bool hasDep = false;
+        for (int j = 0; j < instrs.loopStart; j++)
+        {
+            for (int k = 0; k < table->dependencies[j].local.size; k++)
+            {
+                if (table->dependencies[j].local.list[k].reg == entry->dest && 
+                    table->dependencies[table->dependencies[j].ID - 65].scheduledTime > entry->scheduledTime)
+                {
+                    hasDep = true;
+                    break;
+                }
+            }
+            if (hasDep)
+            {
+                break;
+            }
+        }
+        if (hasDep)
+        {
             continue;
         }
 
@@ -1249,12 +1271,6 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
 
         int stageDiff1 = floor((table->dependencies[entry->ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / (state->II + 1));
         int stageDiff2 = floor((table->dependencies[entry->ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / (state->II + 1));
-
-        printf("\n");
-        printf("ID: %d\n", entry->ID);
-        printf("II: %d\n", state->II);
-        printf("stageDiff1: %d\n", stageDiff1);
-        printf("stageDiff2: %d\n", stageDiff2);
         
         // set the cycle variable to the stage of the instruction + ROTATION_START_INDEX
         instrs.instructions[entry->ID - 65].cycle = stageDiff1 + ROTATION_START_INDEX;
@@ -1262,21 +1278,16 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
         for (int j = 0; j < entry->local.size; j++)
         {
             int stageDiff = floor((table->dependencies[entry->local.list[j].ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / (state->II + 1));
-            printf("stageDiff local: %d\n", stageDiff);
             // MUST use instrs.instructions[entry->local.list[j].ID-65].dest
             // bc table->dependencies[entry->local.list[j].ID-65].dest NOT renamed
             if (entry->local.list[j].reg == reg1 && table->dependencies[entry->local.list[j].ID - 65].scheduledTime > latestDep1)
             {
-                // int stageDiff = floor((table->dependencies[entry->local.list[j].ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
-
                 instrs.instructions[entry->ID - 65].src1 = instrs.instructions[entry->local.list[j].ID - 65].dest + (stageDiff1 - stageDiff);
                 latestDep1 = table->dependencies[entry->local.list[j].ID - 65].scheduledTime;
                 latestDist1 =  entry->scheduledTime - table->dependencies[entry->local.list[j].ID - 65].scheduledTime;
             }
             if (entry->local.list[j].reg == reg2 && table->dependencies[entry->local.list[j].ID - 65].scheduledTime > latestDep2)
             {
-                // int stageDiff = floor((table->dependencies[entry->local.list[j].ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
-
                 instrs.instructions[entry->ID - 65].src2 = instrs.instructions[entry->local.list[j].ID - 65].dest + (stageDiff2 - stageDiff);
                 latestDep2 = table->dependencies[entry->local.list[j].ID - 65].scheduledTime;
                 latestDist2 =  entry->scheduledTime - table->dependencies[entry->local.list[j].ID - 65].scheduledTime;
@@ -1287,23 +1298,15 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
         {
             int distance  = entry->scheduledTime - table->dependencies[entry->loop.list[j].ID - 65].scheduledTime; 
             int stageDiff = floor((table->dependencies[instrs.loopEnd].scheduledTime - table->dependencies[entry->loop.list[j].ID - 65].scheduledTime) / (state->II + 1));
-            //int stageDiff = floor((table->dependencies[entry->loop.list[j].ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
-
-            printf("stageDiff loop: %d\n", stageDiff);
 
             if (entry->loop.list[j].reg == reg1 && distance > latestDist1)
             {
-                // int stageDiff = floor((table->dependencies[instrs.loopEnd].scheduledTime - table->dependencies[entry->loop.list[j].ID - 65].scheduledTime) / state->II);
-                printf("stageDiff  reg1: %d\n", stageDiff);
                 instrs.instructions[entry->ID - 65].src1 = instrs.instructions[entry->loop.list[j].ID - 65].dest + (stageDiff1 - stageDiff) + 1;
-                printf("src1: %d\n", instrs.instructions[entry->ID - 65].src1);
-
                 latestDep1 = table->dependencies[entry->loop.list[j].ID - 65].scheduledTime;
                 latestDist1 = distance;
             }
             if (entry->loop.list[j].reg == reg2 && distance > latestDist2)
             {
-                // int stageDiff = floor((table->dependencies[instrs.loopEnd].scheduledTime - table->dependencies[entry->loop.list[j].ID - 65].scheduledTime) / state->II);
                 instrs.instructions[entry->ID - 65].src2 = instrs.instructions[entry->loop.list[j].ID - 65].dest + (stageDiff2 - stageDiff) + 1;
                 latestDep2 = table->dependencies[entry->loop.list[j].ID - 65].scheduledTime;
                 latestDist2 = distance;

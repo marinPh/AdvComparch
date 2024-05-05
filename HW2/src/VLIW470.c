@@ -367,6 +367,8 @@ typedef struct
  */
 LatestDependency findLatestDependency(DependencyTable *table, DependencyEntry *entry)
 {
+    int latency = instrs.instructions[instrs.loopEnd].type == LOOP ? 2 : 0;
+
     LatestDependency latestDep = {-1, -1, -1, -1, -1, -1, LOCAL, LOCAL, -1, -1};
 
     int latestScheduledTime = -1; // latest scheduled time of the instruction it has a dependency on
@@ -409,9 +411,9 @@ LatestDependency findLatestDependency(DependencyTable *table, DependencyEntry *e
         {
             if (table->dependencies[entry->local.list[j].ID - 65].type == MULU)
             {
-                if ((table->dependencies[entry->local.list[j].ID - 65].scheduledTime + 2) > latestScheduledTime)
+                if ((table->dependencies[entry->local.list[j].ID - 65].scheduledTime + latency) > latestScheduledTime)
                 {
-                    latestScheduledTime = table->dependencies[entry->local.list[j].ID - 65].scheduledTime + 2;
+                    latestScheduledTime = table->dependencies[entry->local.list[j].ID - 65].scheduledTime + latency;
                     IDdependsOn = entry->local.list[j].ID - 65;
                 }
             }
@@ -427,9 +429,9 @@ LatestDependency findLatestDependency(DependencyTable *table, DependencyEntry *e
         {
             if (table->dependencies[entry->local.list[j].ID - 65].type == MULU)
             {
-                if ((table->dependencies[entry->local.list[j].ID - 65].scheduledTime + 2) > latestScheduledTimeOtherSrc)
+                if ((table->dependencies[entry->local.list[j].ID - 65].scheduledTime + latency) > latestScheduledTimeOtherSrc)
                 {
-                    latestScheduledTimeOtherSrc = table->dependencies[entry->local.list[j].ID - 65].scheduledTime + 2;
+                    latestScheduledTimeOtherSrc = table->dependencies[entry->local.list[j].ID - 65].scheduledTime + latency;
                     IDdependsOnOtherSrc = entry->local.list[j].ID - 65;
                 }
             }
@@ -449,9 +451,9 @@ LatestDependency findLatestDependency(DependencyTable *table, DependencyEntry *e
         {
             if (table->dependencies[entry->invariant.list[j].ID - 65].type == MULU)
             {
-                if ((table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime + 2) > latestScheduledTime)
+                if ((table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime + latency) > latestScheduledTime)
                 {
-                    latestScheduledTime = table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime + 2;
+                    latestScheduledTime = table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime + latency;
                     IDdependsOn = entry->invariant.list[j].ID - 65;
                 }
             }
@@ -466,9 +468,9 @@ LatestDependency findLatestDependency(DependencyTable *table, DependencyEntry *e
         {
             if (table->dependencies[entry->invariant.list[j].ID - 65].type == MULU)
             {
-                if ((table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime + 2) > latestScheduledTimeOtherSrc)
+                if ((table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime + latency) > latestScheduledTimeOtherSrc)
                 {
-                    latestScheduledTimeOtherSrc = table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime + 2;
+                    latestScheduledTimeOtherSrc = table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime + latency;
                     IDdependsOnOtherSrc = entry->invariant.list[j].ID - 65;
                 }
             }
@@ -492,9 +494,9 @@ LatestDependency findLatestDependency(DependencyTable *table, DependencyEntry *e
         {
             if (table->dependencies[entry->postL.list[j].ID - 65].type == MULU)
             {
-                if ((table->dependencies[entry->postL.list[j].ID - 65].scheduledTime + 2) > latestScheduledTime)
+                if ((table->dependencies[entry->postL.list[j].ID - 65].scheduledTime + latency) > latestScheduledTime)
                 {
-                    latestScheduledTime = table->dependencies[entry->postL.list[j].ID - 65].scheduledTime + 2;
+                    latestScheduledTime = table->dependencies[entry->postL.list[j].ID - 65].scheduledTime + latency;
                     IDdependsOn = entry->postL.list[j].ID - 65;
                 }
             }
@@ -509,9 +511,9 @@ LatestDependency findLatestDependency(DependencyTable *table, DependencyEntry *e
         {
             if (table->dependencies[entry->postL.list[j].ID - 65].type == MULU)
             {
-                if ((table->dependencies[entry->postL.list[j].ID - 65].scheduledTime + 2) > latestScheduledTimeOtherSrc)
+                if ((table->dependencies[entry->postL.list[j].ID - 65].scheduledTime + latency) > latestScheduledTimeOtherSrc)
                 {
-                    latestScheduledTimeOtherSrc = table->dependencies[entry->postL.list[j].ID - 65].scheduledTime + 2;
+                    latestScheduledTimeOtherSrc = table->dependencies[entry->postL.list[j].ID - 65].scheduledTime + latency;
                     IDdependsOnOtherSrc = entry->postL.list[j].ID - 65;
                 }
             }
@@ -1121,11 +1123,13 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
     printf("start loop schedule time: %d\n", table->dependencies[instrs.loopStart].scheduledTime);
     printf("end loop schedule time: %d\n", table->dependencies[instrs.loopEnd].scheduledTime);
 
+    printf("RRB: %d\n", state->RRB);
+    printf("stage: %d\n", state->stage);
+
     // Step 1. allocate ROTATING registers to the destination registers of all instructions in the VLIW bundles
     for (int i = table->dependencies[instrs.loopStart].scheduledTime; i < table->dependencies[instrs.loopEnd].scheduledTime + 1; i++)
     {
         VLIW *vliw = &state->bundles.vliw[i];
-        printf("i: %d\n", i);
         // ALU1
         if (vliw->alu1->type != NOP && vliw->alu1->dest > 0)
         {
@@ -1133,30 +1137,31 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
             vliw->alu1->dest = offset + ROTATION_START_INDEX + state->RRB;
             offset++;
             offset += state->stage;
+            printf("ALU1 Offset: %d\n", offset);
         }
-        printf("ALU 2: %d\n", state->RRB);
         // ALU2
         if (vliw->alu2->type != NOP && vliw->alu2->dest > 0)
         {
             vliw->alu2->dest = offset + ROTATION_START_INDEX + state->RRB;
             offset++;
             offset += state->stage;
+            printf("ALU2 Offset: %d\n", offset);
         }
-        printf("MULT: %d\n", state->RRB);
         // MULT
         if (vliw->mult->type != NOP && vliw->mult->dest > 0)
         {
             vliw->mult->dest = offset + ROTATION_START_INDEX + state->RRB;
             offset++;
             offset += state->stage;
+            printf("MULT Offset: %d\n", offset);
         }
         // MEM
-        printf("RRB: %d\n", state->RRB);
         if (vliw->mem->type == LD && vliw->mem->dest > 0)
         { // only rename LDs (STs are not renamed)
             vliw->mem->dest = offset + ROTATION_START_INDEX + state->RRB;
             offset++;
             offset += state->stage;
+            printf("MEM Offset: %d\n", offset);
         }
     }
 
@@ -2260,7 +2265,7 @@ void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table)
                 {
                     printf("Latest mem in schedPip: %d\n", schedulerState.latestMem);
                     int oldLatest = schedulerState.latestMem;
-                    //schedulerState.latestMem = max(oldLatest, latestScheduledTime + 1);   TODO
+                    schedulerState.latestMem = max(oldLatest, latestScheduledTime + 1);   
                     printf("Latest mem in schedPip: %d\n", schedulerState.latestMem);
 
                     // for (int j = oldLatest; j < schedulerState.latestMem-1; j++)
@@ -2435,8 +2440,11 @@ void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table)
             int changed = 0;
 
             do {
+                printf("table->dependencies[instrs.loopEnd].scheduledTime + 1: %d\n", table->dependencies[instrs.loopEnd].scheduledTime + 1);
+                printf("table->dependencies[instrs.loopStart].scheduledTime: %d\n", table->dependencies[instrs.loopStart].scheduledTime);
+                printf("II: %d\n", state->II);
                 // Once the loop is scheduled, compute the number of loop stages
-                state->stage = floor((table->dependencies[instrs.loopEnd].scheduledTime + 1 - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
+                state->stage = floor((table->dependencies[instrs.loopEnd].scheduledTime +1 - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
                 printf("Number of stages: %d\n", state->stage);
 
                 // check if the II needs to be updated

@@ -1119,7 +1119,7 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
     printf("end loop schedule time: %d\n", table->dependencies[instrs.loopEnd].scheduledTime);
 
     // Step 1. allocate ROTATING registers to the destination registers of all instructions in the VLIW bundles
-    for (int i = table->dependencies[instrs.loopStart].scheduledTime; i < table->dependencies[instrs.loopEnd].scheduledTime; i++)
+    for (int i = table->dependencies[instrs.loopStart].scheduledTime; i < table->dependencies[instrs.loopEnd].scheduledTime + 1; i++)
     {
         VLIW *vliw = &state->bundles.vliw[i];
         printf("i: %d\n", i);
@@ -2437,12 +2437,12 @@ void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table)
             VLIW *vliw = &state->bundles.vliw[schedulerState.EC];
             if (vliw->alu1->dest == -4)
             {
-                vliw->alu1->imm = state->stage; // -1
+                vliw->alu1->imm = state->stage -1;
                 printf("EC value ALU1: %d", vliw->alu1->imm); 
             } 
             else 
             {
-                vliw->alu2->imm = state->stage; // -1
+                vliw->alu2->imm = state->stage -1; 
                 printf("EC value ALU2: %d\n", vliw->alu2->imm);
             }
         }

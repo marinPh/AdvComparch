@@ -7,6 +7,7 @@
 #include "../lib/cJSON_Utils.h"
 #include "../lib/VLIW470.h"
 #include "../lib/utils.h"
+#include <stdint.h>
 
 #define ROTATION_START_INDEX 32 // Start index of rotating registers
 #define LOOP_AROUND 64          // Number of registers in the rotating register file
@@ -1235,7 +1236,7 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
 
                 instrs.instructions[entry->ID - 65].src1 = instrs.instructions[entry->local.list[j].ID - 65].dest + (stageDiff1 - stageDiff);
                 latestDep1 = table->dependencies[entry->local.list[j].ID - 65].scheduledTime;
-                latestDist1 = entry->scheduledTime - table->dependencies[entry->loop.list[j].ID - 65].scheduledTime;
+                latestDist1 = table->dependencies[entry->local.list[j].ID - 65].scheduledTime - entry->scheduledTime;
             }
             if (entry->local.list[j].reg == reg2 && table->dependencies[entry->local.list[j].ID - 65].scheduledTime > latestDep2)
             {
@@ -1243,7 +1244,7 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
 
                 instrs.instructions[entry->ID - 65].src2 = instrs.instructions[entry->local.list[j].ID - 65].dest + (stageDiff2 - stageDiff);
                 latestDep2 = table->dependencies[entry->local.list[j].ID - 65].scheduledTime;
-                latestDist2 = entry->scheduledTime - table->dependencies[entry->loop.list[j].ID - 65].scheduledTime;
+                latestDist2 = table->dependencies[entry->local.list[j].ID - 65].scheduledTime - entry->scheduledTime;
             }
         }
 

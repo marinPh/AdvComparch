@@ -754,7 +754,7 @@ int renameDestReg(InstructionEntry *FuncUnit, ProcessorState *state, DependencyT
                 {
                     if (entry->loop.list[k].reg == FuncUnit->dest)
                     {
-                        int stageDiff = floor((table->dependencies[entry->loop.list[k].ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
+                        int stageDiff = floor((table->dependencies[entry->loop.list[k].ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / (state->II + 1));
                         FuncUnit->dest = instrs.instructions[entry->loop.list[k].ID - 65].dest; // -S(P), iteration = 1    TODO  - stageDiff + 1
                         dependance = true;
                     }
@@ -1032,7 +1032,7 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
     int offset = 0; // offset for rotating registers
     int reg = 1;    // for non-rotating registers
 
-    // Step 0. destination register renaming and local dependency renaming for BB0 and BB2
+        // Step 0. destination register renaming and local dependency renaming for BB0 and BB2
     // rename the destination registers in BB0
     for (int i = 0; i < table->dependencies[instrs.loopStart].scheduledTime; i++)
     {
@@ -1086,7 +1086,7 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
 
     printf("BB2 renaming done\n");
 
-    // rename the source registers for local dependencies in BB0
+        // rename the source registers for local dependencies in BB0
     for (int i = 0; i < instrs.loopStart; i++)
     {
         DependencyEntry *entry = &table->dependencies[i];
@@ -1117,55 +1117,6 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
 
     printf("Local deps in BB0 done \n");
 
-    // TODO separate state in 1 VLIW bundles for BB0, 1 for BB1 and 1 for BB2 ?
-
-    printf("start loop schedule time: %d\n", table->dependencies[instrs.loopStart].scheduledTime);
-    printf("end loop schedule time: %d\n", table->dependencies[instrs.loopEnd].scheduledTime);
-
-    printf("RRB: %d\n", state->RRB);
-    printf("stage: %d\n", state->stage);
-
-    // Step 1. allocate ROTATING registers to the destination registers of all instructions in the VLIW bundles
-    for (int i = table->dependencies[instrs.loopStart].scheduledTime; i < table->dependencies[instrs.loopEnd].scheduledTime + 1; i++)
-    {
-        VLIW *vliw = &state->bundles.vliw[i];
-        // ALU1
-        if (vliw->alu1->type != NOP && vliw->alu1->dest > 0)
-        {
-            // Allocate registers
-            vliw->alu1->dest = offset + ROTATION_START_INDEX + state->RRB;
-            offset++;
-            offset += state->stage;
-            printf("ALU1 Offset: %d\n", offset);
-        }
-        // ALU2
-        if (vliw->alu2->type != NOP && vliw->alu2->dest > 0)
-        {
-            vliw->alu2->dest = offset + ROTATION_START_INDEX + state->RRB;
-            offset++;
-            offset += state->stage;
-            printf("ALU2 Offset: %d\n", offset);
-        }
-        // MULT
-        if (vliw->mult->type != NOP && vliw->mult->dest > 0)
-        {
-            vliw->mult->dest = offset + ROTATION_START_INDEX + state->RRB;
-            offset++;
-            offset += state->stage;
-            printf("MULT Offset: %d\n", offset);
-        }
-        // MEM
-        printf("RRB: %d\n", state->RRB);
-        if (vliw->mem->type == LD && vliw->mem->dest > 0)
-        { // only rename LDs (STs are not renamed)
-            vliw->mem->dest = offset + ROTATION_START_INDEX + state->RRB;
-            offset++;
-            offset += state->stage;
-            printf("MEM Offset: %d\n", offset);
-        }
-    }
-
-    printf("dest rotational regs done\n");
 
     // rename the source registers for local dependencies in BB2
     for (int i = instrs.loopEnd + 1; i < table->size; i++)
@@ -1198,6 +1149,86 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
 
     printf("local deps in BB2\n");
 
+
+
+    // Step 1. allocate ROTATING registers to the destination registers of all instructions in the VLIW bundles
+    for (int i = table->dependencies[instrs.loopStart].scheduledTime; i < table->dependencies[instrs.loopEnd].scheduledTime + 1; i++)
+    {
+        VLIW *vliw = &state->bundles.vliw[i];
+        // ALU1
+        if (vliw->alu1->type != NOP && vliw->alu1->dest > 0)
+        {
+            // Allocate registers
+            vliw->alu1->dest = offset + ROTATION_START_INDEX + state->RRB;
+            offset++;
+            offset += state->stage;
+        }
+        // ALU2
+        if (vliw->alu2->type != NOP && vliw->alu2->dest > 0)
+        {
+            vliw->alu2->dest = offset + ROTATION_START_INDEX + state->RRB;
+            offset++;
+            offset += state->stage;
+        }
+        // MULT
+        if (vliw->mult->type != NOP && vliw->mult->dest > 0)
+        {
+            vliw->mult->dest = offset + ROTATION_START_INDEX + state->RRB;
+            offset++;
+            offset += state->stage;
+        }
+        // MEM
+        printf("RRB: %d\n", state->RRB);
+        if (vliw->mem->type == LD && vliw->mem->dest > 0)
+        { // only rename LDs (STs are not renamed)
+            vliw->mem->dest = offset + ROTATION_START_INDEX + state->RRB;
+            offset++;
+            offset += state->stage;
+        }
+    }
+
+    printf("dest rotational regs done\n");
+
+    // Step 2. if instruction in BB0 has the same dest reg as the source reg of a interloop dependency
+    // and another instruction in BB1 produces that register
+    // rename BB0's register to the rotating dest register + 1
+    for (int i = 0; i < instrs.loopStart; i++)
+    {
+        DependencyEntry *entry = &table->dependencies[i];
+
+        if (instrs.instructions[i].dest < 0) {  // skip LC, EC, no dst
+            continue;
+        }
+
+        int scheduledTimeSrc  = INT32_MAX; 
+        int scheduledTimeDest = INT32_MAX;
+
+        int IDdest = -1;
+
+        for (int j = instrs.loopStart; j < instrs.loopEnd + 1; j++)
+        {
+            for (int k = 0; k < table->dependencies[j].loop.size; k++)
+            {
+                // the earliest instruction in the loop with the same src register
+                if (table->dependencies[j].loop.list[k].reg == table->dependencies[i].dest && table->dependencies[j].scheduledTime < scheduledTimeSrc)
+                {
+                    scheduledTimeSrc  = table->dependencies[j].scheduledTime;
+                    // the earliest instruction in the loop that produces that register 
+                    if (table->dependencies[table->dependencies[j].loop.list[k].ID - 65].scheduledTime < scheduledTimeDest)
+                    {
+                        IDdest = table->dependencies[j].loop.list[k].ID - 65; 
+                        scheduledTimeDest = table->dependencies[IDdest].scheduledTime;
+                    }
+                }
+            }
+            
+            if (IDdest != -1)
+            {
+                instrs.instructions[i].dest = instrs.instructions[IDdest].dest + 1;
+            }
+        }
+    }
+
     // Step 3. for local and interloop dependencies, adjust the src registers by adding the difference
     // of the stage of the consumer and the stage of the producer (+1 for interloop)
     // (a new stage every II cycles, a new loop => new stage too)
@@ -1216,8 +1247,8 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
         int latestDist1 = INT32_MIN;
         int latestDist2 = INT32_MIN;
 
-        int stageDiff1 = floor((table->dependencies[entry->ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
-        int stageDiff2 = floor((table->dependencies[entry->ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
+        int stageDiff1 = floor((table->dependencies[entry->ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / (state->II + 1));
+        int stageDiff2 = floor((table->dependencies[entry->ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / (state->II + 1));
 
         printf("\n");
         printf("ID: %d\n", entry->ID);
@@ -1230,7 +1261,7 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
 
         for (int j = 0; j < entry->local.size; j++)
         {
-            int stageDiff = floor((table->dependencies[entry->local.list[j].ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
+            int stageDiff = floor((table->dependencies[entry->local.list[j].ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / (state->II + 1));
             printf("stageDiff local: %d\n", stageDiff);
             // MUST use instrs.instructions[entry->local.list[j].ID-65].dest
             // bc table->dependencies[entry->local.list[j].ID-65].dest NOT renamed
@@ -1252,15 +1283,11 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
             }
         }
 
-        // reset
-        // latestDep1 = -1;
-        // latestDep2 = -1;
-
         for (int j = 0; j < entry->loop.size; j++)
         {
             int distance  = entry->scheduledTime - table->dependencies[entry->loop.list[j].ID - 65].scheduledTime; 
-            //int stageDiff = floor((table->dependencies[instrs.loopEnd].scheduledTime - table->dependencies[entry->loop.list[j].ID - 65].scheduledTime) / state->II);
-            int stageDiff = floor((table->dependencies[entry->local.list[j].ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
+            int stageDiff = floor((table->dependencies[instrs.loopEnd].scheduledTime - table->dependencies[entry->loop.list[j].ID - 65].scheduledTime) / (state->II + 1));
+            //int stageDiff = floor((table->dependencies[entry->loop.list[j].ID - 65].scheduledTime - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
 
             printf("stageDiff loop: %d\n", stageDiff);
 
@@ -1283,8 +1310,6 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
             }
         }
 
-        // TODO what if both local and interloop ?
-
         // Step 2. allocate non-rotating register to the invariant dependencies
         // but only if NOT ALSO a local or interloop dependency
         for (int j = 0; j < entry->invariant.size; j++)
@@ -1303,81 +1328,28 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
         }
     }
 
-    // // Step 2. allocate non-rotating register to the invariant dependencies
-    // for (int j = instrs.loopStart; j < instrs.loopEnd + 1; j++)
-    // {
-    //     DependencyEntry *entry = &table->dependencies[j];
-    //     if (entry->invariant.size != 0)
-    //     {
-    //         // find the latest dependency for src1 and src2
-    //         int reg1 = instrs.instructions[entry->ID - 65].src1; // source register 1
-    //         int reg2 = instrs.instructions[entry->ID - 65].src2; // source register 2
-
-    //         int latestDep1 = -1;
-    //         int latestDep2 = -1;
-
-    //         for (int k = 0; k < entry->invariant.size; k++)
-    //         {
-    //             // only rename if it is not ALSO an interloop dependency or a local dependency
-    //             if (entry->invariant.list[j].reg == reg1 && table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime > latestDep1)
-    //             {
-    //                 instrs.instructions[entry->ID - 65].src1 = table->dependencies[entry->invariant.list[j].ID - 65].dest;
-    //                 latestDep1 = table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime;
-    //             }
-    //             if (entry->invariant.list[j].reg == reg2 && table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime > latestDep2)
-    //             {
-    //                 instrs.instructions[entry->ID - 65].src2 = table->dependencies[entry->invariant.list[j].ID - 65].dest;
-    //                 latestDep2 = table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime;
-    //             }
-    //         }
-    //     }
-    // }
-
     // Step 4. for postloop dependencies, adjust the src registers by adding the difference
     // considering the BB2 stage as being the last stage of the loop
 
     // TODO (!) check the -1  used to assign last stage to the post loop dependencies
     // same for all postloop
-    int stageDiffPost = floor((table->dependencies[instrs.loopEnd + 1].scheduledTime - 1) / state->II);
+    int stageDiffPost = floor((table->dependencies[instrs.loopEnd + 1].scheduledTime - 1) / (state->II + 1));
 
-    for (int j = instrs.loopEnd + 1; j < table->size; j++)
+    for (int k = instrs.loopEnd + 1; k < table->size; k++)
     {
-        DependencyEntry *entry = &table->dependencies[j];
+        DependencyEntry *entry = &table->dependencies[k];
 
         // find the latest dependency for src1 and src2
         int reg1 = instrs.instructions[entry->ID - 65].src1; // source register 1
         int reg2 = instrs.instructions[entry->ID - 65].src2; // source register 2
 
-        int latestDep1 = -1;
-        int latestDep2 = -1;
-
-        for (int k = 0; k < entry->postL.size; k++)
-        {
-            // MUST use instrs.instructions[entry->postL.list[j].ID-65].dest
-            // bc table->dependencies[entry->postL.list[j].ID-65].dest NOT renamed
-            if (entry->postL.list[j].reg == reg1 && table->dependencies[entry->postL.list[j].ID - 65].scheduledTime > latestDep1)
-            {
-                int stageDiff = floor(table->dependencies[entry->postL.list[j].ID - 65].scheduledTime / state->II);
-
-                instrs.instructions[entry->ID - 65].src1 = instrs.instructions[entry->postL.list[j].ID - 65].dest + (stageDiffPost - stageDiff);
-                latestDep1 = table->dependencies[entry->postL.list[j].ID - 65].scheduledTime;
-            }
-            if (entry->postL.list[j].reg == reg2 && table->dependencies[entry->postL.list[j].ID - 65].scheduledTime > latestDep2)
-            {
-                int stageDiff = floor(table->dependencies[entry->postL.list[j].ID - 65].scheduledTime / state->II);
-
-                instrs.instructions[entry->ID - 65].src2 = instrs.instructions[entry->postL.list[j].ID - 65].dest + (stageDiffPost - stageDiff);
-                latestDep2 = table->dependencies[entry->postL.list[j].ID - 65].scheduledTime;
-            }
-        }
-
         // loop invariant dependencies BB2->BB0
 
         // reset
-        latestDep1 = -1;
-        latestDep2 = -1;
+        int latestDep1 = -1;
+        int latestDep2 = -1;
 
-        for (int k = 0; k < entry->invariant.size; k++)
+        for (int j = 0; j < entry->invariant.size; j++)
         {
             if (entry->invariant.list[j].reg == reg1 && table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime > latestDep1)
             {
@@ -1388,6 +1360,31 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
             {
                 instrs.instructions[entry->ID - 65].src2 = instrs.instructions[entry->invariant.list[j].ID - 65].dest;
                 latestDep2 = table->dependencies[entry->invariant.list[j].ID - 65].scheduledTime;
+            }
+        }
+
+        latestDep1 = -1;
+        latestDep2 = -1;
+
+        for (int j = 0; j < entry->postL.size; j++)
+        {
+            printf("Entry ID: %d\n", entry->ID);
+            printf("PostL ID: %d\n", entry->postL.list[j].ID);
+            // MUST use instrs.instructions[entry->postL.list[j].ID-65].dest
+            // bc table->dependencies[entry->postL.list[j].ID-65].dest NOT renamed
+            if (entry->postL.list[j].reg == reg1 && table->dependencies[entry->postL.list[j].ID - 65].scheduledTime > latestDep1)
+            {
+                int stageDiff = floor(table->dependencies[entry->postL.list[j].ID - 65].scheduledTime / (state->II + 1));
+
+                instrs.instructions[entry->ID - 65].src1 = instrs.instructions[entry->postL.list[j].ID - 65].dest + (stageDiffPost - stageDiff);
+                latestDep1 = table->dependencies[entry->postL.list[j].ID - 65].scheduledTime;
+            }
+            if (entry->postL.list[j].reg == reg2 && table->dependencies[entry->postL.list[j].ID - 65].scheduledTime > latestDep2)
+            {
+                int stageDiff = floor(table->dependencies[entry->postL.list[j].ID - 65].scheduledTime / (state->II + 1));
+
+                instrs.instructions[entry->ID - 65].src2 = instrs.instructions[entry->postL.list[j].ID - 65].dest + (stageDiffPost - stageDiff);
+                latestDep2 = table->dependencies[entry->postL.list[j].ID - 65].scheduledTime;
             }
         }
     }

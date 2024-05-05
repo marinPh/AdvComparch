@@ -313,22 +313,19 @@ int checkAndAdjustIIForInstruction(DependencyTable *table, int i, ProcessorState
     // Find the instruction in the dependency table
     DependencyEntry *current = &table->dependencies[i];
 
-    // If the instruction has an interloop dependency
-    int latencies[10] = {1, 1, 1, 1, 3, 1, 1, 1, 1, 1};
 
-    int latency = 0;
     for (int i = 0; i < current->loop.size; i++)
     {
         //TODO: wrong typ casting
         dependency *dependency = &current->loop.list[i];
         printf("%d\n",i);
         // Check the interloop dependency condition
-        latency = latencies[current->type];
+
         printf("dep: %d, %d\n",dependency->ID,current->scheduledTime);
-        if (current->scheduledTime + latency > current->scheduledTime + state->II)
+        if (current->scheduledTime + 1 > current->scheduledTime + state->II)
         {
             // Adjust the II to satisfy the interloop dependency
-            state->II = current->scheduledTime + latency - current->scheduledTime;
+            state->II = current->scheduledTime + 1 - current->scheduledTime;
             printf("II adjusted to %d\n", state->II);
             changed = 1;
         }
@@ -1156,6 +1153,7 @@ void registerAllocationPip(ProcessorState *state, DependencyTable *table)
             printf("MULT Offset: %d\n", offset);
         }
         // MEM
+        printf("RRB: %d\n", state->RRB);
         if (vliw->mem->type == LD && vliw->mem->dest > 0)
         { // only rename LDs (STs are not renamed)
             vliw->mem->dest = offset + ROTATION_START_INDEX + state->RRB;

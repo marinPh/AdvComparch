@@ -456,7 +456,6 @@ LatestDependency findLatestDependency(DependencyTable *table, DependencyEntry *e
                 IDdependsOn = entry->invariant.list[j].ID - 65;
             }
             latestDep.depType = INVARIANT;
-            // latestDep.block = instrs.instructions[IDdependsOn].block;
         }
         if (entry->invariant.list[j].reg == reg2)
         {
@@ -474,7 +473,6 @@ LatestDependency findLatestDependency(DependencyTable *table, DependencyEntry *e
                 IDdependsOnOtherSrc = entry->invariant.list[j].ID - 65;
             }
             latestDep.depTypeOtherSrc = INVARIANT;
-            // latestDep.blockOtherSrc = instrs.instructions[IDdependsOnOtherSrc].block;
         }
     }
 
@@ -1581,6 +1579,7 @@ void scheduleInstruction(ProcessorState *state, DependencyEntry *entry, Schedule
     }
     else if (entry->type == LD || entry->type == ST)
     {
+        printf("latestMem before: %d\n", schedulerState->latestMem);
         while (schedulerState->latestMem < state->bundles.size)
         {
             vliw = &state->bundles.vliw[schedulerState->latestMem];
@@ -1598,6 +1597,7 @@ void scheduleInstruction(ProcessorState *state, DependencyEntry *entry, Schedule
         }
         if (!scheduled)
         {
+            printf("scheduled mem: %d\n", schedulerState->latestMem);
             newVLIW(state);
             vliw = &state->bundles.vliw[state->bundles.size - 1];
             vliw->mem = &instrs.instructions[entry->ID - 65];
@@ -1605,6 +1605,9 @@ void scheduleInstruction(ProcessorState *state, DependencyEntry *entry, Schedule
             schedulerState->latestMem += 1;
         }
     }
+    printf("Entry ID: %d\n", entry->ID);
+    printf("latestBr: %d\n", schedulerState->latestBr);
+    printf("scheduledTime: %d\n", entry->scheduledTime);
 
     // update the latest loop instruction to make sure the branch is NOT placed earlier than any other instruction in the loop
     if (instrs.instructions[entry->ID - 65].block == 1 && entry->type != LOOP && entry->type != LOOP_PIP)
@@ -2156,14 +2159,17 @@ void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table)
 
             if (vliw->alu1->type == NOP)
             {
+                printf("Stage = %d\n", state->stage);
                 vliw->alu1 = createNewInstruction("mov", 0, -4, -1, -1, state->stage, -1, MOV, 0, false);  // stage will be 0 for now (changed at the end of loop scheduling)   
             }
             else if (vliw->alu2->type == NOP)
             {
+                printf("Stage = %d\n", state->stage);
                 vliw->alu2 = createNewInstruction("mov", 0, -4, -1, -1, state->stage, -1, MOV, 0, false);  
             }
             else 
             {
+                printf("Stage = %d\n", state->stage);
                 newVLIW(state);
                 vliw = &(state->bundles.vliw[state->bundles.size - 1]);
                 vliw->alu1 = createNewInstruction("mov", 0, -4, -1, -1, state->stage, -1, MOV, 0, false); 
@@ -2246,8 +2252,11 @@ void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table)
                 }
                 else if (entry->type == LD || entry->type == ST)
                 {
+                    printf("Latest mem in schedPip: %d\n", schedulerState.latestMem);
                     int oldLatest = schedulerState.latestMem;
-                    schedulerState.latestMem = max(oldLatest, latestScheduledTime + 1);
+                    //schedulerState.latestMem = max(oldLatest, latestScheduledTime + 1);   TODO
+                    printf("Latest mem in schedPip: %d\n", schedulerState.latestMem);
+
                     // for (int j = oldLatest; j < schedulerState.latestMem-1; j++)
                     // {
                     //     newVLIW(state);
@@ -2422,9 +2431,13 @@ void scheduleInstructionsPip(ProcessorState *state, DependencyTable *table)
             do {
                 // Once the loop is scheduled, compute the number of loop stages
                 state->stage = floor((table->dependencies[instrs.loopEnd].scheduledTime + 1 - table->dependencies[instrs.loopStart].scheduledTime) / state->II);
+                printf("Number of stages: %d\n", state->stage);
 
                 // check if the II needs to be updated
                 changed = checkInterloopDependencies(table, state);
+                printf("Changed: %d\n", changed);
+                printf("II: %d\n", state->II);
+                printf("\n");
 
                 if (changed)
                 {
